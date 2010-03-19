@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from django.shortcuts import render_to_response
+from dyndns.auth import http_auth
 from dyndns.models import Record
 import re
 
+@http_auth
 def update(request):
     """
     Implement the DNS Update API as defined at:
