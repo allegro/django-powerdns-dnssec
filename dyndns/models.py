@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from django.db import models
 
 class Domain(models.Model):
@@ -13,10 +14,10 @@ class Domain(models.Model):
     class Meta:
         db_table = u'domains'
 
-class Record(models.Model):                                                                                                                                 
-    id = models.IntegerField(primary_key=True)                                                                                                               
-    domain = models.ForeignKey(Domains)                                                                                                                      
-    name = models.CharField(max_length=255)                                                                                                                  
+class Record(models.Model):
+    id = models.IntegerField(primary_key=True)
+    domain = models.ForeignKey(Domain)
+    name = models.CharField(max_length=255)
     type = models.CharField(max_length=6)
     content = models.CharField(max_length=255)
     ttl = models.IntegerField()
@@ -33,4 +34,3 @@ class Supermaster(models.Model):
     account = models.CharField(max_length=40)
     class Meta:
         db_table = u'supermasters'
-
