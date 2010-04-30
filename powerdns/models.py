@@ -13,6 +13,9 @@ class Domain(models.Model):
         return self.name
     class Meta:
         db_table = u'domains'
+    def save(self):
+        self.name = self.name.lower() # Get rid of CAPs before saving
+        super(Domain, self).save() # Call the "real" save() method.
 
 class Record(models.Model):
     id = models.IntegerField(primary_key=True)
@@ -27,6 +30,11 @@ class Record(models.Model):
         return self.name
     class Meta:
         db_table = u'records'
+    def save(self):
+        self.name = self.name.lower() # Get rid of CAPs before saving
+	# TODO: Set change_date to current unix time to allow auto SOA update and slave notification
+        super(Record, self).save() # Call the "real" save() method.
+
 
 class Supermaster(models.Model):
     ip = models.CharField(max_length=25)
