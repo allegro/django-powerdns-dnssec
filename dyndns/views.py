@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.shortcuts import render_to_response
 from dyndns.auth import http_auth
-from dyndns.models import Record
+from powerdns.models import Record
 import re
 
 @http_auth
