@@ -11,12 +11,12 @@ except ImportError:
 import os
 
 setup(
-    name = "django-dyndns",
+    name = "django-powerdns",
     version = "0.1",
-    url = 'http://bitbucket.org/peternixon/django-dyndns/wiki/Home',
+    url = 'http://bitbucket.org/peternixon/django-powerdns/',
 	download_url = 'http://bitbucket.org/peternixon/django-dyndns/downloads/',
     license = 'BSD',
-    description = "A small Dynamic DNS Server",
+    description = "PowerDNS administration module for Django",
     author = 'Peter Nixon',
     author_email = 'listuser@peternixon.net',
     packages = find_packages(),
