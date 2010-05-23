@@ -6,11 +6,13 @@ class RecordAdmin(admin.ModelAdmin):
     list_display = ('name', 'type', 'content', 'ttl', 'prio', 'change_date',)
     list_filter = ['type', 'ttl',]
     search_fields  = ('name','content',)
+    readonly_fields = ('change_date',)
 
 class DomainAdmin(admin.ModelAdmin):
     list_display = ('name', 'type', 'last_check', 'account',)
     list_filter = ['type', 'last_check', 'account',]
     search_fields  = ('name',)
+    readonly_fields = ('notified_serial',)
 
 class SupermasterAdmin(admin.ModelAdmin):
     list_display = ('ip', 'nameserver', 'account',)
