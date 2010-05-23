@@ -12,7 +12,7 @@ import os
 
 setup(
     name = "django-powerdns",
-    version = "0.1",
+    version = "0.2",
     url = 'http://bitbucket.org/peternixon/django-powerdns/',
     download_url = 'http://bitbucket.org/peternixon/django-powerdns/downloads/',
     license = 'BSD',
@@ -37,4 +37,14 @@ setup(
     install_requires=[
         'Django>=1.2',
     ]
+    long_description = """\
+Django PowerDNS
+===============
+
+Welcome to the PowerDNS module for Django.
+
+This module allows easy administration of PowerDNS records stored in an SQL database by leveraging
+the standard Django Admin module. You may also use the Django PowerDNS module as part of a larger
+project to programatically modify your DNS records.
+"""
 )
