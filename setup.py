@@ -34,4 +34,7 @@ setup(
         'Topic :: Internet :: WWW/HTTP :: WSGI :: Application',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ]
+    install_requires=[
+        'Django>=1.2',
+    ]
 )
