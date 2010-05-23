@@ -1,13 +1,23 @@
 # -*- coding: utf-8 -*-
 from django.db import models
 from django.core.exceptions import ValidationError
-from django.core.validators import validate_ipv4_address
+from django.utils.translation import ugettext_lazy as _
+from django.core.validators import RegexValidator, validate_ipv4_address
 
+import re
 import time
 
 def validate_dns_nodot(value):
+    '''
+    PowerDNS considers the whole zone to be invalid if any of the records end with a period
+    so this custom validator is used to catch them
+    '''
     if value.endswith('.'):
         raise ValidationError(u'%s is not allowed to end in a period!' % value)
+
+ipv6_re = re.compile(r'^(?:(?:(?:(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){7})|(?:(?!(?:.*[a-f0-9](?::|$)){7,})(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){0,5})?::(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){0,5})?)))|(?:(?:(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){5}:)|(?:(?!(?:.*[a-f0-9]:){5,})(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){0,3})?::(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){0,3}:)?))?(?:(?:25[0-5])|(?:2[0-4][0-9])|(?:1[0-9]{2})|(?:[1-9]?[0-9]))(?:\.(?:(?:25[0-5])|(?:2[0-4][0-9])|(?:1[0-9]{2})|(?:[1-9]?[0-9]))){3}))$')
+validate_ipv6_address = RegexValidator(ipv6_re, _(u'Enter a valid IPv6 address.'), 'invalid')
+
 
 class Domain(models.Model):
     '''
@@ -61,6 +71,8 @@ class Record(models.Model):
     def clean(self):
         if self.type == 'A':
             validate_ipv4_address(self.content)
+        if self.type == 'AAAA':
+            validate_ipv6_address(self.content)
         self.name = self.name.lower() # Get rid of CAPs before saving
         self.type = self.type.upper() # CAPITALISE before saving
     def save(self):
