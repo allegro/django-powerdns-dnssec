@@ -1,6 +1,13 @@
 # -*- coding: utf-8 -*-
 from django.db import models
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_ipv4_address
+
 import time
+
+def validate_dns_nodot(value):
+    if value.endswith('.'):
+        raise ValidationError(u'%s is not allowed to end in a period!' % value)
 
 class Domain(models.Model):
     '''
@@ -15,16 +22,14 @@ class Domain(models.Model):
     master = models.CharField(max_length=128, blank=True, null=True)
     last_check = models.IntegerField(blank=True, null=True)
     type = models.CharField(max_length=6, blank=True, null=True, choices=DOMAIN_TYPE)
-    notified_serial = models.IntegerField(blank=True, null=True)
+    notified_serial = models.PositiveIntegerField(blank=True, null=True)
     account = models.CharField(max_length=40, blank=True, null=True)
     def __unicode__(self):
         return self.name
     class Meta:
         db_table = u'domains'
-    def save(self):
+    def clean(self):
         self.name = self.name.lower() # Get rid of CAPs before saving
-        super(Domain, self).save() # Call the "real" save() method.
-
 
 class Record(models.Model):
     '''
@@ -43,20 +48,23 @@ class Record(models.Model):
         ('TXT', 'TXT'),
     )
     domain = models.ForeignKey(Domain)
-    name = models.CharField(max_length=255, blank=True, null=True, help_text="Actual name of a record. Must not end in a '.' and be fully qualified - it is not relative to the name of the domain!")
+    name = models.CharField(max_length=255, blank=True, null=True, validators=[validate_dns_nodot], help_text="Actual name of a record. Must not end in a '.' and be fully qualified - it is not relative to the name of the domain!")
     type = models.CharField(max_length=6, blank=True, null=True, choices=RECORD_TYPE, help_text='Record qtype')
-    content = models.CharField(max_length=255, blank=True, null=True, help_text="The 'right hand side' of a DNS record. For an A record, this is the IP address")
-    ttl = models.IntegerField(blank=True, null=True, default='3600', help_text='TTL of this record, in seconds')
-    prio = models.IntegerField(blank=True, null=True, help_text='For MX records, this should be the priority of the mail exchanger specified')
-    change_date = models.IntegerField(blank=True, null=True, help_text='Set automatically by the system to trigger SOA updates and slave notifications')
+    content = models.CharField(max_length=255, blank=True, null=True, validators=[validate_dns_nodot], help_text="The 'right hand side' of a DNS record. For an A record, this is the IP address")
+    ttl = models.PositiveIntegerField(blank=True, null=True, default='3600', help_text='TTL of this record, in seconds')
+    prio = models.PositiveIntegerField(blank=True, null=True, help_text='For MX records, this should be the priority of the mail exchanger specified')
+    change_date = models.PositiveIntegerField(blank=True, null=True, help_text='Set automatically by the system to trigger SOA updates and slave notifications')
     def __unicode__(self):
         return self.name
     class Meta:
         db_table = u'records'
-    def save(self):
+    def clean(self):
+        if self.type == 'A':
+            validate_ipv4_address(self.content)
         self.name = self.name.lower() # Get rid of CAPs before saving
         self.type = self.type.upper() # CAPITALISE before saving
-	# Set change_date to current unix time to allow auto SOA update and slave notification
+    def save(self):
+        # Set change_date to current unix time to allow auto SOA update and slave notification
         self.change_date = int(time.time())
         super(Record, self).save() # Call the "real" save() method.
 
