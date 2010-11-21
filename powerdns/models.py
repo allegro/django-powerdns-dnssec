@@ -73,8 +73,10 @@ class Record(models.Model):
             validate_ipv4_address(self.content)
         if self.type == 'AAAA':
             validate_ipv6_address(self.content)
-        self.name = self.name.lower() # Get rid of CAPs before saving
-        self.type = self.type.upper() # CAPITALISE before saving
+        if self.name:
+            self.name = self.name.lower() # Get rid of CAPs before saving
+        if self.type:
+            self.type = self.type.upper() # CAPITALISE before saving
     def save(self):
         # Set change_date to current unix time to allow auto SOA update and slave notification
         self.change_date = int(time.time())
