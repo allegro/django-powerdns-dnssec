@@ -1,3 +1,6 @@
 syntax: glob
 *.pyc
 *~
+dist/*
+build/*
+django_powerdns.egg-info/*
