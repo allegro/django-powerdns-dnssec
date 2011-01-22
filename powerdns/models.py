@@ -64,6 +64,8 @@ class Record(models.Model):
     ttl = models.PositiveIntegerField(blank=True, null=True, default='3600', help_text='TTL of this record, in seconds')
     prio = models.PositiveIntegerField(blank=True, null=True, help_text='For MX records, this should be the priority of the mail exchanger specified')
     change_date = models.PositiveIntegerField(blank=True, null=True, help_text='Set automatically by the system to trigger SOA updates and slave notifications')
+    ordername = models.CharField(max_length=255, blank=True, null=True,)
+    auth = models.NullBooleanField()
     def __unicode__(self):
         return self.name
     class Meta:
@@ -92,4 +94,20 @@ class Supermaster(models.Model):
     account = models.CharField(max_length=40, blank=True, null=True)
     class Meta:
         db_table = u'supermasters'
+
+class Domainmetadata(models.Model):
+    domain_id = models.PositiveIntegerField()
+    kind = models.CharField(max_length=15)
+    content = models.TextField(blank=True, null=True)
+    class Meta:
+        db_table = u'domainmetadata'
+
+class Cryptokey(models.Model):
+    domain_id = models.PositiveIntegerField(blank=True, null=True, default=None,)
+    flags = models.PositiveIntegerField()
+    active = models.NullBooleanField()
+    content = models.TextField(blank=True, null=True)
+    class Meta:
+        db_table = u'cryptokeys'
+
 
