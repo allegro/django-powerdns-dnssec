@@ -70,6 +70,9 @@ class Record(models.Model):
         return self.name
     class Meta:
         db_table = u'records'
+        ordering = ('name', 'type')
+        unique_together = ('name', 'type', 'content')
+
     def clean(self):
         if self.type == 'A':
             validate_ipv4_address(self.content)
@@ -79,35 +82,50 @@ class Record(models.Model):
             self.name = self.name.lower() # Get rid of CAPs before saving
         if self.type:
             self.type = self.type.upper() # CAPITALISE before saving
-    def save(self):
+    def save(self, *args, **kwargs):
         # Set change_date to current unix time to allow auto SOA update and slave notification
         self.change_date = int(time.time())
-        super(Record, self).save() # Call the "real" save() method.
+        ## The 'ordername' field needs to be filled out depending on the NSEC/NSEC3 mode.
+        ## When running in NSEC3 'Narrow' mode, the ordername field is ignored and best left empty.
+        super(Record, self).save(*args, **kwargs) # Call the "real" save() method.
 
 
-class Supermaster(models.Model):
+class SuperMaster(models.Model):
     '''
     PowerDNS DNS Servers that should be trusted to push new domains to us
     '''
     ip = models.CharField(max_length=25)
     nameserver = models.CharField(max_length=255)
     account = models.CharField(max_length=40, blank=True, null=True)
+    def __unicode__(self):
+        return self.ip
     class Meta:
         db_table = u'supermasters'
+        ordering = ('nameserver', 'account')
+        unique_together = ('nameserver', 'account')
 
-class Domainmetadata(models.Model):
-    domain_id = models.PositiveIntegerField()
+class DomainMetadata(models.Model):
+    domain = models.ForeignKey(Domain)
     kind = models.CharField(max_length=15)
     content = models.TextField(blank=True, null=True)
+    def __unicode__(self):
+        return self.domain.__unicode__()
     class Meta:
+        verbose_name_plural = 'Domain metadata'
         db_table = u'domainmetadata'
+        ordering = ('domain',)
 
-class Cryptokey(models.Model):
-    domain_id = models.PositiveIntegerField(blank=True, null=True, default=None,)
+class CryptoKey(models.Model):
+    domain = models.ForeignKey(Domain)
+    ## TODO: When Django 1.3 is released use this instead..
+    # domain = models.ForeignKey(Domain, blank=True, null=True, on_delete=models.SET_NULL)
     flags = models.PositiveIntegerField()
     active = models.NullBooleanField()
     content = models.TextField(blank=True, null=True)
+    def __unicode__(self):
+        return self.domain.__unicode__()
     class Meta:
         db_table = u'cryptokeys'
+        ordering = ('domain',)
 
 
