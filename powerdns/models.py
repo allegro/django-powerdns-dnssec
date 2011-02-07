@@ -61,18 +61,61 @@ class Record(models.Model):
     name = models.CharField(max_length=255, blank=True, null=True, validators=[validate_dns_nodot], help_text="Actual name of a record. Must not end in a '.' and be fully qualified - it is not relative to the name of the domain!")
     type = models.CharField(max_length=6, blank=True, null=True, choices=RECORD_TYPE, help_text='Record qtype')
     content = models.CharField(max_length=255, blank=True, null=True, validators=[validate_dns_nodot], help_text="The 'right hand side' of a DNS record. For an A record, this is the IP address")
-    ttl = models.PositiveIntegerField(blank=True, null=True, default='3600', help_text='TTL of this record, in seconds')
-    prio = models.PositiveIntegerField(blank=True, null=True, help_text='For MX records, this should be the priority of the mail exchanger specified')
+    ttl = models.PositiveIntegerField("TTL", blank=True, null=True, default='3600', help_text='TTL in seconds')
+    prio = models.PositiveIntegerField("Priority", blank=True, null=True, help_text='For MX records, this should be the priority of the mail exchanger specified')
     change_date = models.PositiveIntegerField(blank=True, null=True, help_text='Set automatically by the system to trigger SOA updates and slave notifications')
-    ordername = models.CharField(max_length=255, blank=True, null=True,)
-    auth = models.NullBooleanField()
+    ordername = models.CharField("DNSSEC Order", max_length=255, blank=True, null=True,)
+    auth = models.NullBooleanField("Authoritative", help_text="Should be set for data for which is itself authoritative, which includes the SOA record and our own NS records but not set for NS records which are used for delegation or any delegation related glue (A, AAAA) records")
     def __unicode__(self):
         return self.name
     class Meta:
         db_table = u'records'
         ordering = ('name', 'type')
         unique_together = ('name', 'type', 'content')
+    def _generate_ordername(self):
+        "The 'ordername' field needs to be filled out depending on the NSEC/NSEC3 mode."
+        '''Check which DNSSEC Mode the domain is in'''
+        q1 = DomainMetadata.objects.filter(domain=self.domain)
+        if len(q1) == 0:
+            '''We are not in NSEC3 mode so it must be NSEC'''
+            print "DEBUG: MODE is NSEC"
+            return self._generate_ordername_nsec()
+        try:
+            '''Check is a NSEC3NARROW record exists'''
+            mode = q1.get(kind='NSEC3NARROW').kind
+            print "DEBUG: MODE is NSEC3NARROW"
+            return self._generate_ordername_nsec3_narrow()
+        except:
+            '''We seem to be in NSEC3 non-narrow mode'''
+            print "DEBUG: MODE is NSEC3"
+            return self._generate_ordername_nsec3()
 
+    def _generate_ordername_nsec(self):
+        '''
+        In 'NSEC' mode, it should contain the relative part of a domain name,
+        in reverse order, with dots replaced by spaces
+        '''
+        domain_words = self.domain.name.split('.')
+        host_words = self.name.split('.')
+        print len(domain_words), domain_words
+        print len(host_words), host_words
+        relative_word_no = len(host_words) - len(domain_words)
+        relative_words = host_words[0:relative_word_no]
+        relative_words.reverse()
+        print "DEBUG Host words:", relative_words
+        ordername = ' '.join(relative_words)
+        return ordername
+    def _generate_ordername_nsec3(self):
+        '''
+        In 'NSEC3' non-narrow mode, the ordername should contain a lowercase base32hex encoded
+        representation of the salted & iterated hash of the full record name.
+        "pdnssec hash-zone-record zone record" can be used to calculate this hash.
+        '''
+        # FIXME
+        return 'FIXME'
+    def _generate_ordername_nsec3_narrow(self):
+        "When running in NSEC3 'Narrow' mode, the ordername field is ignored and best left empty."
+        return None
     def clean(self):
         if self.type == 'A':
             validate_ipv4_address(self.content)
@@ -86,7 +129,7 @@ class Record(models.Model):
         # Set change_date to current unix time to allow auto SOA update and slave notification
         self.change_date = int(time.time())
         ## The 'ordername' field needs to be filled out depending on the NSEC/NSEC3 mode.
-        ## When running in NSEC3 'Narrow' mode, the ordername field is ignored and best left empty.
+        self.ordername = self._generate_ordername()
         super(Record, self).save(*args, **kwargs) # Call the "real" save() method.
 
 

@@ -6,14 +6,14 @@ class RecordAdmin(admin.ModelAdmin):
     list_display = ('name', 'type', 'content', 'ttl', 'prio', 'change_date',)
     list_filter = ['type', 'ttl',]
     search_fields  = ('name','content',)
-    readonly_fields = ('change_date',)
+    readonly_fields = ('change_date', 'ordername',)
     fieldsets = (
         (None, {
-            'fields': ('domain', ('type', 'name', 'content',))
+            'fields': ('domain', ('type', 'name', 'content',), 'auth',)
         }),
         ('Advanced options', {
             'classes': ('collapse',),
-            'fields': ('prio', 'ttl', 'ordername', 'auth', 'change_date',)
+            'fields': ('prio', 'ttl', 'ordername', 'change_date',)
         }),
     )
 
