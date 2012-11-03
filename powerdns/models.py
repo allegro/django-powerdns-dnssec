@@ -3,10 +3,23 @@
 import re
 import time
 
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator, validate_ipv4_address
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+
+
+RECORD_TYPES = (
+    'A', 'AAAA', 'CERT', 'CNAME', 'DNSKEY', 'DS', 'HINFO', 'KEY', 'LOC', 'MX',
+    'NAPTR', 'NS', 'NSEC', 'PTR', 'RP', 'RRSIG', 'SOA', 'SPF', 'SSHFP', 'SRV',
+    'TXT',
+)
+
+try:
+    RECORD_TYPES = settings.POWERDNS_RECORD_TYPES
+except AttributeError:
+    pass
 
 
 def validate_dns_nodot(value):
@@ -71,18 +84,8 @@ class Record(models.Model):
     '''
     PowerDNS DNS records
     '''
-    RECORD_TYPE = (
-        ('A', 'A'),
-        ('AAAA', 'AAAA'),
-        ('CNAME', 'CNAME'),
-        ('MX', 'MX'),
-        ('NS', 'NS'),
-        ('PTR', 'PTR'),
-        ('SOA', 'SOA'),
-        ('SPF', 'SPF'),
-        ('SRV', 'SRV'),
-        ('TXT', 'TXT'),
-    )
+    RECORD_TYPE = [(r, r) for r in RECORD_TYPES]
+
     domain = models.ForeignKey(Domain, verbose_name=_("domain"))
     name = models.CharField(
         _("name"), max_length=255, blank=True, null=True,
