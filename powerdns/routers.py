@@ -23,9 +23,11 @@ class PowerDNSRouter(object):
         return None
 
     def allow_syncdb(self, db, model):
+        print(db, model)
         if model._meta.app_label == self.app_name:
             return db == self.db_name
         elif db == self.db_name:
-            return False
+            # workaround for http://south.aeracode.org/ticket/370
+            return model._meta.app_label == 'south'
         return None
 

@@ -51,6 +51,21 @@ add this setting to ``settings.py``::
 
   DATABASE_ROUTERS = ['powerdns.routers.PowerDNSRouter']
 
+You have to sync and migrate the ``default`` and the ``powerdns`` databases
+separately. First the default database::
+
+  $ python manage.py syncdb
+  $ python manage.py migrate
+
+Then the ``powerdns`` database::
+
+  $ python manage.py syncdb --database=powerdns
+  $ python manage.py migrate --database==powerdns
+
+Note that the ``powerdns`` database will maintain its own separate South
+migration history table. This is especially helpful if your connecting several
+Django projects to a single PowerDNS database.
+
 Authors
 -------
 
