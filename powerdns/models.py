@@ -135,7 +135,11 @@ class Record(models.Model):
         verbose_name_plural = _("records")
 
     def __unicode__(self):
-        return self.name
+        if self.prio is not None:
+            content = "%d %s" % (self.prio, self.content)
+        else:
+            content = self.content
+        return "%s IN %s %s" % (self.name, self.type, content)
 
     def _generate_ordername(self):
         '''
