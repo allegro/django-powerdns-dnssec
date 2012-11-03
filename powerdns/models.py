@@ -111,7 +111,7 @@ class Record(models.Model):
                     " mail exchanger specified"),
     )
     change_date = models.PositiveIntegerField(
-        _("change date"), _blank=True, null=True,
+        _("change date"), blank=True, null=True,
         help_text=_("Set automatically by the system to trigger SOA"
                     " updates and slave notifications"),
     )
