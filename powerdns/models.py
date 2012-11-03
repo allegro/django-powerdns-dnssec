@@ -6,9 +6,11 @@ import re
 import string
 import time
 
+import ipaddr
+
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.core.validators import RegexValidator, validate_ipv4_address
+from django.core.validators import validate_ipv4_address
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
@@ -34,21 +36,18 @@ def validate_dns_nodot(value):
     with a period so this custom validator is used to catch them
     '''
     if value.endswith('.'):
-        raise ValidationError(u'%s is not allowed to end in a period!' % value)
+        raise ValidationError(
+            _(u'%s is not allowed to end in a period!') % value,
+            code='invalid',
+        )
 
-ipv6_re = re.compile(r'^(?:(?:(?:(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){7})|(?:(?!'
-                     r'(?:.*[a-f0-9](?::|$)){7,})(?:[a-f0-9]{1,4}(?::[a-f0-9]'
-                     r'{1,4}){0,5})?::(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){0,5})'
-                     r'?)))|(?:(?:(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){5}:)|(?:'
-                     r'(?!(?:.*[a-f0-9]:){5,})(?:[a-f0-9]{1,4}(?::[a-f0-9]'
-                     r'{1,4}){0,3})?::(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){0,3}'
-                     r':)?))?(?:(?:25[0-5])|(?:2[0-4][0-9])|(?:1[0-9]{2})|(?:'
-                     r'[1-9]?[0-9]))(?:\.(?:(?:25[0-5])|(?:2[0-4][0-9])|(?:1'
-                     r'[0-9]{2})|(?:[1-9]?[0-9]))){3}))$')
-validate_ipv6_address = RegexValidator(
-    ipv6_re, _(u'Enter a valid IPv6 address.'), 'invalid',
-)
-
+def validate_ipv6_address(value):
+    try:
+        ipaddr.IPv6Address(value)
+    except ipaddr.AddressValueError:
+        raise ValidationError(
+            _(u'Enter a valid IPv6 address.'), code='invalid',
+        )
 
 class Domain(models.Model):
     '''
