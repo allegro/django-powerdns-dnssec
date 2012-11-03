@@ -209,7 +209,7 @@ class Record(models.Model):
         result = result.translate(b32_trans)
         return result.lower()
 
-    def _sha1(value, salt):
+    def _sha1(self, value, salt):
         s = hashlib.sha1()
         s.update(value)
         s.update(salt)
