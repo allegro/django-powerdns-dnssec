@@ -41,6 +41,6 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
     install_requires=[
-        'Django>=1.2',
+        'Django>=1.3.4',
     ],
 )
