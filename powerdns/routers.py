@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+
 class PowerDNSRouter(object):
     """Route all operations on powerdns models to the powerdns database."""
 
@@ -18,7 +19,7 @@ class PowerDNSRouter(object):
 
     def allow_relation(self, obj1, obj2, **hints):
         if (obj1._meta.app_label == self.app_name and
-            obj2._meta.app_label == self.app_name):
+                obj2._meta.app_label == self.app_name):
             return True
         return None
 
@@ -30,4 +31,3 @@ class PowerDNSRouter(object):
             # workaround for http://south.aeracode.org/ticket/370
             return model._meta.app_label == 'south'
         return None
-

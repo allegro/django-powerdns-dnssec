@@ -14,6 +14,7 @@ import sys
 reload(sys)
 sys.setdefaultencoding('utf8')
 
+
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
@@ -25,12 +26,12 @@ setup(
     download_url = 'http://bitbucket.org/peternixon/django-powerdns/downloads/',
     license = 'BSD',
     description = 'PowerDNS administration module for Django',
-    long_description=read('README.rst'),
+    long_description = read('README.rst'),
     author = 'Peter Nixon, Łukasz Langa',
     author_email = 'listuser@peternixon.net',
     packages = [p for p in find_packages() if not p.startswith('example')],
     include_package_data = True,
-    platforms='any',
+    platforms = 'any',
     classifiers = [
         'Development Status :: 4 - Beta',
         'Framework :: Django',
@@ -49,9 +50,9 @@ setup(
         'Topic :: Internet :: WWW/HTTP :: WSGI :: Application',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
-    install_requires=[
+    install_requires = [
         'Django>=1.3.4',
         'ipaddr>=2.1.7',
     ],
-    zip_safe = False, # if only because of the readme file
+    zip_safe = False,  # if only because of the readme file
 )

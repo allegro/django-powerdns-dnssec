@@ -2,7 +2,6 @@
 
 import base64
 import hashlib
-import re
 import string
 import time
 
@@ -30,6 +29,7 @@ except AttributeError:
 b32_trans = string.maketrans('ABCDEFGHIJKLMNOPQRSTUVWXYZ234567',
                              '0123456789ABCDEFGHIJKLMNOPQRSTUV')
 
+
 def validate_dns_nodot(value):
     '''
     PowerDNS considers the whole zone to be invalid if any of the records end
@@ -41,6 +41,7 @@ def validate_dns_nodot(value):
             code='invalid',
         )
 
+
 def validate_ipv6_address(value):
     try:
         ipaddr.IPv6Address(value)
@@ -48,6 +49,7 @@ def validate_ipv6_address(value):
         raise ValidationError(
             _(u'Enter a valid IPv6 address.'), code='invalid',
         )
+
 
 class Domain(models.Model):
     '''
@@ -199,7 +201,7 @@ class Record(models.Model):
             parts = ["%s%s" % (chr(len(x)), x) for x in record_name.split('.')]
             record_name = ''.join(parts)
         except (ValueError, TypeError, AttributeError):
-            return None # incompatible input
+            return None  # incompatible input
         record_name = self._sha1(record_name, salt)
         i = 0
         while i < int(iterations):
