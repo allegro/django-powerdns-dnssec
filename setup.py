@@ -28,7 +28,7 @@ setup(
     long_description=read('README.rst'),
     author = 'Peter Nixon, Łukasz Langa',
     author_email = 'listuser@peternixon.net',
-    packages = find_packages(),
+    packages = [p for p in find_packages() if not p.startswith('example')],
     include_package_data = True,
     platforms='any',
     classifiers = [
