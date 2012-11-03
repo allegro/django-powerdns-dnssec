@@ -3,4 +3,5 @@ syntax: glob
 *~
 dist/*
 build/*
+example/settings_local.py
 django_powerdns.egg-info/*
