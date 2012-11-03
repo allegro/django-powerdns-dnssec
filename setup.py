@@ -51,6 +51,7 @@ setup(
     ],
     install_requires=[
         'Django>=1.3.4',
+        'ipaddr>=2.1.7',
     ],
     zip_safe = False, # if only because of the readme file
 )

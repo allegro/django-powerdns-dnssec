@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
+import base64
+import hashlib
 import re
+import string
 import time
 
 from django.conf import settings
@@ -21,6 +24,9 @@ try:
 except AttributeError:
     pass
 
+# http://tools.ietf.org/html/rfc4648#section-7
+b32_trans = string.maketrans('ABCDEFGHIJKLMNOPQRSTUVWXYZ234567',
+                             '0123456789ABCDEFGHIJKLMNOPQRSTUV')
 
 def validate_dns_nodot(value):
     '''
@@ -85,7 +91,6 @@ class Record(models.Model):
     PowerDNS DNS records
     '''
     RECORD_TYPE = [(r, r) for r in RECORD_TYPES]
-
     domain = models.ForeignKey(Domain, verbose_name=_("domain"))
     name = models.CharField(
         _("name"), max_length=255, blank=True, null=True,
@@ -149,20 +154,19 @@ class Record(models.Model):
         Check which DNSSEC Mode the domain is in and fill the `ordername`
         field depending on the mode.
         '''
-        q1 = DomainMetadata.objects.filter(domain=self.domain)
-        if not len(q1) == 0:
-            '''We are not in NSEC3 mode so it must be NSEC'''
-            print "DEBUG: MODE is NSEC"
-            return self._generate_ordername_nsec()
-        try:
-            '''Check is a NSEC3NARROW record exists'''
-            mode = q1.get(kind='NSEC3NARROW').kind
-            print "DEBUG: MODE is NSEC3NARROW"
-            return self._generate_ordername_nsec3_narrow()
-        except:
-            '''We seem to be in NSEC3 non-narrow mode'''
-            print "DEBUG: MODE is NSEC3"
-            return self._generate_ordername_nsec3()
+        cryptokey = CryptoKey.objects.filter(domain=self.domain)
+        if not cryptokey.count():
+            return None
+        metadata = DomainMetadata.objects.filter(domain=self.domain)
+        nsec3param = metadata.filter(kind='NSEC3PARAM')
+        nsec3narrow = metadata.filter(kind='NSEC3NARROW')
+        if nsec3param.count():
+            if nsec3narrow.count():
+                # When running in NSEC3 'Narrow' mode, the ordername field is
+                # ignored and best left empty.
+                return ''
+            return self._generate_ordername_nsec3(nsec3param[0])
+        return self._generate_ordername_nsec()
 
     def _generate_ordername_nsec(self):
         '''
@@ -171,30 +175,46 @@ class Record(models.Model):
         '''
         domain_words = self.domain.name.split('.')
         host_words = self.name.split('.')
-        print len(domain_words), domain_words
-        print len(host_words), host_words
-        relative_word_no = len(host_words) - len(domain_words)
-        relative_words = host_words[0:relative_word_no]
-        relative_words.reverse()
-        print "DEBUG Host words:", relative_words
-        ordername = ' '.join(relative_words)
+        relative_word_count = len(host_words) - len(domain_words)
+        relative_words = host_words[0:relative_word_count]
+        ordername = ' '.join(relative_words[::-1])
         return ordername
 
-    def _generate_ordername_nsec3(self):
+    def _generate_ordername_nsec3(self, nsec3param):
         '''
         In 'NSEC3' non-narrow mode, the ordername should contain a lowercase
         base32hex encoded representation of the salted & iterated hash of the
         full record name.  "pdnssec hash-zone-record zone record" can be used
         to calculate this hash.
         '''
-        return 'FIXME'  # FIXME: Implement ordername_nsec3.
+        try:
+            algo, flags, iterations, salt = nsec3param.content.split()
+            if algo != '1':
+                raise ValueError("Incompatible hash algorithm.")
+            if flags != '1':
+                raise ValueError("Incompatible flags.")
+            salt = salt.decode('hex')
+            # convert the record name to the DNSSEC canonical form, e.g.
+            # a format suitable for digesting in hashes
+            record_name = '%s.' % self.name.lower().rstrip('.')
+            parts = ["%s%s" % (chr(len(x)), x) for x in record_name.split('.')]
+            record_name = ''.join(parts)
+        except (ValueError, TypeError, AttributeError):
+            return None # incompatible input
+        record_name = self._sha1(record_name, salt)
+        i = 0
+        while i < int(iterations):
+            record_name = self._sha1(record_name, salt)
+            i += 1
+        result = base64.b32encode(record_name)
+        result = result.translate(b32_trans)
+        return result.lower()
 
-    def _generate_ordername_nsec3_narrow(self):
-        '''
-        When running in NSEC3 'Narrow' mode, the ordername field is ignored and
-        best left empty.
-        '''
-        return None
+    def _sha1(value, salt):
+        s = hashlib.sha1()
+        s.update(value)
+        s.update(salt)
+        return s.digest()
 
     def clean(self):
         if self.type == 'A':
