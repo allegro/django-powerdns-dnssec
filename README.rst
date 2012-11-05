@@ -70,4 +70,6 @@ Authors
 -------
 
 Application written by `Peter Nixon <mailto:listuser@peternixon.net>`_ and
-`Łukasz Langa <mailto:lukasz@langa.pl>`_.
+`Łukasz Langa <mailto:lukasz@langa.pl>`_. NSEC3 code based on George Notaras'
+work with `django-powerdns-manager
+<https://bitbucket.org/gnotaras/django-powerdns-manager>`_.
