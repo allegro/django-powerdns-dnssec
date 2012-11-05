@@ -70,6 +70,31 @@ Note that the ``powerdns`` database will maintain its own separate South
 migration history table. This is especially helpful if your connecting several
 Django projects to a single PowerDNS database.
 
+Change Log
+----------
+
+0.9.0
+~~~~~
+
+* DNSSEC tables supported.
+
+* Support for multiple databases.
+
+* Updated the project to require at least Django 1.3.
+
+* UI translations supported (currently Polish translation added).
+
+* South migrations.
+
+* Source code compliant with PEP8.
+
+* Minor fixes.
+
+0.2.0
+~~~~~
+
+* First release with basic PowerDNS support.
+
 Authors
 -------
 
