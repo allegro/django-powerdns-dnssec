@@ -1,5 +1,5 @@
-Django PowerDNS
-===============
+Django PowerDNS with DNSSEC support
+===================================
 
 Welcome to the PowerDNS app for Django.
 
@@ -7,6 +7,10 @@ This application allows easy administration of PowerDNS records stored in an
 SQL database by leveraging the standard Django Admin app. You may also use the
 Django PowerDNS application as part of a larger project to programatically
 modify your DNS records.
+
+**Note:** This is an updated and enhanced fork of `django-powerdns
+<http://pypi.python.org/pypi/django-powerdns/>`_ which looks abandoned as of
+November 2012.
 
 Quickstart
 ----------

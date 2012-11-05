@@ -20,15 +20,14 @@ def read(fname):
 
 
 setup(
-    name = 'django-powerdns',
+    name = 'django-powerdns-dnssec',
     version = '0.9.0',
-    url = 'http://bitbucket.org/peternixon/django-powerdns/',
-    download_url = 'http://bitbucket.org/peternixon/django-powerdns/downloads/',
+    url = 'http://bitbucket.org/ambv/django-powerdns/',
     license = 'BSD',
-    description = 'PowerDNS administration module for Django',
+    description = 'PowerDNS administration app for Django',
     long_description = read('README.rst'),
     author = 'Peter Nixon, Łukasz Langa',
-    author_email = 'listuser@peternixon.net',
+    author_email = 'lukasz@langa.pl',
     packages = [p for p in find_packages() if not p.startswith('example')],
     include_package_data = True,
     platforms = 'any',
