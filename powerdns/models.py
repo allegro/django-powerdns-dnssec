@@ -14,11 +14,18 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 
-RECORD_TYPES = (
-    'A', 'AAAA', 'CERT', 'CNAME', 'DNSKEY', 'DS', 'HINFO', 'KEY', 'LOC', 'MX',
-    'NAPTR', 'NS', 'NSEC', 'PTR', 'RP', 'RRSIG', 'SOA', 'SPF', 'SSHFP', 'SRV',
+BASIC_RECORD_TYPES = (
+    'A', 'AAAA', 'CNAME', 'HINFO', 'MX', 'NAPTR', 'NS', 'PTR', 'SOA', 'SRV',
     'TXT',
 )
+
+DNSSEC_RECORD_TYPES = ('DNSKEY', 'DS', 'KEY', 'NSEC', 'RRSIG')
+
+AUX_RECORD_TYPES = ('AFSDB', 'CERT', 'LOC', 'RP', 'SPF', 'SSHFP')
+
+RECORD_TYPES = sorted(set(
+    BASIC_RECORD_TYPES + DNSSEC_RECORD_TYPES + AUX_RECORD_TYPES
+))
 
 try:
     RECORD_TYPES = settings.POWERDNS_RECORD_TYPES

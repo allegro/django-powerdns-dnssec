@@ -18,6 +18,21 @@ Quickstart
 Simply add ``powerdns`` to ``INSTALLED_APPS`` in your ``settings.py``. Use
 South for database migrations.
 
+Customizing resource record types
+---------------------------------
+
+If you're not using DNSSEC or the other less common record types, you can
+simplify the user interface even more by specifying a sequence of types the app
+should use. Simply put this in your ``settings.py``::
+
+  POWERDNS_RECORD_TYPES = (
+      'A', 'AAAA', 'CNAME', 'HINFO', 'MX', 'NAPTR', 'NS',
+      'PTR', 'SOA', 'SRV', 'TXT',
+  )
+
+Consult PowerDNS documentation for a `list of supported resource record types
+<http://doc.powerdns.com/types.html>`_.
+
 Using a separate database for PowerDNS
 --------------------------------------
 
