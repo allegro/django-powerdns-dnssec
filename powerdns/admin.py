@@ -105,6 +105,13 @@ class CryptoKeyAdmin(admin.ModelAdmin):
     list_per_page = 250
     save_on_top = True
     search_fields = ('content',)
+    formfield_overrides = {
+        models.NullBooleanField: {
+            'widget': NullBooleanRadioSelect(
+                attrs={'class': 'radiolist inline'}
+            ),
+        },
+    }
 
 
 admin.site.register(Domain, DomainAdmin)
