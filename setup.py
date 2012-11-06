@@ -20,15 +20,14 @@ def read(fname):
 
 
 setup(
-    name = 'django-powerdns',
-    version = '0.9.0',
-    url = 'http://bitbucket.org/peternixon/django-powerdns/',
-    download_url = 'http://bitbucket.org/peternixon/django-powerdns/downloads/',
+    name = 'django-powerdns-dnssec',
+    version = '0.9.1',
+    url = 'http://bitbucket.org/ambv/django-powerdns/',
     license = 'BSD',
-    description = 'PowerDNS administration module for Django',
+    description = 'PowerDNS administration app for Django',
     long_description = read('README.rst'),
     author = 'Peter Nixon, Łukasz Langa',
-    author_email = 'listuser@peternixon.net',
+    author_email = 'lukasz@langa.pl',
     packages = [p for p in find_packages() if not p.startswith('example')],
     include_package_data = True,
     platforms = 'any',
@@ -53,6 +52,7 @@ setup(
     install_requires = [
         'Django>=1.3.4',
         'ipaddr>=2.1.7',
+        'lck.django>=0.8.0',
     ],
     zip_safe = False,  # if only because of the readme file
 )
