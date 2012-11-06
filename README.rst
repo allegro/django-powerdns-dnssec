@@ -15,8 +15,8 @@ November 2012.
 Quickstart
 ----------
 
-Simply add ``powerdns`` to ``INSTALLED_APPS`` in your ``settings.py``. Use
-South for database migrations.
+Simply add ``powerdns`` and ``lck.django.common`` to ``INSTALLED_APPS`` in your
+``settings.py``.  Use South for database migrations.
 
 Customizing resource record types
 ---------------------------------
@@ -87,6 +87,16 @@ Django projects to a single PowerDNS database.
 
 Change Log
 ----------
+
+0.9.1
+~~~~~
+
+* Domain foreign keys support auto completion and have "Edit separately" links
+  
+* Field choices use radio selects whenever that makes sense (fever clicks
+  necessary)
+
+* Forward/reverse domain filter (requires Django 1.4+)
 
 0.9.0
 ~~~~~
