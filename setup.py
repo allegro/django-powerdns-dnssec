@@ -21,7 +21,7 @@ def read(fname):
 
 setup(
     name = 'django-powerdns-dnssec',
-    version = '0.9.0',
+    version = '0.9.1',
     url = 'http://bitbucket.org/ambv/django-powerdns/',
     license = 'BSD',
     description = 'PowerDNS administration app for Django',
@@ -52,7 +52,7 @@ setup(
     install_requires = [
         'Django>=1.3.4',
         'ipaddr>=2.1.7',
-        'lck.django>=0.7.14',
+        'lck.django>=0.8.0',
     ],
     zip_safe = False,  # if only because of the readme file
 )
