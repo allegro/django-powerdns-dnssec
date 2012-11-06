@@ -75,11 +75,16 @@ separately. First the default database::
 Then the ``powerdns`` database::
 
   $ python manage.py syncdb --database=powerdns
-  $ python manage.py migrate --database==powerdns
+  $ python manage.py migrate --database==powerdns powerdns
 
 Note that the ``powerdns`` database will maintain its own separate South
 migration history table. This is especially helpful if your connecting several
 Django projects to a single PowerDNS database.
+
+Also note that due to `South limitations
+<http://south.aeracode.org/ticket/370>`_, ``migrate`` will create all powerdns
+tables also in the default database. This is harmless, even though creates some
+clutter.
 
 Authors
 -------
