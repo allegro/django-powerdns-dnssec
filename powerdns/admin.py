@@ -1,15 +1,45 @@
 # -*- coding: utf-8 -*-
 
-from django.forms import NullBooleanSelect
 from django.contrib import admin
 from django.contrib.admin.widgets import AdminRadioSelect
 from django.db import models
+from django.forms import NullBooleanSelect
+from django.utils.translation import ugettext_lazy as _
 from powerdns.models import (CryptoKey, Domain, DomainMetadata, Record,
                              SuperMaster)
 
 
 class NullBooleanRadioSelect(NullBooleanSelect, AdminRadioSelect):
     pass
+
+
+try:
+    from django.contrib.admin import SimpleListFilter
+except ImportError:
+    _domain_filters = ('type', 'last_check', 'account',)
+else:
+    class ReverseDomainListFilter(SimpleListFilter):
+        title = _('domain class')
+
+        # Parameter for the filter that will be used in the URL query.
+        parameter_name = 'domain_class'
+
+        def lookups(self, request, model_admin):
+            return (
+                ('fwd', _('domain:forward')),
+                ('rev', _('domain:reverse')),
+            )
+
+        def queryset(self, request, queryset):
+            q = (models.Q(name__endswith='.in-addr.arpa') |
+                 models.Q(name__endswith='.ip6.arpa'))
+            if self.value() == 'fwd':
+                return queryset.exclude(q)
+            if self.value() == 'rev':
+                return queryset.filter(q)
+    _domain_filters = (
+        ReverseDomainListFilter, 'type', 'last_check', 'account',
+    )
 
 
 class RecordAdmin(admin.ModelAdmin):
@@ -20,7 +50,6 @@ class RecordAdmin(admin.ModelAdmin):
     list_per_page = 250
     save_on_top = True
     search_fields = ('name', 'content',)
-    #radio_fields = {'auth': admin.HORIZONTAL}
     readonly_fields = ('change_date', 'ordername',)
     fieldsets = (
         (None, {
@@ -48,7 +77,7 @@ class DomainMetadataInline(admin.TabularInline):
 class DomainAdmin(admin.ModelAdmin):
     inlines = [DomainMetadataInline]
     list_display = ('name', 'type', 'last_check', 'account',)
-    list_filter = ('type', 'last_check', 'account',)
+    list_filter = _domain_filters
     list_per_page = 250
     save_on_top = True
     search_fields = ('name',)
