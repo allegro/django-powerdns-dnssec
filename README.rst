@@ -1,5 +1,5 @@
-Django PowerDNS
-===============
+Django PowerDNS with DNSSEC support
+===================================
 
 Welcome to the PowerDNS app for Django.
 
@@ -8,11 +8,15 @@ SQL database by leveraging the standard Django Admin app. You may also use the
 Django PowerDNS application as part of a larger project to programatically
 modify your DNS records.
 
+**Note:** This is an updated and enhanced fork of `django-powerdns
+<http://pypi.python.org/pypi/django-powerdns/>`_ which looks abandoned as of
+November 2012.
+
 Quickstart
 ----------
 
-Simply add ``powerdns`` to ``INSTALLED_APPS`` in your ``settings.py``. Use
-South for database migrations.
+Simply add ``powerdns`` and ``lck.django.common`` to ``INSTALLED_APPS`` in your
+``settings.py``.  Use South for database migrations.
 
 Customizing resource record types
 ---------------------------------
@@ -80,6 +84,41 @@ Then the ``powerdns`` database::
 Note that the ``powerdns`` database will maintain its own separate South
 migration history table. This is especially helpful if your connecting several
 Django projects to a single PowerDNS database.
+
+Change Log
+----------
+
+0.9.1
+~~~~~
+
+* Domain foreign keys support auto completion and have "Edit separately" links
+  
+* Field choices use radio selects whenever that makes sense (fever clicks
+  necessary)
+
+* Forward/reverse domain filter (requires Django 1.4+)
+
+0.9.0
+~~~~~
+
+* DNSSEC tables supported.
+
+* Support for multiple databases.
+
+* Updated the project to require at least Django 1.3.
+
+* UI translations supported (currently Polish translation added).
+
+* South migrations.
+
+* Source code compliant with PEP8.
+
+* Minor fixes.
+
+0.2.0
+~~~~~
+
+* First release with basic PowerDNS support.
 
 Authors
 -------
