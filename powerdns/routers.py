@@ -24,7 +24,6 @@ class PowerDNSRouter(object):
         return None
 
     def allow_syncdb(self, db, model):
-        print(db, model)
         if model._meta.app_label == self.app_name:
             return db == self.db_name
         elif db == self.db_name:
