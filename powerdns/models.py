@@ -118,6 +118,10 @@ class Record(TimeTrackable):
         help_text=_("The 'right hand side' of a DNS record. For an A"
                     " record, this is the IP address"),
     )
+    number = models.PositiveIntegerField(
+        _("IP number"), null=True, blank=True, default=None, editable=False,
+        db_index=True
+    )
     ttl = models.PositiveIntegerField(
         _("TTL"), blank=True, null=True, default=3600,
         help_text=_("TTL in seconds"),
@@ -238,6 +242,8 @@ class Record(TimeTrackable):
     def save(self, *args, **kwargs):
         self.change_date = int(time.time())
         self.ordername = self._generate_ordername()
+        if self.type == 'A':
+            self.number = int(ipaddr.IPAddress(self.content))
         super(Record, self).save(*args, **kwargs)
 
 
