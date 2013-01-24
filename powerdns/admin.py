@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from django import forms
 from django.contrib import admin
 from django.contrib.admin.widgets import AdminRadioSelect
 from django.db import models
@@ -42,7 +43,16 @@ else:
     )
 
 
+class RecordAdminForm(forms.ModelForm):
+    def clean_type(self):
+        type = self.cleaned_data['type']
+        if not type:
+            raise forms.ValidationError(_("Record type is required"))
+        return type
+
+
 class RecordAdmin(admin.ModelAdmin):
+    form = RecordAdminForm
     list_display = (
         'name', 'type', 'content', 'domain', 'ttl', 'prio', 'change_date',
     )
