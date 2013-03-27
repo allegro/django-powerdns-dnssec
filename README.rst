@@ -93,6 +93,16 @@ clutter.
 Change Log
 ----------
 
+0.9.3
+~~~~~
+
+* Fixed issue #3: HTTP 500 in record admin form if no type given
+
+0.9.2
+~~~~~
+
+* Fixed issue #2: numeric sorting of IP addresses in admin
+
 0.9.1
 ~~~~~
 
