@@ -3,7 +3,7 @@
 from django.contrib import admin
 from django.contrib.admin.widgets import AdminRadioSelect
 from django.db import models
-from django.forms import NullBooleanSelect
+from django.forms import NullBooleanSelect, ModelForm, ValidationError
 from django.utils.translation import ugettext_lazy as _
 from lck.django.common.admin import ModelAdmin
 from powerdns.models import (CryptoKey, Domain, DomainMetadata, Record,
@@ -43,11 +43,11 @@ else:
     )
 
 
-class RecordAdminForm(forms.ModelForm):
+class RecordAdminForm(ModelForm):
     def clean_type(self):
         type = self.cleaned_data['type']
         if not type:
-            raise forms.ValidationError(_("Record type is required"))
+            raise ValidationError(_("Record type is required"))
         return type
 
 
