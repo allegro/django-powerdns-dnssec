@@ -119,6 +119,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'django.contrib.admindocs',
+    'lck.django.common',
     'powerdns',
     'south',
 )

@@ -12,6 +12,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import validate_ipv4_address
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from lck.django.common.models import TimeTrackable
 
 
 BASIC_RECORD_TYPES = (
@@ -58,7 +59,7 @@ def validate_ipv6_address(value):
         )
 
 
-class Domain(models.Model):
+class Domain(TimeTrackable):
     '''
     PowerDNS domains
     '''
@@ -94,7 +95,7 @@ class Domain(models.Model):
         self.name = self.name.lower()
 
 
-class Record(models.Model):
+class Record(TimeTrackable):
     '''
     PowerDNS DNS records
     '''
@@ -116,6 +117,10 @@ class Record(models.Model):
         validators=[validate_dns_nodot],
         help_text=_("The 'right hand side' of a DNS record. For an A"
                     " record, this is the IP address"),
+    )
+    number = models.PositiveIntegerField(
+        _("IP number"), null=True, blank=True, default=None, editable=False,
+        db_index=True
     )
     ttl = models.PositiveIntegerField(
         _("TTL"), blank=True, null=True, default=3600,
@@ -237,10 +242,12 @@ class Record(models.Model):
     def save(self, *args, **kwargs):
         self.change_date = int(time.time())
         self.ordername = self._generate_ordername()
+        if self.type == 'A':
+            self.number = int(ipaddr.IPAddress(self.content))
         super(Record, self).save(*args, **kwargs)
 
 
-class SuperMaster(models.Model):
+class SuperMaster(TimeTrackable):
     '''
     PowerDNS DNS Servers that should be trusted to push new domains to us
     '''
@@ -261,7 +268,7 @@ class SuperMaster(models.Model):
         return self.ip
 
 
-class DomainMetadata(models.Model):
+class DomainMetadata(TimeTrackable):
     domain = models.ForeignKey(Domain, verbose_name=_("domain"))
     kind = models.CharField(_("kind"), max_length=15)
     content = models.TextField(_("content"), blank=True, null=True)
@@ -276,7 +283,7 @@ class DomainMetadata(models.Model):
         return unicode(self.domain)
 
 
-class CryptoKey(models.Model):
+class CryptoKey(TimeTrackable):
     domain = models.ForeignKey(
         Domain, verbose_name=_("domain"), blank=True, null=True,
         on_delete=models.SET_NULL,

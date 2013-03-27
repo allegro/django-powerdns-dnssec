@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from django import forms
 from django.contrib import admin
 from django.contrib.admin.widgets import AdminRadioSelect
 from django.db import models
 from django.forms import NullBooleanSelect
 from django.utils.translation import ugettext_lazy as _
+from lck.django.common.admin import ModelAdmin
 from powerdns.models import (CryptoKey, Domain, DomainMetadata, Record,
                              SuperMaster)
 
@@ -51,7 +51,7 @@ class RecordAdminForm(forms.ModelForm):
         return type
 
 
-class RecordAdmin(admin.ModelAdmin):
+class RecordAdmin(ModelAdmin):
     form = RecordAdminForm
     list_display = (
         'name', 'type', 'content', 'domain', 'ttl', 'prio', 'change_date',
@@ -61,6 +61,9 @@ class RecordAdmin(admin.ModelAdmin):
     save_on_top = True
     search_fields = ('name', 'content',)
     readonly_fields = ('change_date', 'ordername',)
+    related_search_fields = {
+        'domain': ['^name'],
+    }
     fieldsets = (
         (None, {
             'fields': ('domain', ('type', 'name', 'content',), 'auth',)
@@ -84,7 +87,7 @@ class DomainMetadataInline(admin.TabularInline):
     extra = 0
 
 
-class DomainAdmin(admin.ModelAdmin):
+class DomainAdmin(ModelAdmin):
     inlines = [DomainMetadataInline]
     list_display = ('name', 'type', 'last_check', 'account',)
     list_filter = _domain_filters
@@ -95,24 +98,30 @@ class DomainAdmin(admin.ModelAdmin):
     readonly_fields = ('notified_serial',)
 
 
-class SuperMasterAdmin(admin.ModelAdmin):
+class SuperMasterAdmin(ModelAdmin):
     list_display = ('ip', 'nameserver', 'account',)
     list_filter = ('ip', 'account',)
     search_fields = ('ip', 'nameserver',)
 
 
-class DomainMetadataAdmin(admin.ModelAdmin):
+class DomainMetadataAdmin(ModelAdmin):
     list_display = ('domain', 'kind', 'content',)
     list_filter = ('kind', 'domain',)
     list_per_page = 250
+    related_search_fields = {
+        'domain': ['^name'],
+    }
     save_on_top = True
     search_fields = ('content',)
 
 
-class CryptoKeyAdmin(admin.ModelAdmin):
+class CryptoKeyAdmin(ModelAdmin):
     list_display = ('domain', 'flags', 'active', 'content',)
     list_filter = ('active', 'domain',)
     list_per_page = 250
+    related_search_fields = {
+        'domain': ['^name'],
+    }
     save_on_top = True
     search_fields = ('content',)
     formfield_overrides = {
