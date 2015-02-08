@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 import datetime
-import ipaddr
 from south.db import db
 from south.v2 import SchemaMigration
 from django.db import models
+from IPy import IP
 
 
 class Migration(SchemaMigration):
@@ -13,16 +13,16 @@ class Migration(SchemaMigration):
         db.add_column(u'records', 'number',
                       self.gf('django.db.models.fields.PositiveIntegerField')(default=None, null=True, db_index=True, blank=True),
                       keep_default=False)
-                      
-        if not db.dry_run:
-	    items = orm['powerdns.record'].objects.filter(type='A')
-	    for item in items:
-	      try:
-	          item.number = int(ipaddr.IPAddress(item.content))
-	          item.save()
-	      except ValueError:
-		  pass
 
+        if not db.dry_run:
+            items = orm['powerdns.record'].objects.filter(type='A')
+            for item in items:
+                try:
+	                item.number = IP(item.content).int()
+                except ValueError:
+                    pass
+                else:
+                    item.save()
 
     def backwards(self, orm):
         # Deleting field 'Record.number'

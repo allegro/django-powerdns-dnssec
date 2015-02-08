@@ -10,10 +10,6 @@ except ImportError:
     ez_setup.use_setuptools()
     from setuptools import setup, find_packages
 
-import sys
-reload(sys)
-sys.setdefaultencoding('utf8')
-
 
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
@@ -21,7 +17,7 @@ def read(fname):
 
 setup(
     name = 'django-powerdns-dnssec',
-    version = '0.9.3',
+    version = '0.10.0',
     url = 'http://bitbucket.org/ambv/django-powerdns/',
     license = 'BSD',
     description = 'PowerDNS administration app for Django',
@@ -41,18 +37,18 @@ setup(
         'Natural Language :: English',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 2 :: Only',
+        'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.4',
         'Topic :: Internet :: Name Service (DNS)',
         'Topic :: Internet :: WWW/HTTP',
         'Topic :: Internet :: WWW/HTTP :: WSGI :: Application',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
     install_requires = [
-        'Django>=1.3.4',
-        'ipaddr>=2.1.7',
-        'lck.django>=0.8.0',
+        'Django>=1.4',
+        'IPy==0.82a',
+        'django-extensions==1.5.0'
     ],
     zip_safe = False,  # if only because of the readme file
 )

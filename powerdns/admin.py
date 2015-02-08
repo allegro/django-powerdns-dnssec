@@ -1,11 +1,16 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+
 from django.contrib import admin
 from django.contrib.admin.widgets import AdminRadioSelect
 from django.db import models
 from django.forms import NullBooleanSelect, ModelForm, ValidationError
 from django.utils.translation import ugettext_lazy as _
-from lck.django.common.admin import ModelAdmin
+from django_extensions.admin import ForeignKeyAutocompleteAdmin
 from powerdns.models import (CryptoKey, Domain, DomainMetadata, Record,
                              SuperMaster)
 
@@ -51,18 +56,18 @@ class RecordAdminForm(ModelForm):
         return type
 
 
-class RecordAdmin(ModelAdmin):
+class RecordAdmin(ForeignKeyAutocompleteAdmin):
     form = RecordAdminForm
     list_display = (
         'name', 'type', 'content', 'domain', 'ttl', 'prio', 'change_date',
     )
-    list_filter = ('type', 'ttl', 'auth', 'domain',)
+    list_filter = ('type', 'ttl', 'auth', 'domain', 'created', 'modified')
     list_per_page = 250
     save_on_top = True
     search_fields = ('name', 'content',)
-    readonly_fields = ('change_date', 'ordername',)
+    readonly_fields = ('change_date', 'ordername', 'created', 'modified')
     related_search_fields = {
-        'domain': ['^name'],
+        'domain': ('name',),
     }
     fieldsets = (
         (None, {
@@ -72,6 +77,7 @@ class RecordAdmin(ModelAdmin):
             'classes': ('collapse',),
             'fields': ('prio', 'ttl', 'ordername', 'change_date',)
         }),
+        (None, {'fields': ('created', 'modified')})
     )
     formfield_overrides = {
         models.NullBooleanField: {
@@ -87,40 +93,44 @@ class DomainMetadataInline(admin.TabularInline):
     extra = 0
 
 
-class DomainAdmin(ModelAdmin):
+class DomainAdmin(admin.ModelAdmin):
     inlines = [DomainMetadataInline]
     list_display = ('name', 'type', 'last_check', 'account',)
-    list_filter = _domain_filters
+    list_filter = _domain_filters + ('created', 'modified')
     list_per_page = 250
     save_on_top = True
     search_fields = ('name',)
     radio_fields = {'type': admin.HORIZONTAL}
-    readonly_fields = ('notified_serial',)
+    readonly_fields = ('notified_serial', 'created', 'modified')
 
 
-class SuperMasterAdmin(ModelAdmin):
+class SuperMasterAdmin(admin.ModelAdmin):
     list_display = ('ip', 'nameserver', 'account',)
-    list_filter = ('ip', 'account',)
+    list_filter = ('ip', 'account', 'created', 'modified')
     search_fields = ('ip', 'nameserver',)
+    readonly_fields = ('created', 'modified')
 
 
-class DomainMetadataAdmin(ModelAdmin):
+class DomainMetadataAdmin(ForeignKeyAutocompleteAdmin):
     list_display = ('domain', 'kind', 'content',)
-    list_filter = ('kind', 'domain',)
+    list_filter = ('kind', 'domain', 'created', 'modified')
     list_per_page = 250
+    list_filter = ('created', 'modified')
+    readonly_fields = ('created', 'modified')
     related_search_fields = {
-        'domain': ['^name'],
+        'domain': ('name',),
     }
     save_on_top = True
     search_fields = ('content',)
 
 
-class CryptoKeyAdmin(ModelAdmin):
+class CryptoKeyAdmin(ForeignKeyAutocompleteAdmin):
     list_display = ('domain', 'flags', 'active', 'content',)
-    list_filter = ('active', 'domain',)
+    list_filter = ('active', 'domain', 'created', 'modified')
     list_per_page = 250
+    readonly_fields = ('created', 'modified')
     related_search_fields = {
-        'domain': ['^name'],
+        'domain': ('name',),
     }
     save_on_top = True
     search_fields = ('content',)

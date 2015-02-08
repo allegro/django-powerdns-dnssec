@@ -15,8 +15,9 @@ November 2012.
 Quickstart
 ----------
 
-Simply add ``powerdns`` and ``lck.django.common`` to ``INSTALLED_APPS`` in your
-``settings.py``.  Use South for database migrations.
+Simply add ``powerdns`` and ``django_extensions`` to ``INSTALLED_APPS`` in your
+``settings.py``.  If you are using Django < 1.7 then use South for database migrations - otherwise 
+native Django 1.7 migrations are also available.
 
 Customizing resource record types
 ---------------------------------

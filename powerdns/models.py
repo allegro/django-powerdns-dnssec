@@ -1,18 +1,23 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+#
 import base64
 import hashlib
-import string
+import sys
 import time
-
-import ipaddr
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_ipv4_address
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from lck.django.common.models import TimeTrackable
+from IPy import IP
+
+from powerdns.utils import python_2_unicode_compatible, TimeTrackable
 
 
 BASIC_RECORD_TYPES = (
@@ -34,8 +39,15 @@ except AttributeError:
     pass
 
 # http://tools.ietf.org/html/rfc4648#section-7
-b32_trans = string.maketrans('ABCDEFGHIJKLMNOPQRSTUVWXYZ234567',
-                             '0123456789ABCDEFGHIJKLMNOPQRSTUV')
+if sys.version_info[0] == 2:
+    import string
+    maketrans_func = string.maketrans
+else:
+    maketrans_func = str.maketrans
+b32_trans = maketrans_func(
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567',
+    '0123456789ABCDEFGHIJKLMNOPQRSTUV'
+)
 
 
 def validate_dns_nodot(value):
@@ -52,13 +64,16 @@ def validate_dns_nodot(value):
 
 def validate_ipv6_address(value):
     try:
-        ipaddr.IPv6Address(value)
-    except ipaddr.AddressValueError:
+        ip = IP(value)
+    except ValueError:
+        ip = None
+    if not ip or ip.version() == 4:
         raise ValidationError(
             _(u'Enter a valid IPv6 address.'), code='invalid',
         )
 
 
+@python_2_unicode_compatible
 class Domain(TimeTrackable):
     '''
     PowerDNS domains
@@ -88,13 +103,14 @@ class Domain(TimeTrackable):
         verbose_name = _("domain")
         verbose_name_plural = _("domains")
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     def clean(self):
         self.name = self.name.lower()
 
 
+@python_2_unicode_compatible
 class Record(TimeTrackable):
     '''
     PowerDNS DNS records
@@ -155,7 +171,7 @@ class Record(TimeTrackable):
         verbose_name = _("record")
         verbose_name_plural = _("records")
 
-    def __unicode__(self):
+    def __str__(self):
         if self.prio is not None:
             content = "%d %s" % (self.prio, self.content)
         else:
@@ -243,10 +259,11 @@ class Record(TimeTrackable):
         self.change_date = int(time.time())
         self.ordername = self._generate_ordername()
         if self.type == 'A':
-            self.number = int(ipaddr.IPAddress(self.content))
+            self.number = IP(self.content).int()
         super(Record, self).save(*args, **kwargs)
 
 
+@python_2_unicode_compatible
 class SuperMaster(TimeTrackable):
     '''
     PowerDNS DNS Servers that should be trusted to push new domains to us
@@ -264,10 +281,11 @@ class SuperMaster(TimeTrackable):
         verbose_name = _("supermaster")
         verbose_name_plural = _("supermasters")
 
-    def __unicode__(self):
+    def __str__(self):
         return self.ip
 
 
+@python_2_unicode_compatible
 class DomainMetadata(TimeTrackable):
     domain = models.ForeignKey(Domain, verbose_name=_("domain"))
     kind = models.CharField(_("kind"), max_length=15)
@@ -279,10 +297,11 @@ class DomainMetadata(TimeTrackable):
         verbose_name = _("domain metadata")
         verbose_name_plural = _("domain metadata")
 
-    def __unicode__(self):
+    def __str__(self):
         return unicode(self.domain)
 
 
+@python_2_unicode_compatible
 class CryptoKey(TimeTrackable):
     domain = models.ForeignKey(
         Domain, verbose_name=_("domain"), blank=True, null=True,
@@ -298,5 +317,5 @@ class CryptoKey(TimeTrackable):
         verbose_name = _("crypto key")
         verbose_name_plural = _("crypto keys")
 
-    def __unicode__(self):
+    def __str__(self):
         return unicode(self.domain)
