@@ -4,4 +4,6 @@ syntax: glob
 dist/*
 build/*
 example/settings_local.py
-django_powerdns.egg-info/*
+django_powerdns_dnssec.egg-info/*
+.DS_Store
+.tox
