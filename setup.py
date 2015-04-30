@@ -48,7 +48,9 @@ setup(
     install_requires = [
         'Django>=1.4',
         'IPy==0.82a',
-        'django-extensions==1.5.0'
+        'django-extensions==1.5.0',
+        'django-nose==1.4',
+        'nose-cov==1.6',
     ],
     zip_safe = False,  # if only because of the readme file
 )
