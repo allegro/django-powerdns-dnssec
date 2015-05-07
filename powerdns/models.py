@@ -12,7 +12,7 @@ import time
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.core.validators import validate_ipv4_address
+from django.core.validators import validate_ipv4_address, RegexValidator
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from IPy import IP
@@ -33,6 +33,8 @@ RECORD_TYPES = sorted(set(
     BASIC_RECORD_TYPES + DNSSEC_RECORD_TYPES + AUX_RECORD_TYPES
 ))
 
+DOMAIN_NAME_RECORDS = ('CNAME', 'MX', 'NAPTR', 'NS', 'PTR')
+
 try:
     RECORD_TYPES = settings.POWERDNS_RECORD_TYPES
 except AttributeError:
@@ -49,17 +51,52 @@ b32_trans = maketrans_func(
     '0123456789ABCDEFGHIJKLMNOPQRSTUV'
 )
 
+# Validator for the domain names only in RFC-1035
+# PowerDNS considers the whole zone to be invalid if any of the records end
+# with a period so this custom validator is used to catch them
 
-def validate_dns_nodot(value):
-    '''
-    PowerDNS considers the whole zone to be invalid if any of the records end
-    with a period so this custom validator is used to catch them
-    '''
-    if value.endswith('.'):
-        raise ValidationError(
-            _(u'%s is not allowed to end in a period!') % value,
-            code='invalid',
-        )
+validate_domain_name = RegexValidator('^[A-Za-z][A-Za-z1-9.-]*[A-Za-z1-9]$')
+validate_dn_optional_dot = RegexValidator(
+    '^[A-Za-z][A-Za-z1-9.-]*$'
+)
+
+
+validate_time = RegexValidator('^[0-9]+$')
+
+
+def validate_soa(value):
+    """Validator for a correct SOA record"""
+    try:
+        name, email, sn, refresh, retry, expiry, nx = value.split()
+    except ValueError:
+        raise ValidationError(_('Enter a valid SOA record'))
+    for subvalue, field in [
+        (name, 'Domain name'),
+        (email, 'e-mail'),
+    ]:
+        try:
+            validate_dn_optional_dot(subvalue)
+        except ValidationError:
+            raise ValidationError(
+                _('Incorrect {}. Should be a valid domain name.'.format(
+                    field
+                ))
+            )
+    for subvalue, field in [
+        (sn, 'Serial'),
+        (refresh, 'Refresh rate'),
+        (retry, 'Retry rate'),
+        (expiry, 'Expiry time'),
+        (nx, 'Negative resp. time'),
+    ]:
+        try:
+            validate_time(subvalue)
+        except ValidationError:
+            raise ValidationError(
+                _('Incorrect {}. Should be a valid domain name.'.format(
+                    field
+                ))
+            )
 
 
 def validate_ipv6_address(value):
@@ -83,7 +120,12 @@ class Domain(TimeTrackable):
         ('NATIVE', 'NATIVE'),
         ('SLAVE', 'SLAVE'),
     )
-    name = models.CharField(_("name"), unique=True, max_length=255)
+    name = models.CharField(
+        _("name"),
+        unique=True,
+        max_length=255,
+        validators=[validate_domain_name]
+    )
     master = models.CharField(
         _("master"), max_length=128, blank=True, null=True,
     )
@@ -119,7 +161,7 @@ class Record(TimeTrackable):
     domain = models.ForeignKey(Domain, verbose_name=_("domain"))
     name = models.CharField(
         _("name"), max_length=255, blank=True, null=True,
-        validators=[validate_dns_nodot],
+        validators=[validate_domain_name],
         help_text=_("Actual name of a record. Must not end in a '.' and be"
                     " fully qualified - it is not relative to the name of the"
                     " domain!"),
@@ -130,7 +172,6 @@ class Record(TimeTrackable):
     )
     content = models.CharField(
         _("content"), max_length=255, blank=True, null=True,
-        validators=[validate_dns_nodot],
         help_text=_("The 'right hand side' of a DNS record. For an A"
                     " record, this is the IP address"),
     )
@@ -248,8 +289,12 @@ class Record(TimeTrackable):
     def clean(self):
         if self.type == 'A':
             validate_ipv4_address(self.content)
-        if self.type == 'AAAA':
+        elif self.type == 'AAAA':
             validate_ipv6_address(self.content)
+        elif self.type == 'SOA':
+            validate_soa(self.content)
+        elif self.type in DOMAIN_NAME_RECORDS:
+            validate_domain_name(self.content)
         if self.name:
             self.name = self.name.lower()
         if self.type:
@@ -298,7 +343,7 @@ class DomainMetadata(TimeTrackable):
         verbose_name_plural = _("domain metadata")
 
     def __str__(self):
-        return unicode(self.domain)
+        return self.domain
 
 
 @python_2_unicode_compatible
@@ -318,4 +363,4 @@ class CryptoKey(TimeTrackable):
         verbose_name_plural = _("crypto keys")
 
     def __str__(self):
-        return unicode(self.domain)
+        return self.domain

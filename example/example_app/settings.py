@@ -119,6 +119,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_extensions',
+    'django_nose',
     'powerdns',
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
@@ -126,11 +127,13 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
 )
 
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+NOSE_ARGS = ['-c.noserc', '--verbosity=2']
+
 import django
 if django.VERSION[1] < 7:
     INSTALLED_APPS += ('south',)
-if django.VERSION[1] >= 6:
-    TEST_RUNNER = 'django.test.runner.DiscoverRunner'
+
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
