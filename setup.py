@@ -28,8 +28,8 @@ setup(
     license = 'BSD',
     description = 'PowerDNS administration app for Django',
     long_description = read('README.rst'),
-    author = 'Peter Nixon, Łukasz Langa',
-    author_email = 'lukasz@langa.pl',
+    author = 'Peter Nixon, Łukasz Langa, pylabs Team',
+    author_email = 'pylabs@allegro.pl',
     packages = [p for p in find_packages() if not p.startswith('example')],
     include_package_data = True,
     platforms = 'any',
@@ -58,6 +58,8 @@ setup(
         'django-nose==1.4',
         'nose-cov==1.6',
         'factory_boy==2.5.2',
+        'djangorestframework==3.1.2',
+        'django-filter==0.10.0',
     ],
     zip_safe = False,  # if only because of the readme file
 )

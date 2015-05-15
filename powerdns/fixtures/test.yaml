@@ -1,0 +1,23 @@
+- fields: {account: '', created: !!timestamp '2015-05-21 05:58:49.747219', last_check: null,
+    master: '', modified: !!timestamp '2015-05-21 05:58:49.747254', name: example.com,
+    notified_serial: null, type: MASTER}
+  model: powerdns.domain
+  pk: 1
+- fields: {auth: true, change_date: 1432206225, content: ns1.example.com. hostmaster.example.com.
+      201505211 43200 600 1209600 600, created: !!timestamp '2015-05-21 06:00:06.910745',
+    disabled: false, domain: 1, modified: !!timestamp '2015-05-21 06:03:45.775133',
+    name: example.com, number: null, ordername: null, prio: null, ttl: 3600, type: SOA}
+  model: powerdns.record
+  pk: 1
+- fields: {auth: true, change_date: 1432206218, content: 192.168.1.11, created: !!timestamp '2015-05-21
+      06:03:09.887652', disabled: false, domain: 1, modified: !!timestamp '2015-05-21
+      06:03:38.785414', name: www.example.com, number: 3232235787, ordername: null,
+    prio: null, ttl: 3600, type: A}
+  model: powerdns.record
+  pk: 2
+- fields: {auth: true, change_date: 1432206210, content: 192.168.1.12, created: !!timestamp '2015-05-21
+      06:03:30.294415', disabled: false, domain: 1, modified: !!timestamp '2015-05-21
+      06:03:30.294481', name: blog.example.com, number: 3232235788, ordername: null,
+    prio: null, ttl: 3600, type: A}
+  model: powerdns.record
+  pk: 3
