@@ -1,0 +1,23 @@
+%YAML 1.2
+---
+
+dnsaas:
+    build: .
+    ports: 
+        - "8000:8000"
+    links: 
+        - mysql:db
+
+
+pdns:
+    build: ./pdns
+    ports:
+        - "5353:53"
+        - "5353:53/udp"
+    links:
+        - mysql:db
+
+mysql:
+    image: mysql
+    environment:
+        MYSQL_ROOT_PASSWORD: root

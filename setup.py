@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
 
 try:
     from setuptools import setup, find_packages
@@ -12,9 +13,12 @@ except ImportError:
 
 
 def read(fname):
+    kwargs = {}
+    if sys.version_info >= (3, 0, 0):
+        kwargs['encoding'] = 'utf-8'
     return open(
         os.path.join(os.path.dirname(__file__), fname),
-        encoding='utf-8',
+        **kwargs
     ).read()
 
 setup(

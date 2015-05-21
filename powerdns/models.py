@@ -204,6 +204,14 @@ class Record(TimeTrackable):
                     " delegation or any delegation related glue (A, AAAA)"
                     " records"),
     )
+    disabled = models.BooleanField(
+        _("Disabled"),
+        help_text=_(
+            "This field should not be used for actual DNS queries."
+            " Note - this field works for pdns >= 3.4.0"
+        ),
+        default=False,
+    )
 
     class Meta:
         db_table = u'records'
