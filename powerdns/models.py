@@ -286,7 +286,8 @@ class Record(TimeTrackable):
         s.update(salt)
         return s.digest()
 
-    def clean(self):
+    def clean_content_field(self):
+        """Perform a type-dependent validation of content field"""
         if self.type == 'A':
             validate_ipv4_address(self.content)
         elif self.type == 'AAAA':
@@ -295,10 +296,41 @@ class Record(TimeTrackable):
             validate_soa(self.content)
         elif self.type in DOMAIN_NAME_RECORDS:
             validate_domain_name(self.content)
+
+    def force_case(self):
+        """Force the name and content case to upper and lower respectively"""
         if self.name:
             self.name = self.name.lower()
         if self.type:
             self.type = self.type.upper()
+
+    def validate_for_conflicts(self):
+        """Ensure this record doesn't conflict with other records."""
+        def check_unique(comment, **kwargs):
+            conflicting = Record.objects.filter(**kwargs)
+            if conflicting:
+                raise ValidationError(comment.format(
+                    ', '.join(str(record.id) for record in conflicting)
+                ))
+        if self.type == 'CNAME':
+            check_unique(
+                'Cannot create CNAME record. Following conflicting '
+                'records exist: {}',
+                name=self.name,
+            )
+        else:
+            check_unique(
+                'Cannot create a record. Following conflicting CNAME'
+                'record exists: {}',
+                type='CNAME',
+                name=self.name,
+            )
+
+    def clean(self):
+        self.clean_content_field()
+        self.force_case()
+        self.validate_for_conflicts()
+        return super(Record, self).clean()
 
     def save(self, *args, **kwargs):
         self.change_date = int(time.time())

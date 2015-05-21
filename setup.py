@@ -53,6 +53,7 @@ setup(
         'django-extensions==1.5.0',
         'django-nose==1.4',
         'nose-cov==1.6',
+        'factory_boy==2.5.2',
     ],
     zip_safe = False,  # if only because of the readme file
 )
