@@ -4,7 +4,7 @@
   model: powerdns.domain
   pk: 1
 - fields: {auth: true, change_date: 1432206225, content: ns1.example.com. hostmaster.example.com.
-      201505211 43200 600 1209600 600, created: !!timestamp '2015-05-21 06:00:06.910745',
+      0 43200 600 1209600 600, created: !!timestamp '2015-05-21 06:00:06.910745',
     disabled: false, domain: 1, modified: !!timestamp '2015-05-21 06:03:45.775133',
     name: example.com, number: null, ordername: null, prio: null, ttl: 3600, type: SOA}
   model: powerdns.record
