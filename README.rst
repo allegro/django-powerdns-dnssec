@@ -1,4 +1,4 @@
-Django PowerDNS with DNSSEC support
+DNS as a service
 ===================================
 
 Welcome to the PowerDNS app for Django.
@@ -12,12 +12,34 @@ modify your DNS records.
 <http://pypi.python.org/pypi/django-powerdns/>`_ which looks abandoned as of
 November 2012.
 
-Quickstart
-----------
+Django app Quickstart
+---------------------------
 
-Simply add ``powerdns`` and ``django_extensions`` to ``INSTALLED_APPS`` in your
-``settings.py``.  If you are using Django < 1.7 then use South for database migrations - otherwise 
+To add powerdns to your django project simply add ``powerdns`` and
+``django_extensions`` to ``INSTALLED_APPS`` in your
+``settings.py``.  If you are using Django < 1.7 then use South for
+database migrations - otherwise 
 native Django 1.7 migrations are also available.
+
+Docker quickstart
+---------------------------
+
+After you issue ``docker-compose up`` three containers should be started. One
+for mysql, one for powerdns and one for your application. A test user is
+created with login/password dnsaas/dnsaas. Also an ``example.com`` domain with
+some records is added.
+
+You can access admin by navigating to ``http://127.0.0.1:8080/admin``
+The DNS service is by default served on port 5353. If you want to test it, you
+may issue::
+
+    $ dig @127.0.0.1 -p 5353 www.example.com
+    
+Which should i.a. print::
+
+    ;; ANSWER SECTION:
+    www.example.com.        3600    IN      A       192.168.1.11
+
 
 Customizing resource record types
 ---------------------------------

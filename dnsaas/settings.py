@@ -1,7 +1,11 @@
-# Django settings for example_app project.
+# Django settings for dnsaas.
+import sys
+
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
+
+TESTING = len(sys.argv) > 1 and sys.argv[1] == 'test'
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -9,16 +13,28 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'powerdns',
-        'USER': 'root',
-        'PASSWORD': 'root',
-        'HOST': 'db',
-        'PORT': '3306',
+if TESTING:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': 'memory://',
+            'USER': '',
+            'PASSWORD': '',
+            'HOST': '',
+            'PORT': '',
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'dnsaas',
+            'USER': 'dnsaas',
+            'PASSWORD': 'dnsaas',
+            'HOST': 'db',
+            'PORT': '3306',
+        }
+    }
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -77,7 +93,6 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -87,7 +102,6 @@ SECRET_KEY = '5w%2cqg#kb1w&amp;mm-ss67(eo&amp;3+d9%pbu+5pesa*l&amp;pk7g-m48d'
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -100,16 +114,12 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-ROOT_URLCONF = 'example_app.urls'
+ROOT_URLCONF = 'dnsaas.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
-WSGI_APPLICATION = 'example_app.wsgi.application'
+WSGI_APPLICATION = 'dnsaas.wsgi.application'
 
-TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-)
+TEMPLATE_DIRS = ()
 
 INSTALLED_APPS = (
     'django.contrib.auth',
@@ -120,11 +130,11 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django_extensions',
     'django_nose',
+    'rest_framework',
     'powerdns',
-    # Uncomment the next line to enable the admin:
+    'dnsaas',
     'django.contrib.admin',
-    # Uncomment the next line to enable admin documentation:
-    # 'django.contrib.admindocs',
+    'django.contrib.admindocs',
 )
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
@@ -135,12 +145,18 @@ if django.VERSION[1] < 7:
     INSTALLED_APPS += ('south',)
 
 
+# A sample logging configuration. The only tangible logging
+# performed by this configuration is to send an email to
+# the site admins on every HTTP 500 error when DEBUG=False.
+# See http://docs.djangoproject.com/en/dev/topics/logging for
+# more details on how to customize your logging configuration.
+
+
 import os
 if os.environ.get('DJANGO_SETTINGS_PROFILE') == 'tests':
     DATABASES['default']['NAME'] = ':memory:'
 
-
 try:
-    from settings_local import *
+    from settings_local import *  # noqa
 except ImportError:
     pass
