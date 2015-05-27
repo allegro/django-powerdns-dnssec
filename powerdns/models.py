@@ -14,6 +14,8 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_ipv4_address, RegexValidator
 from django.db import models
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
 from IPy import IP
 
@@ -150,6 +152,13 @@ class Domain(TimeTrackable):
 
     def clean(self):
         self.name = self.name.lower()
+
+    def get_soa(self):
+        """Returns the SOA record for this domain"""
+        try:
+            return Record.objects.get(type='SOA', domain=self)
+        except Record.DoesNotExist:
+            return
 
 
 @python_2_unicode_compatible
@@ -346,6 +355,15 @@ class Record(TimeTrackable):
         if self.type == 'A':
             self.number = IP(self.content).int()
         super(Record, self).save(*args, **kwargs)
+
+
+# When we delete a record, the zone changes, but there no change_date is
+# updated. We update the SOA record, so the serial changes
+@receiver(post_delete, sender=Record)
+def update_serial(sender, instance, **kwargs):
+    soa = instance.domain.get_soa()
+    if soa:
+        soa.save()
 
 
 @python_2_unicode_compatible
