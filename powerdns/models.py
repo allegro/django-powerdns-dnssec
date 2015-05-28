@@ -212,6 +212,7 @@ class Record(TimeTrackable):
                     " NS records but not set for NS records which are used for"
                     " delegation or any delegation related glue (A, AAAA)"
                     " records"),
+        default=True,
     )
     disabled = models.BooleanField(
         _("Disabled"),
