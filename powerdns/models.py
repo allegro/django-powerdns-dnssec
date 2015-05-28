@@ -141,6 +141,7 @@ class Domain(TimeTrackable):
     account = models.CharField(
         _("account"), max_length=40, blank=True, null=True,
     )
+    remarks = models.TextField(blank=True)
 
     class Meta:
         db_table = u'domains'
@@ -222,6 +223,8 @@ class Record(TimeTrackable):
         ),
         default=False,
     )
+
+    remarks = models.TextField(blank=True)
 
     class Meta:
         db_table = u'records'
