@@ -1,5 +1,4 @@
-# -*- encoding: utf-8 -*-
-
+"""Serializer classes for DNSaaS API"""
 
 from powerdns.models import (
     CryptoKey,

@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-#
 import base64
 import hashlib
 import sys
@@ -9,7 +6,7 @@ import time
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_ipv4_address, RegexValidator
-from django.db import models
+from django.db import models, transaction
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
@@ -136,7 +133,13 @@ class Domain(TimeTrackable):
     account = models.CharField(
         _("account"), max_length=40, blank=True, null=True,
     )
-    remarks = models.TextField(blank=True)
+    remarks = models.TextField(_('Additional remarks'), blank=True)
+    template = models.ForeignKey(
+        'powerdns.DomainTemplate',
+        verbose_name=_('Template'),
+        blank=True,
+        null=True,
+    )
 
     class Meta:
         db_table = u'domains'
@@ -148,6 +151,12 @@ class Domain(TimeTrackable):
 
     def clean(self):
         self.name = self.name.lower()
+
+    def save(self, *args, **kwargs):
+        # This save can trigger creating some templated records.
+        # So we do it atomically
+        with transaction.atomic():
+            super(Domain, self).save(*args, **kwargs)
 
     def get_soa(self):
         """Returns the SOA record for this domain"""
@@ -219,6 +228,12 @@ class Record(TimeTrackable):
     )
 
     remarks = models.TextField(blank=True)
+    template = models.ForeignKey(
+        'powerdns.RecordTemplate',
+        verbose_name=_('Template'),
+        blank=True,
+        null=True,
+    )
 
     class Meta:
         db_table = u'records'
@@ -357,7 +372,7 @@ class Record(TimeTrackable):
 
 # When we delete a record, the zone changes, but there no change_date is
 # updated. We update the SOA record, so the serial changes
-@receiver(post_delete, sender=Record)
+@receiver(post_delete, sender=Record, dispatch_uid='record_update_serial')
 def update_serial(sender, instance, **kwargs):
     soa = instance.domain.get_soa()
     if soa:

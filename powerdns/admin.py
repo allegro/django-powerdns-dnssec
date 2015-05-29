@@ -1,14 +1,21 @@
-# -*- coding: utf-8 -*-
-
-
 from django.contrib import admin
 from django.contrib.admin.widgets import AdminRadioSelect
 from django.db import models
 from django.forms import NullBooleanSelect, ModelForm, ValidationError
 from django.utils.translation import ugettext_lazy as _
 from django_extensions.admin import ForeignKeyAutocompleteAdmin
-from powerdns.models import (CryptoKey, Domain, DomainMetadata, Record,
-                             SuperMaster)
+from powerdns.models.powerdns import (
+    CryptoKey,
+    Domain,
+    DomainMetadata,
+    Record,
+    SuperMaster,
+)
+
+from powerdns.models.templates import (
+    DomainTemplate,
+    RecordTemplate,
+)
 
 
 class NullBooleanRadioSelect(NullBooleanSelect, AdminRadioSelect):
@@ -144,3 +151,5 @@ admin.site.register(Record, RecordAdmin)
 admin.site.register(SuperMaster, SuperMasterAdmin)
 admin.site.register(DomainMetadata, DomainMetadataAdmin)
 admin.site.register(CryptoKey, CryptoKeyAdmin)
+admin.site.register(DomainTemplate)
+admin.site.register(RecordTemplate)

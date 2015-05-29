@@ -1,11 +1,11 @@
-# -*- encoding: utf-8 -*-
-
+"""Utilities for tests"""
 
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from factory.django import DjangoModelFactory
 
-from powerdns.models import Record, Domain
+from powerdns.models.powerdns import Record, Domain
+from powerdns.models.templates import RecordTemplate, DomainTemplate
 
 
 class DomainFactory(DjangoModelFactory):
@@ -18,11 +18,21 @@ class RecordFactory(DjangoModelFactory):
         model = Record
 
 
+class DomainTemplateFactory(DjangoModelFactory):
+    class Meta:
+        model = DomainTemplate
+
+
+class RecordTemplateFactory(DjangoModelFactory):
+    class Meta:
+        model = RecordTemplate
+
+
 class RecordTestCase(TestCase):
     """Base class for tests on records."""
 
     def setUp(self):
-        self.domain = DomainFactory(name='example.com')
+        self.domain = DomainFactory(name='example.com', template=None)
 
     def validate(self, **values):
         """

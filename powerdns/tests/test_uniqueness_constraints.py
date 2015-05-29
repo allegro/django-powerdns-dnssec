@@ -1,5 +1,4 @@
-# -*- encoding: utf-8 -*-
-
+"""Tests for keeping uniqueness constraints"""
 
 from powerdns.tests.utils import RecordFactory, RecordTestCase
 

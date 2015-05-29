@@ -1,6 +1,4 @@
-# -*- encoding: utf-8 -*-
-
-
+"""Validation tests"""
 
 from powerdns.tests.utils import RecordTestCase
 

@@ -1,5 +1,4 @@
-# -*- encoding: utf-8 -*-
-
+"""Views and viewsets for DNSaaS API"""
 
 from powerdns.models import (
     CryptoKey,
