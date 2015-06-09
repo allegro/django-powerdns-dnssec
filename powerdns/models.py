@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
 #
 import base64
 import hashlib
@@ -19,7 +15,7 @@ from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
 from IPy import IP
 
-from powerdns.utils import python_2_unicode_compatible, TimeTrackable
+from powerdns.utils import TimeTrackable
 
 
 BASIC_RECORD_TYPES = (
@@ -112,7 +108,6 @@ def validate_ipv6_address(value):
         )
 
 
-@python_2_unicode_compatible
 class Domain(TimeTrackable):
     '''
     PowerDNS domains
@@ -162,7 +157,6 @@ class Domain(TimeTrackable):
             return
 
 
-@python_2_unicode_compatible
 class Record(TimeTrackable):
     '''
     PowerDNS DNS records
@@ -370,7 +364,6 @@ def update_serial(sender, instance, **kwargs):
         soa.save()
 
 
-@python_2_unicode_compatible
 class SuperMaster(TimeTrackable):
     '''
     PowerDNS DNS Servers that should be trusted to push new domains to us
@@ -392,7 +385,6 @@ class SuperMaster(TimeTrackable):
         return self.ip
 
 
-@python_2_unicode_compatible
 class DomainMetadata(TimeTrackable):
     domain = models.ForeignKey(Domain, verbose_name=_("domain"))
     kind = models.CharField(_("kind"), max_length=15)
@@ -408,7 +400,6 @@ class DomainMetadata(TimeTrackable):
         return self.domain
 
 
-@python_2_unicode_compatible
 class CryptoKey(TimeTrackable):
     domain = models.ForeignKey(
         Domain, verbose_name=_("domain"), blank=True, null=True,

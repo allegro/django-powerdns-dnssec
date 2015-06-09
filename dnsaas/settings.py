@@ -140,10 +140,6 @@ INSTALLED_APPS = (
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 NOSE_ARGS = ['-c.noserc', '--verbosity=2']
 
-import django
-if django.VERSION[1] < 7:
-    INSTALLED_APPS += ('south',)
-
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
