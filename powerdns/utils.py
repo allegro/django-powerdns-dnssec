@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
-
-
-import sys
+"""Utilities for powerdns models"""
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _

@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
-
 class PowerDNSRouter(object):
     """Route all operations on powerdns models to the powerdns database."""
 
