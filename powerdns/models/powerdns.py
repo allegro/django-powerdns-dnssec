@@ -7,12 +7,12 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_ipv4_address, RegexValidator
 from django.db import models, transaction
-from django.db.models.signals import post_delete
+from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
 from IPy import IP
 
-from powerdns.utils import TimeTrackable
+from powerdns.utils import TimeTrackable, to_reverse
 
 
 BASIC_RECORD_TYPES = (
@@ -29,6 +29,24 @@ RECORD_TYPES = sorted(set(
 ))
 
 DOMAIN_NAME_RECORDS = ('CNAME', 'MX', 'NAPTR', 'NS', 'PTR')
+
+
+# If we try get the domain in the global scope then removing it
+# would be unrecoverable. Thus this little helper function.
+
+DEFAULT_REVERSE_DOMAIN_TEMPLATE = None
+
+
+def get_default_reverse_domain():
+    """Returns a default reverse domain."""
+    from powerdns.models.templates import DomainTemplate
+    global DEFAULT_REVERSE_DOMAIN_TEMPLATE
+    if not DEFAULT_REVERSE_DOMAIN_TEMPLATE:
+        DEFAULT_REVERSE_DOMAIN_TEMPLATE = DomainTemplate.objects.get(
+            name=settings.DNSAAS_DEFAULT_REVERSE_DOMAIN_TEMPLATE
+        )
+    return DEFAULT_REVERSE_DOMAIN_TEMPLATE
+
 
 try:
     RECORD_TYPES = settings.POWERDNS_RECORD_TYPES
@@ -140,6 +158,18 @@ class Domain(TimeTrackable):
         blank=True,
         null=True,
     )
+    reverse_template = models.ForeignKey(
+        'powerdns.DomainTemplate',
+        verbose_name=_('Reverse template'),
+        blank=True,
+        null=True,
+        related_name='reverse_template_for',
+        help_text=_(
+            'A template that should be used for reverse domains when '
+            'PTR templates are automatically created for A records in this '
+            'template.'
+        )
+    )
 
     class Meta:
         db_table = u'domains'
@@ -233,6 +263,21 @@ class Record(TimeTrackable):
         verbose_name=_('Template'),
         blank=True,
         null=True,
+    )
+    depends_on = models.ForeignKey(
+        'self',
+        null=True,
+        blank=True,
+        verbose_name=_('Dependent on'),
+        help_text=_(
+            'This record is maintained automatically for another record. It '
+            'should be automatically updated/deleted. Used for PTR records'
+            'that depend on A records.'
+        )
+    )
+    auto_ptr = models.BooleanField(
+        _('Auto PTR field'),
+        default=True,
     )
 
     class Meta:
@@ -369,6 +414,25 @@ class Record(TimeTrackable):
             self.number = IP(self.content).int()
         super(Record, self).save(*args, **kwargs)
 
+    def create_ptr(self):
+        """Creates a PTR record for A record creating a domain if necessary."""
+        if self.type != 'A':
+            raise ValueError(_('Creating PTR only for A records'))
+        domain_name, number = to_reverse(self.content)
+        domain, created = Domain.objects.get_or_create(
+            name=domain_name,
+            template=(
+                self.domain.reverse_template or
+                get_default_reverse_domain()
+            )
+        )
+        Record.objects.create(
+            type='PTR',
+            domain=domain,
+            name='.'.join([number, domain_name]),
+            content=self.name,
+        )
+
 
 # When we delete a record, the zone changes, but there no change_date is
 # updated. We update the SOA record, so the serial changes
@@ -377,6 +441,13 @@ def update_serial(sender, instance, **kwargs):
     soa = instance.domain.get_soa()
     if soa:
         soa.save()
+
+
+@receiver(post_save, sender=Record, dispatch_uid='record_create_ptr')
+def create_ptr(sender, instance, **kwargs):
+    if not instance.auto_ptr or instance.type != 'A':
+        return
+    instance.create_ptr()
 
 
 class SuperMaster(TimeTrackable):

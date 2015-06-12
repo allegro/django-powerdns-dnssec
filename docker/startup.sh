@@ -6,8 +6,10 @@ do
     sleep 3
 done
 echo "CREATE DATABASE powerdns" | mysql -u root --password=root -h db
-python3.4 dnsaas/manage.py syncdb --noinput
-python3.4 dnsaas/manage.py migrate --noinput
-python3.4 dnsaas/manage.py loaddata test
-echo "from django.contrib.auth.models import User; User.objects.create_superuser('dnsaas', 'dnsaas@example.com', 'dnsaas')" | python3.4 dnsaas/manage.py shell
-python3.4 dnsaas/manage.py runserver 0.0.0.0:8080
+touch dnsaas/settings_local.py
+cd dnsaas
+python3.4 manage.py syncdb --noinput
+python3.4 manage.py migrate --noinput
+python3.4 manage.py loaddata test
+echo "from django.contrib.auth.models import User; User.objects.create_superuser('dnsaas', 'dnsaas@example.com', 'dnsaas')" | python3.4 manage.py shell
+python3.4 manage.py runserver 0.0.0.0:8080
