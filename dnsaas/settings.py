@@ -140,6 +140,7 @@ INSTALLED_APPS = (
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 NOSE_ARGS = ['-c.noserc', '--verbosity=2']
 
+DNSAAS_DEFAULT_REVERSE_DOMAIN_TEMPLATE = 'reverse'
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
@@ -152,7 +153,5 @@ import os
 if os.environ.get('DJANGO_SETTINGS_PROFILE') == 'tests':
     DATABASES['default']['NAME'] = ':memory:'
 
-try:
-    from settings_local import *  # noqa
-except ImportError:
-    pass
+
+from settings_local import *  # noqa
