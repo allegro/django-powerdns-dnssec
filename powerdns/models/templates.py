@@ -12,6 +12,9 @@ class DomainTemplate(models.Model):
     """A predefined template containing several record templates"""
     name = models.CharField(_('Name'), unique=True, max_length=255)
 
+    def __str__(self):
+        return self.name
+
 
 class RecordTemplate(models.Model):
     """A predefined record template that would cause a corresponding record
@@ -44,6 +47,13 @@ class RecordTemplate(models.Model):
         default=True,
     )
     remarks = models.TextField(_('Additional remarks'), blank=True)
+
+    def __str__(self):
+        if self.prio is not None:
+            content = "%d %s" % (self.prio, self.content)
+        else:
+            content = self.content
+        return "%s IN %s %s" % (self.name, self.type, content)
 
     def create_record(self, domain):
         """Creates, saves and returns a record for this domain"""
