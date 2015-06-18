@@ -131,6 +131,8 @@ INSTALLED_APPS = (
     'django_extensions',
     'django_nose',
     'rest_framework',
+    'rest_framework.authtoken',
+    'rest_framework_swagger',
     'powerdns',
     'dnsaas',
     'django.contrib.admin',
@@ -141,6 +143,19 @@ TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 NOSE_ARGS = ['-c.noserc', '--verbosity=2']
 
 DNSAAS_DEFAULT_REVERSE_DOMAIN_TEMPLATE = 'reverse'
+
+REST_FRAMEWORK = {
+    'VIEW_DESCRIPTION_FUNCTION':
+        'rest_framework_swagger.views.get_restructuredtext',
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAdminUser',
+    ),
+}
+
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to

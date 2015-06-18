@@ -4,7 +4,9 @@ from powerdns.models import (
     CryptoKey,
     Domain,
     DomainMetadata,
+    DomainTemplate,
     Record,
+    RecordTemplate,
     SuperMaster,
 )
 from rest_framework.filters import DjangoFilterBackend
@@ -14,7 +16,9 @@ from dnsaas.serializers import (
     CryptoKeySerializer,
     DomainMetadataSerializer,
     DomainSerializer,
+    DomainTemplateSerializer,
     RecordSerializer,
+    RecordTemplateSerializer,
     SuperMasterSerializer,
 )
 
@@ -57,3 +61,17 @@ class SuperMasterViewSet(FiltersMixin, ModelViewSet):
     queryset = SuperMaster.objects.all()
     serializer_class = SuperMasterSerializer
     filter_fields = ('ip', 'nameserver')
+
+
+class DomainTemplateViewSet(FiltersMixin, ModelViewSet):
+
+    queryset = DomainTemplate.objects.all()
+    serializer_class = DomainTemplateSerializer
+    filter_fields = ('name',)
+
+
+class RecordTemplateViewSet(FiltersMixin, ModelViewSet):
+
+    queryset = RecordTemplate.objects.all()
+    serializer_class = RecordTemplateSerializer
+    filter_fields = ('domain', 'name', 'content')

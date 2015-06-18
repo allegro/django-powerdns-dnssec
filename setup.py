@@ -51,13 +51,14 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
     install_requires = [
-        'Django>=1.4',
+        'Django==1.8',
         'IPy==0.82a',
         'django-extensions==1.5.5',
         'django-nose==1.4',
         'nose-cov==1.6',
         'factory_boy==2.5.2',
         'djangorestframework==3.1.2',
+        'django-rest-swagger==0.3.2',
         'django-filter==0.10.0',
     ],
     zip_safe = False,  # if only because of the readme file
