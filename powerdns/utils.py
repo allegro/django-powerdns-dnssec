@@ -16,3 +16,13 @@ class TimeTrackable(models.Model):
 
     class Meta:
         abstract = True
+
+
+def to_reverse(ip):
+    """
+    Given an ip address it will return a tuple of (domain, number)
+    suitable for PTR record
+    """
+    *domain_parts, number = ip.split('.')
+    domain = '{}.in-addr.arpa'.format('.'.join(reversed(domain_parts)))
+    return (domain, number)
