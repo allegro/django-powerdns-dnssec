@@ -10,8 +10,7 @@ class TimeTrackable(models.Model):
         editable=False,
     )
     modified = models.DateTimeField(
-        verbose_name=_('last modified'), auto_now=True, auto_now_add=True,
-        editable=False,
+        verbose_name=_('last modified'), auto_now=True, editable=False,
     )
 
     class Meta:
