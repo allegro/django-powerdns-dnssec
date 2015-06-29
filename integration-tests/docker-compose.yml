@@ -1,0 +1,23 @@
+%YAML 1.2
+---
+
+runner:
+    build: .
+    links:
+        - "dnsaas:dnsaas"
+        - "pdns:pdns"
+dnsaas:
+    build: ".."
+    links: 
+        - mysql:db
+pdns:
+    build: "../docker/pdns"
+    links:
+        - mysql:db
+mysql:
+    image: "drakedroid/mysql-with-data"
+    environment:
+        MYSQL_ROOT_PASSWORD: root
+        MYSQL_USER: dnsaas
+        MYSQL_DATABASE: dnsaas
+        MYSQL_PASSWORD: dnsaas

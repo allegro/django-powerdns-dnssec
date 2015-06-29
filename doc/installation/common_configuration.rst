@@ -19,8 +19,7 @@ Consult PowerDNS documentation for a `list of supported resource record types
 Using a separate database for PowerDNS
 --------------------------------------
 
-If you are using ``django-powerdns-dnssec`` as a part of a larger django
-project and this project uses a different database than the one used by
+If your Django application is using a different database than the one used by
 PowerDNS, provide the configuration for the DNS database in ``settings.py`` as
 a separate entry in ``DATABASES``, for example::
 
@@ -68,3 +67,4 @@ Then the ``powerdns`` database::
 Note that the ``powerdns`` database will maintain its own separate
 migration history table. This is especially helpful if your connecting several
 Django projects to a single PowerDNS database.
+

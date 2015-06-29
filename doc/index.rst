@@ -21,7 +21,6 @@ Contents:
     installation/index
     api_tutorial/index
     templating/index
-    
 
 Indices and tables
 ==================
