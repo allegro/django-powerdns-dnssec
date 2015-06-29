@@ -146,10 +146,19 @@ class CryptoKeyAdmin(ForeignKeyAutocompleteAdmin):
     }
 
 
+class RecordTemplateInline(admin.StackedInline):
+    model = RecordTemplate
+    extra = 1
+
+
+class DomainTemplateAdmin(ForeignKeyAutocompleteAdmin):
+    inlines = [RecordTemplateInline]
+
+
 admin.site.register(Domain, DomainAdmin)
 admin.site.register(Record, RecordAdmin)
 admin.site.register(SuperMaster, SuperMasterAdmin)
 admin.site.register(DomainMetadata, DomainMetadataAdmin)
 admin.site.register(CryptoKey, CryptoKeyAdmin)
-admin.site.register(DomainTemplate)
+admin.site.register(DomainTemplate, DomainTemplateAdmin)
 admin.site.register(RecordTemplate)
