@@ -1,4 +1,4 @@
-DNS as a service
+django-powerdns-dnssec
 ===================================
 
 Welcome to the PowerDNS app for Django.
