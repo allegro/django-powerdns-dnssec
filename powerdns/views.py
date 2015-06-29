@@ -12,7 +12,7 @@ from powerdns.models import (
 from rest_framework.filters import DjangoFilterBackend
 from rest_framework.viewsets import ModelViewSet
 
-from dnsaas.serializers import (
+from powerdns.serializers import (
     CryptoKeySerializer,
     DomainMetadataSerializer,
     DomainSerializer,

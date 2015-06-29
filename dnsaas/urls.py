@@ -3,7 +3,7 @@ from django.contrib import admin
 from rest_framework.routers import DefaultRouter
 from rest_framework.authtoken.views import obtain_auth_token
 
-from dnsaas.views import (
+from powerdns.views import (
     CryptoKeyViewSet,
     DomainMetadataViewSet,
     DomainViewSet,
