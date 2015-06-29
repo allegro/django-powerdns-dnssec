@@ -1,4 +1,4 @@
-# Django settings for dnsaas.
+# Django settings for standalone django_powerdns.
 import sys
 
 
