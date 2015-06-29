@@ -4,7 +4,9 @@ from powerdns.models import (
     CryptoKey,
     Domain,
     DomainMetadata,
+    DomainTemplate,
     Record,
+    RecordTemplate,
     SuperMaster,
 )
 from rest_framework.serializers import HyperlinkedModelSerializer
@@ -40,3 +42,15 @@ class SuperMasterSerializer(HyperlinkedModelSerializer):
 
     class Meta:
         model = SuperMaster
+
+
+class DomainTemplateSerializer(HyperlinkedModelSerializer):
+
+    class Meta:
+        model = DomainTemplate
+
+
+class RecordTemplateSerializer(HyperlinkedModelSerializer):
+
+    class Meta:
+        model = RecordTemplate
