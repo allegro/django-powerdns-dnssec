@@ -1,22 +1,23 @@
-import unittest
-
 import DNS
 from DNS.Type import PTR
-import requests
+
+from .util import TestBase
 
 
-class TestCreation(unittest.TestCase):
+class TestCreation(TestBase):
     """Tests for domain and record creation"""
 
     def setUp(self):
-        domain_create_rq = requests.post(
+        domain_create_rq = self.post(
             'http://dnsaas:8080/api/domains/', {
                 'name': 'example2.com',
                 'template': 'http://dnsaas:8080/api/domain-templates/1/',
             }
         )
+        print(domain_create_rq.status_code)
+        print(domain_create_rq.text)
         self.domain_url = domain_create_rq.headers['Location']
-        record_create_rq = requests.post(
+        record_create_rq = self.post(
             'http://dnsaas:8080/api/records/', data={
                 'type': 'A',
                 'name': 'www.example2.com',
@@ -35,4 +36,4 @@ class TestCreation(unittest.TestCase):
         self.assertEqual(len(response.answers), 1)
 
     def tearDown(self):
-        requests.delete(self.domain_url)
+        self.delete(self.domain_url)

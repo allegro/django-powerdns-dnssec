@@ -1,6 +1,7 @@
-FROM ubuntu:vivid
+FROM debian:jessie
+MAINTAINER Pylabs <pylabs@allegro.pl>
 
-RUN apt-get update && apt-get install -yq curl build-essential libcurl3 libboost-dev libboost-program-options-dev libboost-serialization-dev libmysqlclient-dev && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -yq curl build-essential libcurl3 libboost-dev libboost-program-options-dev libboost-serialization-dev libmysqlclient-dev && apt-get clean && rm -rf /var/lib/apt/lists/* && apt-get clean
 RUN curl -sS https://downloads.powerdns.com/releases/pdns-3.4.4.tar.bz2 | tar xjf - -C . && \
     cd pdns-* && ./configure --with-modules="gmysql" && make && make install && \
     cd .. && rm -fr pdns-*

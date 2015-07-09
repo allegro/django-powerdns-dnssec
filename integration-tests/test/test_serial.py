@@ -1,8 +1,8 @@
 import time
-import unittest
 
 import DNS
-import requests
+
+from .util import TestBase
 
 
 def get_serial(data):
@@ -14,16 +14,16 @@ def get_serial(data):
                 return value
 
 
-class TestSerial(unittest.TestCase):
+class TestSerial(TestBase):
     """Tests for serial updates"""
 
     def setUp(self):
-        get_domain_request = requests.get(
+        get_domain_request = self.get(
             'http://dnsaas:8080/api/domains/',
             {'name': 'example.com'}
         )
         domain_url = get_domain_request.json()[0]['url']
-        create_record_request = requests.post(
+        create_record_request = self.post(
             'http://dnsaas:8080/api/records/',
             {
                 'type': 'A',
@@ -41,7 +41,7 @@ class TestSerial(unittest.TestCase):
         response = dns_request.req(name='example.com')
         old_serial = get_serial(response.authority[0]['data'])
         time.sleep(1)
-        requests.delete(self.record_url)
+        self.delete(self.record_url)
         dns_request = DNS.Request(server='pdns')
         response = dns_request.req(name='example.com')
         new_serial = get_serial(response.authority[0]['data'])

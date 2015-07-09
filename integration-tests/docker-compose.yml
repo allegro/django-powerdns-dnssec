@@ -11,11 +11,11 @@ dnsaas:
     links: 
         - mysql:db
 pdns:
-    build: "../docker/pdns"
+    image: "zefciu/pdns"
     links:
         - mysql:db
 mysql:
-    image: "drakedroid/mysql-with-data"
+    image: "zefciu/mysql-with-data"
     environment:
         MYSQL_ROOT_PASSWORD: root
         MYSQL_USER: dnsaas
