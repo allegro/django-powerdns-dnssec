@@ -24,6 +24,7 @@ if TESTING:
             'PORT': '',
         }
     }
+    EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
 else:
     DATABASES = {
         'default': {
@@ -140,7 +141,11 @@ INSTALLED_APPS = (
 )
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
-NOSE_ARGS = ['-c.noserc', '--verbosity=2']
+NOSE_ARGS = [
+    '-c.noserc',
+    '--verbosity=2',
+    '--exclude=integration-tests',  # To be run in docker
+]
 
 DNSAAS_DEFAULT_REVERSE_DOMAIN_TEMPLATE = 'reverse'
 
@@ -167,6 +172,27 @@ REST_FRAMEWORK = {
 import os
 if os.environ.get('DJANGO_SETTINGS_PROFILE') == 'tests':
     DATABASES['default']['NAME'] = ':memory:'
+
+ENABLE_OWNER_NOTIFICATIONS = TESTING  # E-mail backend required
+
+FROM_EMAIL = 'dnsaas@example.com'
+
+OWNER_NOTIFICATIONS = {
+    'Domain': (
+        'Domain {object} created for you!',
+        """
+        User {creator-name} ({creator-email}) has created a domain
+        {object} and set its owner to you!
+        """,
+    ),
+    'Record': (
+        'Record {object} created for you!',
+        """
+        User {creator-name} ({creator-email}) has created a record
+        {object} and set its owner to you!
+        """,
+    )
+}
 
 
 from settings_local import *  # noqa

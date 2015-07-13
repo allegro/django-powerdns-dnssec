@@ -28,14 +28,25 @@ class FiltersMixin(object):
     filter_backends = (DjangoFilterBackend,)
 
 
-class DomainViewSet(FiltersMixin, ModelViewSet):
+class OwnerViewSet(FiltersMixin, ModelViewSet):
+    """Base view for objects with owner"""
+
+    def perform_create(self, serializer, *args, **kwargs):
+        if serializer.validated_data.get('owner') is None:
+            serializer.save(owner=self.request.user)
+        else:
+            object_ = serializer.save()
+            object_.email_owner(self.request.user)
+
+
+class DomainViewSet(OwnerViewSet):
 
     queryset = Domain.objects.all()
     serializer_class = DomainSerializer
     filter_fields = ('name', 'type')
 
 
-class RecordViewSet(FiltersMixin, ModelViewSet):
+class RecordViewSet(OwnerViewSet):
 
     queryset = Record.objects.all()
     serializer_class = RecordSerializer

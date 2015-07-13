@@ -59,7 +59,16 @@ class RecordAdminForm(ModelForm):
         return type
 
 
-class RecordAdmin(ForeignKeyAutocompleteAdmin):
+class OwnedAdmin(admin.ModelAdmin):
+    """Admin for models with owner field"""
+    def save_model(self, request, object_, form, change):
+        if object_.owner is None:
+            object_.owner = request.user
+        object_.email_owner(request.user)
+        super(OwnedAdmin, self).save_model(request, object_, form, change)
+
+
+class RecordAdmin(ForeignKeyAutocompleteAdmin, OwnedAdmin):
     form = RecordAdminForm
     list_display = (
         'name', 'type', 'content', 'domain', 'ttl', 'prio', 'change_date',
@@ -74,7 +83,12 @@ class RecordAdmin(ForeignKeyAutocompleteAdmin):
     }
     fieldsets = (
         (None, {
-            'fields': ('domain', ('type', 'name', 'content',), 'auth',)
+            'fields': (
+                'owner',
+                'domain',
+                ('type', 'name', 'content',),
+                'auth',
+            ),
         }),
         ('Advanced options', {
             'classes': ('collapse',),
@@ -96,7 +110,7 @@ class DomainMetadataInline(admin.TabularInline):
     extra = 0
 
 
-class DomainAdmin(admin.ModelAdmin):
+class DomainAdmin(OwnedAdmin):
     inlines = [DomainMetadataInline]
     list_display = ('name', 'type', 'last_check', 'account',)
     list_filter = _domain_filters + ('created', 'modified')
