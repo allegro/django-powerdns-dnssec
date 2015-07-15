@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import json
 import os
 import sys
 
@@ -17,9 +18,12 @@ with open(
 ) as f:
     long_description = f.read()
 
+with open('version.json') as f:
+    version = '.'.join(str(part) for part in json.load(f))
+
 setup(
     name = 'django-powerdns-dnssec',
-    version = '0.10.0',
+    version = version,
     url = 'http://bitbucket.org/ambv/django-powerdns/',
     license = 'BSD',
     description = 'PowerDNS administration app for Django',
