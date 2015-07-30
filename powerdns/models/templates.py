@@ -8,17 +8,37 @@ from django.utils.translation import ugettext_lazy as _
 from powerdns.models.powerdns import Domain, Record
 
 
+class DomainTemplateManager(models.Manager):
+    def get_by_natural_key(self, name):
+        return self.get(name=name)
+
+
 class DomainTemplate(models.Model):
     """A predefined template containing several record templates"""
     name = models.CharField(_('Name'), unique=True, max_length=255)
+    objects = DomainTemplateManager()
 
     def __str__(self):
         return self.name
+
+    def natural_key(self):
+        return (self.name,)
+
+
+class RecordTemplateManager(models.Manager):
+    def get_by_natural_key(self, domain_name, type, name, content):
+        return self.get(
+            domain_template__name=domain_name,
+            type=type,
+            name=name,
+            content=content,
+        )
 
 
 class RecordTemplate(models.Model):
     """A predefined record template that would cause a corresponding record
     to be created."""
+    objects = RecordTemplateManager()
     domain_template = models.ForeignKey(
         DomainTemplate, verbose_name=_('Domain template')
     )
@@ -47,6 +67,9 @@ class RecordTemplate(models.Model):
         default=True,
     )
     remarks = models.TextField(_('Additional remarks'), blank=True)
+
+    def natural_key(self):
+        return (self.domain_template.name, self.type, self.name, self.content)
 
     def __str__(self):
         if self.prio is not None:
