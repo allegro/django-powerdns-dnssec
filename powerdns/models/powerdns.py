@@ -12,7 +12,7 @@ from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
 from IPy import IP
 
-from powerdns.utils import TimeTrackable, to_reverse
+from powerdns.utils import Owned, TimeTrackable, to_reverse
 
 
 BASIC_RECORD_TYPES = (
@@ -123,7 +123,7 @@ def validate_ipv6_address(value):
         )
 
 
-class Domain(TimeTrackable):
+class Domain(TimeTrackable, Owned):
     '''
     PowerDNS domains
     '''
@@ -196,7 +196,7 @@ class Domain(TimeTrackable):
             return
 
 
-class Record(TimeTrackable):
+class Record(TimeTrackable, Owned):
     '''
     PowerDNS DNS records
     '''

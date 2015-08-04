@@ -1,5 +1,7 @@
 """Utilities for powerdns models"""
 
+from django.conf import settings
+from django.core.mail import send_mail
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
@@ -15,6 +17,47 @@ class TimeTrackable(models.Model):
 
     class Meta:
         abstract = True
+
+
+class Owned(models.Model):
+    """Model that has an owner. This owner is set as default to the creator
+    of this model, but can be overridden."""
+
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True)
+
+    class Meta:
+        abstract = True
+
+    def email_owner(self, creator):
+        """If the owner is different from the creator - notify the owner."""
+        if (
+            creator != self.owner and
+            settings.ENABLE_OWNER_NOTIFICATIONS and
+            hasattr(self.owner, 'email')
+        ):
+            subject_template, content_template = settings.OWNER_NOTIFICATIONS[
+                type(self)._meta.object_name
+            ]
+            kwargs = {}
+            for key, user in [
+                ('owner', self.owner),
+                ('creator', creator),
+            ]:
+                kwargs[key + '-email'] = user.email
+                kwargs[key + '-name'] = '{} {}'.format(
+                    user.first_name,
+                    user.last_name
+                )
+            kwargs['object'] = str(self)
+
+            subject = subject_template.format(**kwargs)
+            content = content_template.format(**kwargs)
+            send_mail(
+                subject,
+                content,
+                settings.FROM_EMAIL,
+                [self.owner.email],
+            )
 
 
 def to_reverse(ip):

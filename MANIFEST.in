@@ -1,2 +1,2 @@
-include README.rst LICENSE
+include README.rst LICENSE version.json
 recursive-include powerdns/locale *.*

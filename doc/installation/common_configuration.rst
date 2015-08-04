@@ -2,7 +2,7 @@ Common configuration options
 ===================================
 
 Customizing resource record types
----------------------------------
+--------------------------------------
 
 If you're not using DNSSEC or the other less common record types, you can
 simplify the user interface even more by specifying a sequence of types the app
@@ -15,6 +15,37 @@ should use. Simply put this in your ``settings.py``::
 
 Consult PowerDNS documentation for a `list of supported resource record types
 <http://doc.powerdns.com/types.html>`_.
+
+Notifications
+------------------------
+
+This app notifies owners of domains and records that were created for them. To
+have them working you need to:
+
+* enable them by setting ``ENABLE_OWNER_NOTIFICATIONS``
+
+* configure ``FROM_EMAIL`` (the e-mail that would be a sender of the
+  notifications) 
+
+* configure ``OWNER_NOTIFICATIONS`` as following::
+
+    OWNER_NOTIFICATIONS = {
+        'Domain': (subject, content),
+        'Record': (subject, content),
+    }
+
+* set up the `mailing backend
+  <https://docs.djangoproject.com/en/1.8/topics/email/#email-backends>`_
+
+
+In the subject and content strings you can place the following placeholders:
+
+* ``object`` - the string representation of the domain or record created
+* ``owner-email``
+* ``owner-name``
+* ``creator-email``
+* ``creator-name``
+
 
 Using a separate database for PowerDNS
 --------------------------------------
