@@ -138,6 +138,12 @@ INSTALLED_APPS = (
     'dnsaas',
     'django.contrib.admin',
     'django.contrib.admindocs',
+    'rules',
+)
+
+AUTHENTICATION_BACKENDS = (
+    'rules.permissions.ObjectPermissionBackend',
+    'django.contrib.auth.backends.ModelBackend',
 )
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
@@ -157,7 +163,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAdminUser',
+        'rest_framework.permissions.DjangoObjectPermissions',
     ),
     'DEFAULT_PAGINATION_CLASS':
         'rest_framework.pagination.LimitOffsetPagination',

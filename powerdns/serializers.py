@@ -12,8 +12,10 @@ from powerdns.models import (
 )
 from rest_framework.serializers import(
     HyperlinkedModelSerializer,
+    HyperlinkedRelatedField,
     SlugRelatedField,
 )
+from powerdns.utils import PermissionValidator
 
 
 class OwnerSerializer(HyperlinkedModelSerializer):
@@ -38,6 +40,12 @@ class RecordSerializer(OwnerSerializer):
     class Meta:
         model = Record
         read_only_fields = ('change_date', 'ordername',)
+
+    domain = HyperlinkedRelatedField(
+        queryset=Domain.objects.all(),
+        view_name='domain-detail',
+        validators=[PermissionValidator('powerdns.change_domain')],
+    )
 
 
 class CryptoKeySerializer(HyperlinkedModelSerializer):

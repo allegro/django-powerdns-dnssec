@@ -3,6 +3,7 @@ import hashlib
 import sys
 import time
 
+from dj.choices.fields import ChoiceField
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_ipv4_address, RegexValidator
@@ -12,10 +13,16 @@ from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
 from django.core.urlresolvers import reverse
 from IPy import IP
+import rules
 
-from dj.choices.fields import ChoiceField
-
-from powerdns.utils import Owned, TimeTrackable, to_reverse, AutoPtrOptions
+from powerdns.utils import (
+    AutoPtrOptions,
+    Owned,
+    TimeTrackable,
+    to_reverse,
+    is_owner,
+    UserBasedValidator
+)
 
 
 BASIC_RECORD_TYPES = (
@@ -128,6 +135,31 @@ def validate_ipv6_address(value):
         )
 
 
+class SubDomainValidator(UserBasedValidator):
+
+    def __call__(self, domain_name):
+        if rules.is_superuser(self.user):
+            return domain_name
+        domain_bits = domain_name.split('.')
+        for i in range(-len(domain_bits), 0):
+            super_domain = '.'.join(domain_bits[i:])
+            try:
+                super_domain = Domain.objects.get(name=super_domain)
+            except Domain.DoesNotExist:
+                continue
+            if is_owner(self.user, super_domain):
+                # ALLOW - this user owns a superdomain
+                return domain_name
+            else:
+                # DENY - this user doesn't own a superdomain
+                raise ValidationError(
+                    "You don't have a permission to create a subdomain in {}".
+                    format(super_domain)
+                )
+        # Fallthrough - ALLOW - we don't manage any superdomain
+        return domain_name
+
+
 class Domain(TimeTrackable, Owned):
     '''
     PowerDNS domains
@@ -142,7 +174,7 @@ class Domain(TimeTrackable, Owned):
         _("name"),
         unique=True,
         max_length=255,
-        validators=[validate_domain_name]
+        validators=[validate_domain_name, SubDomainValidator()]
     )
     master = models.CharField(
         _("master"), max_length=128, blank=True, null=True,
@@ -221,12 +253,21 @@ class Domain(TimeTrackable, Owned):
         yield (self.add_record_url(), 'Add record')
 
 
+rules.add_perm('powerdns', rules.is_authenticated)
+rules.add_perm('powerdns.add_domain', rules.is_authenticated)
+rules.add_perm('powerdns.change_domain', (is_owner | rules.is_superuser))
+rules.add_perm('powerdns.delete_domain', (is_owner | rules.is_superuser))
+
+
 class Record(TimeTrackable, Owned):
     '''
     PowerDNS DNS records
     '''
     RECORD_TYPE = [(r, r) for r in RECORD_TYPES]
-    domain = models.ForeignKey(Domain, verbose_name=_("domain"))
+    domain = models.ForeignKey(
+        Domain,
+        verbose_name=_("domain"),
+    )
     name = models.CharField(
         _("name"), max_length=255, blank=True, null=True,
         validators=[validate_domain_name],
@@ -475,6 +516,10 @@ class Record(TimeTrackable, Owned):
             depends_on=self,
             owner=self.owner,
         )
+
+rules.add_perm('powerdns.add_record', rules.is_authenticated)
+rules.add_perm('powerdns.change_record', (is_owner | rules.is_superuser))
+rules.add_perm('powerdns.delete_record', (is_owner | rules.is_superuser))
 
 
 # When we delete a record, the zone changes, but there no change_date is

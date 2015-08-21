@@ -20,6 +20,7 @@ Contents:
 
     installation/index
     api_tutorial/index
+    permissions/index
     templating/index
 
 Indices and tables

@@ -5,6 +5,7 @@ import functools as ft
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from factory.django import DjangoModelFactory
+from rest_framework.test import APIClient
 
 from powerdns.models.powerdns import Record, Domain
 from powerdns.models.templates import RecordTemplate, DomainTemplate
@@ -49,6 +50,13 @@ class RecordTestCase(TestCase):
         """
         with self.assertRaises(ValidationError):
             self.validate(**values)
+
+
+def user_client(user):
+    """Returns client for a given user"""
+    client = APIClient()
+    client.force_authenticate(user=user)
+    return client
 
 
 def assert_exists(exists, Model, **kwargs):
