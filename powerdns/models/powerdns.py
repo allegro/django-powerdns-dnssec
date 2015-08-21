@@ -483,7 +483,7 @@ class DomainMetadata(TimeTrackable):
         verbose_name_plural = _("domain metadata")
 
     def __str__(self):
-        return self.domain
+        return str(self.domain)
 
 
 class CryptoKey(TimeTrackable):
