@@ -5,9 +5,8 @@ import base64
 from django.contrib.auth.models import User
 from django.core import mail
 from django.test import TestCase
-from rest_framework.test import APIClient
 
-from powerdns.tests.utils import DomainFactory
+from powerdns.tests.utils import DomainFactory, user_client
 
 
 class TestOwnershipBase(TestCase):
@@ -20,12 +19,7 @@ class TestOwnershipBase(TestCase):
         self.user2 = User.objects.create_superuser(
             'user2', 'user2@example.com', 'password'
         )
-        userpass = base64.b64encode(
-            '{}:{}'.format(self.user1.username, 'password').encode(
-                'ascii'
-            )
-        ).decode('ascii')
-        self.client = APIClient(HTTP_AUTHORIZATION='Basic {}'.format(userpass))
+        self.client = user_client(self.user1)
         mail.outbox = []
 
     def assertOwner(self, request, username, mailed):
