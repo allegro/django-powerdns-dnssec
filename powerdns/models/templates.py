@@ -78,8 +78,7 @@ class RecordTemplate(models.Model):
             content = self.content
         return "%s IN %s %s" % (self.name, self.type, content)
 
-    def create_record(self, domain):
-        """Creates, saves and returns a record for this domain"""
+    def get_kwargs(self, domain):
         kwargs = {}
         template_kwargs = {
             'domain-name': domain.name,
@@ -90,8 +89,18 @@ class RecordTemplate(models.Model):
             kwargs[argname] = getattr(self, argname).format(**template_kwargs)
         kwargs['template'] = self
         kwargs['domain'] = domain
+        return kwargs
+
+    def create_record(self, domain):
+        """Creates, saves and returns a record for this domain"""
+        kwargs = self.get_kwargs(domain)
         record = Record.objects.create(**kwargs)
         return record
+
+    def update_record(self, record):
+        kwargs = self.get_kwargs(record.domain)
+        for kwarg, value in kwargs.items():
+            setattr(record, kwarg, value)
 
 
 @receiver(
@@ -115,3 +124,14 @@ def update_templated_records(sender, instance, **kwargs):
         pk__in=existing_template_ids,
     ):
         template.create_record(instance)
+
+
+@receiver(
+    post_save,
+    sender=RecordTemplate,
+    dispatch_uid='record_template_modify_templated_records',
+)
+def modify_templated_records(sender, instance, **kwargs):
+    for record in instance.record_set.all():
+        instance.update_record(record)
+        record.save()
