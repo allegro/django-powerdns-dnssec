@@ -58,7 +58,15 @@ class TestRecordValidators(RecordTestCase):
         self.check_invalid(
             name='site.example.com',
             type='CNAME',
-            content='www,example.com.'
+            content='www,example.com'
+        )
+        
+    def test_cname_record_multidot(self):
+        """CNAME record doesn't validate with a several dots in a row"""
+        self.check_invalid(
+            name='site.example.com',
+            type='CNAME',
+            content='www..example.com'
         )
 
     def test_valid_soa_record_dot(self):
