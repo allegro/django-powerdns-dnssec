@@ -1,11 +1,13 @@
 from django.test import TestCase
 
-from powerdns.models.powerdns import Domain
+from powerdns.models.powerdns import Domain, Record
 from powerdns.tests.utils import (
     DomainFactory,
     DomainTemplateFactory,
     RecordFactory,
     RecordTemplateFactory,
+    assert_does_exist,
+    assert_not_exists,
 )
 
 
@@ -61,3 +63,15 @@ class TestAutoPtr(TestCase):
         )
         domain = Domain.objects.get(name='1.168.192.in-addr.arpa')
         self.assertTrue(domain.get_soa().content.endswith('1200'))
+
+    def test_ptr_autoremove(self):
+        """A PTR record is automatically removed with its A record"""
+        a = RecordFactory(
+            domain=self.domain,
+            type='A',
+            name='site.example.com',
+            content='192.168.1.1',
+        )
+        assert_does_exist(Record, name='1.1.168.192.in-addr.arpa', type='PTR')
+        a.delete()
+        assert_not_exists(Record, name='1.1.168.192.in-addr.arpa', type='PTR')
