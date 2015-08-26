@@ -7,7 +7,7 @@ from __future__ import unicode_literals
 
 from django.test import TestCase
 
-from powerdns.models.powerdns import Domain
+from powerdns.models.powerdns import Domain, Record
 from powerdns.tests.utils import DomainTemplateFactory, RecordTemplateFactory
 
 
@@ -90,6 +90,15 @@ class TestTemplates(TestCase):
                 'nameserver2.example.com',
             }
         )
+
+    def test_template_modify(self):
+        """Record is changed when its template is modified"""
+        domain = Domain(name='example.com', template=self.domain_template1)
+        domain.save()
+        self.t1_ns_record.content = 'nsrv1.{domain-name}'
+        self.t1_ns_record.save()
+        record = Record.objects.get(type='NS', domain=domain)
+        self.assertEqual(record.content, 'nsrv1.example.com')
 
     def test_template_delete(self):
         """Records are deleted if corresponding template is deleted"""
