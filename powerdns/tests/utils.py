@@ -1,5 +1,7 @@
 """Utilities for tests"""
 
+import functools as ft
+
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from factory.django import DjangoModelFactory
@@ -47,3 +49,15 @@ class RecordTestCase(TestCase):
         """
         with self.assertRaises(ValidationError):
             self.validate(**values)
+
+
+def assert_exists(exists, Model, **kwargs):
+    """Check if given object exists or doesn't exist"""
+    if Model.objects.filter(**kwargs).exists() != exists:
+        raise AssertionError("Object with arguments {} {}!".format(
+            kwargs,
+            "doesn't exist" if exists else "exists"
+        ))
+
+assert_does_exist = ft.partial(assert_exists, True)
+assert_not_exists = ft.partial(assert_exists, False)

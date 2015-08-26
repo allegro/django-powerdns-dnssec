@@ -431,6 +431,7 @@ class Record(TimeTrackable, Owned):
             domain=domain,
             name='.'.join([number, domain_name]),
             content=self.name,
+            depends_on=self,
         )
 
 

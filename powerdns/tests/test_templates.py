@@ -33,6 +33,15 @@ class TestTemplates(TestCase):
             ),
             domain_template = self.domain_template1,
         )
+        self.t1_a_record = RecordTemplateFactory(
+            type='A',
+            name='www.{domain-name}',
+            content=(
+                '192.168.1.3'
+            ),
+            domain_template = self.domain_template1,
+            auto_ptr=True,
+        )
         self.domain_template2 = DomainTemplateFactory(name='template2')
         RecordTemplateFactory(
             type='SOA',
@@ -62,21 +71,31 @@ class TestTemplates(TestCase):
 
     def test_record_creation(self):
         """Records are created when template is used to create a domain"""
-        domain = Domain(name='example.com', template=self.domain_template1)
+        domain = Domain(
+            name='example.com',
+            template=self.domain_template1,
+            reverse_template=self.domain_template2,
+        )
         domain.save()
-        self.assertEqual(domain.record_set.count(), 2)
+        self.assertEqual(domain.record_set.count(), 3)
         self.assertSetEqual(
             set(r.content for r in domain.record_set.all()),
             {
                 'ns1.example.com hostmaster.example.com '
                 '0 43200 600 1209600 600',
                 'ns1.example.com',
+                '192.168.1.3'
             }
         )
+        Record.objects.get(type='PTR', name='3.1.168.192.in-addr.arpa')
 
     def test_template_change(self):
         """Records are changed when template on existing domain is changed"""
-        domain = Domain(name='example.com', template=self.domain_template1)
+        domain = Domain(
+            name='example.com',
+            template=self.domain_template1,
+            reverse_template = self.domain_template2,
+        )
         domain.save()
         domain.template = self.domain_template2
         domain.save()
@@ -104,7 +123,19 @@ class TestTemplates(TestCase):
         """Records are deleted if corresponding template is deleted"""
         # This is managed by django's default ForeignKey.on_delete
         # so doesn't need implementation, but let's test it anyways:
-        domain = Domain(name='example.com', template=self.domain_template1)
+        domain = Domain(
+            name='example.com',
+            template=self.domain_template1,
+            reverse_template= self.domain_template2,
+        )
         domain.save()
-        self.t1_ns_record.delete()
-        self.assertEqual(domain.record_set.count(), 1)
+        self.t1_a_record.delete()
+        self.assertEqual(domain.record_set.count(), 2)
+        try:
+            Record.objects.get(
+                name='3.1.168.192.in-addr.arpa', type='PTR'
+            )
+        except Record.DoesNotExist:
+            pass
+        else:
+            self.fail('The PTR stayed after template removal')
