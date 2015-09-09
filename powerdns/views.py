@@ -85,4 +85,4 @@ class RecordTemplateViewSet(FiltersMixin, ModelViewSet):
 
     queryset = RecordTemplate.objects.all()
     serializer_class = RecordTemplateSerializer
-    filter_fields = ('domain', 'name', 'content')
+    filter_fields = ('domain_template', 'name', 'content')
