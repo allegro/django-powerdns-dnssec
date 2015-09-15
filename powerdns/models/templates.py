@@ -4,8 +4,10 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
+from dj.choices.fields import ChoiceField
 
 from powerdns.models.powerdns import Domain, Record
+from powerdns.utils import AutoPtrOptions
 
 
 class DomainTemplateManager(models.Manager):
@@ -67,9 +69,10 @@ class RecordTemplate(models.Model):
         default=True,
     )
     remarks = models.TextField(_('Additional remarks'), blank=True)
-    auto_ptr = models.BooleanField(
+    auto_ptr = ChoiceField(
         _('Auto PTR field'),
-        default=True,
+        choices=AutoPtrOptions,
+        default=AutoPtrOptions.ALWAYS,
     )
 
     def natural_key(self):

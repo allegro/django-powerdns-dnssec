@@ -9,6 +9,7 @@ from powerdns.tests.utils import (
     assert_does_exist,
     assert_not_exists,
 )
+from powerdns.utils import AutoPtrOptions
 
 
 class TestAutoPtr(TestCase):
@@ -48,9 +49,61 @@ class TestAutoPtr(TestCase):
             type='A',
             name='site.example.com',
             content='192.168.1.1',
+            auto_ptr=AutoPtrOptions.ALWAYS,
         )
         domain = Domain.objects.get(name='1.168.192.in-addr.arpa')
         self.assertTrue(domain.get_soa().content.endswith('600'))
+        assert_does_exist(
+            Record,
+            domain=domain,
+            name='1.1.168.192.in-addr.arpa',
+        )
+
+    def test_default_ptr_never(self):
+        """A PTR record is not created if auto_ptr set to NEVER"""
+        domain = DomainFactory(name='1.168.192.in-addr.arpa')
+        RecordFactory(
+            domain=self.domain,
+            type='A',
+            name='site.example.com',
+            content='192.168.1.1',
+            auto_ptr=AutoPtrOptions.NEVER,
+        )
+        assert_not_exists(
+            Record,
+            domain=domain,
+            name='1.1.168.192.in-addr.arpa'
+        )
+
+    def test_ptr_domain_exists(self):
+        """A PTR record with 'only-if-domain' is created if domain exists"""
+        domain = DomainFactory(name='1.168.192.in-addr.arpa')
+        RecordFactory(
+            domain=self.domain,
+            type='A',
+            name='site.example.com',
+            content='192.168.1.1',
+            auto_ptr=AutoPtrOptions.ONLY_IF_DOMAIN,
+        )
+        assert_does_exist(
+            Record,
+            domain=domain,
+            name='1.1.168.192.in-addr.arpa'
+        )
+
+    def test_ptr_domain_not_exists(self):
+        """A PTR record with 'only-if-domain' is created if domain exists"""
+        RecordFactory(
+            domain=self.domain,
+            type='A',
+            name='site.example.com',
+            content='192.168.1.1',
+            auto_ptr=AutoPtrOptions.ONLY_IF_DOMAIN,
+        )
+        assert_not_exists(
+            Record,
+            name='1.1.168.192.in-addr.arpa'
+        )
 
     def test_alt_ptr_created(self):
         """A PTR record is created for an A record with alternative"""
@@ -60,6 +113,7 @@ class TestAutoPtr(TestCase):
             type='A',
             name='site.example.com',
             content='192.168.1.1',
+            auto_ptr=AutoPtrOptions.ALWAYS,
         )
         domain = Domain.objects.get(name='1.168.192.in-addr.arpa')
         self.assertTrue(domain.get_soa().content.endswith('1200'))
@@ -71,6 +125,7 @@ class TestAutoPtr(TestCase):
             type='A',
             name='site.example.com',
             content='192.168.1.1',
+            auto_ptr=AutoPtrOptions.ALWAYS,
         )
         assert_does_exist(Record, name='1.1.168.192.in-addr.arpa', type='PTR')
         a.delete()

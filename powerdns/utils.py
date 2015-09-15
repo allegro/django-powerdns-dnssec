@@ -4,6 +4,7 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from dj.choices import Choices
 
 
 class TimeTrackable(models.Model):
@@ -68,3 +69,10 @@ def to_reverse(ip):
     *domain_parts, number = ip.split('.')
     domain = '{}.in-addr.arpa'.format('.'.join(reversed(domain_parts)))
     return (domain, number)
+
+
+class AutoPtrOptions(Choices):
+    _ = Choices.Choice
+    NEVER = _("Never")
+    ALWAYS = _("Always")
+    ONLY_IF_DOMAIN = _("Only if domain exists")

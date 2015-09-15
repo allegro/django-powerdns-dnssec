@@ -14,12 +14,14 @@ from powerdns.tests.utils import (
     assert_does_exist,
     assert_not_exists,
 )
+from powerdns.utils import AutoPtrOptions
 
 
 class TestTemplates(TestCase):
     """Test cases for a simple template"""
 
     def setUp(self):
+        self.reverse_template = DomainTemplateFactory(name='reverse')
         self.domain_template1 = DomainTemplateFactory(name='template1')
         self.t1_soa_record = RecordTemplateFactory(
             type='SOA',
@@ -45,7 +47,7 @@ class TestTemplates(TestCase):
                 '192.168.1.3'
             ),
             domain_template = self.domain_template1,
-            auto_ptr=True,
+            auto_ptr=AutoPtrOptions.ALWAYS,
         )
         self.domain_template2 = DomainTemplateFactory(name='template2')
         RecordTemplateFactory(
@@ -92,7 +94,7 @@ class TestTemplates(TestCase):
                 '192.168.1.3'
             }
         )
-        Record.objects.get(type='PTR', name='3.1.168.192.in-addr.arpa')
+        assert_does_exist(Record, type='PTR', name='3.1.168.192.in-addr.arpa')
 
     def test_template_change(self):
         """Records are changed when template on existing domain is changed"""
