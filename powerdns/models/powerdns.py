@@ -10,6 +10,7 @@ from django.db import models, transaction
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
+from django.core.urlresolvers import reverse
 from dj.choices.fields import ChoiceField
 from IPy import IP
 
@@ -133,6 +134,7 @@ class Domain(TimeTrackable, Owned):
         ('NATIVE', 'NATIVE'),
         ('SLAVE', 'SLAVE'),
     )
+    record_fields = ['record_auto_ptr']
     name = models.CharField(
         _("name"),
         unique=True,
@@ -171,6 +173,10 @@ class Domain(TimeTrackable, Owned):
             'template.'
         )
     )
+    record_auto_ptr = ChoiceField(
+        choices=AutoPtrOptions,
+        default=AutoPtrOptions.ALWAYS,
+    )
 
     class Meta:
         db_table = u'domains'
@@ -195,6 +201,21 @@ class Domain(TimeTrackable, Owned):
             return Record.objects.get(type='SOA', domain=self)
         except Record.DoesNotExist:
             return
+
+    def add_record_url(self):
+        """Return URL for 'Add record' action"""
+        return (
+            reverse('admin:powerdns_record_add') +
+            '?domain={}'.format(self.pk)
+        )
+
+    def add_record_link(self):
+        return '<a href="{}">Add record</a>'.format(self.add_record_url())
+
+    add_record_link.allow_tags = True
+
+    def extra_buttons(self):
+        yield (self.add_record_url(), 'Add record')
 
 
 class Record(TimeTrackable, Owned):
