@@ -169,10 +169,22 @@ class DomainTemplateAdmin(ForeignKeyAutocompleteAdmin):
     inlines = [RecordTemplateInline]
 
 
+class RecordTemplateAdmin(ForeignKeyAutocompleteAdmin):
+    form = RecordAdminForm
+    list_display = (
+        'name',
+        'type',
+        'content',
+        'domain_template',
+        'ttl',
+        'prio',
+    )
+
+
 admin.site.register(Domain, DomainAdmin)
 admin.site.register(Record, RecordAdmin)
 admin.site.register(SuperMaster, SuperMasterAdmin)
 admin.site.register(DomainMetadata, DomainMetadataAdmin)
 admin.site.register(CryptoKey, CryptoKeyAdmin)
 admin.site.register(DomainTemplate, DomainTemplateAdmin)
-admin.site.register(RecordTemplate)
+admin.site.register(RecordTemplate, RecordTemplateAdmin)
