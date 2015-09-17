@@ -8,7 +8,12 @@ from __future__ import unicode_literals
 from django.test import TestCase
 
 from powerdns.models.powerdns import Domain, Record
-from powerdns.tests.utils import DomainTemplateFactory, RecordTemplateFactory
+from powerdns.tests.utils import (
+    DomainTemplateFactory,
+    RecordTemplateFactory,
+    assert_does_exist,
+    assert_not_exists,
+)
 
 
 class TestTemplates(TestCase):
@@ -94,7 +99,7 @@ class TestTemplates(TestCase):
         domain = Domain(
             name='example.com',
             template=self.domain_template1,
-            reverse_template = self.domain_template2,
+            reverse_template=self.domain_template2,
         )
         domain.save()
         domain.template = self.domain_template2
@@ -126,16 +131,44 @@ class TestTemplates(TestCase):
         domain = Domain(
             name='example.com',
             template=self.domain_template1,
-            reverse_template= self.domain_template2,
+            reverse_template=self.domain_template2,
         )
         domain.save()
+        assert_does_exist(
+            Record,
+            domain=domain,
+            content='192.168.1.3'
+        )
+        assert_does_exist(
+            Record,
+            name='3.1.168.192.in-addr.arpa',
+            type='PTR'
+        )
         self.t1_a_record.delete()
         self.assertEqual(domain.record_set.count(), 2)
-        try:
-            Record.objects.get(
-                name='3.1.168.192.in-addr.arpa', type='PTR'
-            )
-        except Record.DoesNotExist:
-            pass
-        else:
-            self.fail('The PTR stayed after template removal')
+        assert_not_exists(
+            Record,
+            domain=domain,
+            content='192.168.1.3'
+        )
+        assert_not_exists(
+            Record,
+            name='3.1.168.192.in-addr.arpa',
+            type='PTR'
+        )
+
+    def test_template_add(self):
+        """Records are added if the domain template gets a new record
+        template"""
+        domain = Domain(name='example.com', template=self.domain_template1)
+        domain.save()
+        self.t1_ns2_record = RecordTemplateFactory(
+            type='NS',
+            name='{domain-name}',
+            content=(
+                'ns2.{domain-name}'
+            ),
+            domain_template = self.domain_template1,
+        )
+        self.assertEqual(domain.record_set.count(), 4)
+        assert_does_exist(Record, domain=domain, content='ns2.example.com')

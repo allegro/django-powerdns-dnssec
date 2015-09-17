@@ -135,7 +135,11 @@ def update_templated_records(sender, instance, **kwargs):
     sender=RecordTemplate,
     dispatch_uid='record_template_modify_templated_records',
 )
-def modify_templated_records(sender, instance, **kwargs):
-    for record in instance.record_set.all():
-        instance.update_record(record)
-        record.save()
+def modify_templated_records(sender, instance, created, **kwargs):
+    if created:
+        for domain in instance.domain_template.domain_set.all():
+            instance.create_record(domain)
+    else:
+        for record in instance.record_set.all():
+            instance.update_record(record)
+            record.save()
