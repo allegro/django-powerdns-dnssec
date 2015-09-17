@@ -383,6 +383,8 @@ class Record(TimeTrackable, Owned):
         """Ensure this record doesn't conflict with other records."""
         def check_unique(comment, **kwargs):
             conflicting = Record.objects.filter(**kwargs)
+            if self.pk is not None:
+                conflicting = conflicting.exclude(pk=self.pk)
             if conflicting:
                 raise ValidationError(comment.format(
                     ', '.join(str(record.id) for record in conflicting)
