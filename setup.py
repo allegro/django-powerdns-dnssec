@@ -2,8 +2,6 @@
 
 import json
 import os
-import sys
-
 try:
     from setuptools import setup, find_packages
 except ImportError:
@@ -54,6 +52,7 @@ setup(
         'IPy>=0.82a',
         'django-extensions>=1.5.5',
         'django-nose>=1.4',
+        'dj.choices>=0.10.0',
         'nose-cov>=1.6',
         'factory_boy>=2.5.2',
         'djangorestframework>=3.1.2',

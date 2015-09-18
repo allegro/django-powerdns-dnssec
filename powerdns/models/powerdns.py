@@ -10,9 +10,10 @@ from django.db import models, transaction
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
+from dj.choices.fields import ChoiceField
 from IPy import IP
 
-from powerdns.utils import Owned, TimeTrackable, to_reverse
+from powerdns.utils import Owned, TimeTrackable, to_reverse, AutoPtrOptions
 
 
 BASIC_RECORD_TYPES = (
@@ -275,9 +276,10 @@ class Record(TimeTrackable, Owned):
             'that depend on A records.'
         )
     )
-    auto_ptr = models.BooleanField(
-        _('Auto PTR field'),
-        default=True,
+    auto_ptr = ChoiceField(
+        _('Auto PTR record'),
+        choices=AutoPtrOptions,
+        default=AutoPtrOptions.ALWAYS,
     )
 
     class Meta:
@@ -421,13 +423,22 @@ class Record(TimeTrackable, Owned):
         if self.type != 'A':
             raise ValueError(_('Creating PTR only for A records'))
         domain_name, number = to_reverse(self.content)
-        domain, created = Domain.objects.get_or_create(
-            name=domain_name,
-            template=(
-                self.domain.reverse_template or
-                get_default_reverse_domain()
+        if self.auto_ptr == AutoPtrOptions.ALWAYS:
+            domain, created = Domain.objects.get_or_create(
+                name=domain_name,
+                defaults={'template': (
+                    self.domain.reverse_template or
+                    get_default_reverse_domain()
+                )}
             )
-        )
+        elif self.auto_ptr == AutoPtrOptions.ONLY_IF_DOMAIN:
+            try:
+                domain = Domain.objects.get(name=domain_name)
+            except Domain.DoesNotExist:
+                return
+        else:
+            return
+
         Record.objects.create(
             type='PTR',
             domain=domain,
@@ -448,7 +459,7 @@ def update_serial(sender, instance, **kwargs):
 
 @receiver(post_save, sender=Record, dispatch_uid='record_create_ptr')
 def create_ptr(sender, instance, **kwargs):
-    if not instance.auto_ptr or instance.type != 'A':
+    if instance.auto_ptr == AutoPtrOptions.NEVER or instance.type != 'A':
         return
     instance.create_ptr()
 
