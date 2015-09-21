@@ -59,6 +59,19 @@ class RecordAdminForm(ModelForm):
         return type
 
 
+class CopyingAdmin(admin.ModelAdmin):
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        from_pk = request.GET.get(self.from_field)
+        if from_pk is not None:
+            from_object = self.FromModel.objects.get(pk=from_pk)
+            for field in self.FromModel.copy_fields:
+                form.base_fields[field[len(self.field_prefix):]].initial = \
+                    getattr(from_object, field)
+        return form
+
+
 class OwnedAdmin(admin.ModelAdmin):
     """Admin for models with owner field"""
     def save_model(self, request, object_, form, change):
@@ -68,10 +81,10 @@ class OwnedAdmin(admin.ModelAdmin):
         super(OwnedAdmin, self).save_model(request, object_, form, change)
 
 
-class RecordAdmin(ForeignKeyAutocompleteAdmin, OwnedAdmin):
+class RecordAdmin(ForeignKeyAutocompleteAdmin, OwnedAdmin, CopyingAdmin):
     form = RecordAdminForm
     list_display = (
-        'name', 'type', 'content', 'domain', 'ttl', 'prio', 'change_date',
+        'name', 'type', 'content', 'domain', 'ttl', 'prio', 'change_date'
     )
     list_filter = ('type', 'ttl', 'auth', 'domain', 'created', 'modified')
     list_per_page = 250
@@ -88,6 +101,7 @@ class RecordAdmin(ForeignKeyAutocompleteAdmin, OwnedAdmin):
                 'domain',
                 ('type', 'name', 'content',),
                 'auth',
+                'auto_ptr',
             ),
         }),
         ('Advanced options', {
@@ -103,6 +117,9 @@ class RecordAdmin(ForeignKeyAutocompleteAdmin, OwnedAdmin):
             ),
         },
     }
+    FromModel = Domain
+    from_field = 'domain'
+    field_prefix = 'record_'
 
 
 class DomainMetadataInline(admin.TabularInline):
@@ -110,15 +127,18 @@ class DomainMetadataInline(admin.TabularInline):
     extra = 0
 
 
-class DomainAdmin(OwnedAdmin):
+class DomainAdmin(OwnedAdmin, CopyingAdmin):
     inlines = [DomainMetadataInline]
-    list_display = ('name', 'type', 'last_check', 'account',)
+    list_display = ('name', 'type', 'last_check', 'account', 'add_record_link')
     list_filter = _domain_filters + ('created', 'modified')
     list_per_page = 250
     save_on_top = True
     search_fields = ('name',)
     radio_fields = {'type': admin.HORIZONTAL}
     readonly_fields = ('notified_serial', 'created', 'modified')
+    FromModel = DomainTemplate
+    field_prefix = ''
+    from_field = 'template'
 
 
 class SuperMasterAdmin(admin.ModelAdmin):
@@ -167,6 +187,7 @@ class RecordTemplateInline(admin.StackedInline):
 
 class DomainTemplateAdmin(ForeignKeyAutocompleteAdmin):
     inlines = [RecordTemplateInline]
+    list_display = ['name', 'add_domain_link']
 
 
 class RecordTemplateAdmin(ForeignKeyAutocompleteAdmin):

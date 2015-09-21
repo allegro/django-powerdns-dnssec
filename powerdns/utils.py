@@ -76,3 +76,10 @@ class AutoPtrOptions(Choices):
     NEVER = _("Never")
     ALWAYS = _("Always")
     ONLY_IF_DOMAIN = _("Only if domain exists")
+
+
+DOMAIN_TYPE = (
+    ('MASTER', 'MASTER'),
+    ('NATIVE', 'NATIVE'),
+    ('SLAVE', 'SLAVE'),
+)
