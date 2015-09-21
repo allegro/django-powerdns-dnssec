@@ -11,8 +11,9 @@ from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
 from django.core.urlresolvers import reverse
-from dj.choices.fields import ChoiceField
 from IPy import IP
+
+from dj.choices.fields import ChoiceField
 
 from powerdns.utils import Owned, TimeTrackable, to_reverse, AutoPtrOptions
 
@@ -439,6 +440,9 @@ class Record(TimeTrackable, Owned):
             self.number = IP(self.content).int()
         super(Record, self).save(*args, **kwargs)
 
+    def delete_ptr(self):
+        Record.objects.filter(depends_on=self).delete()
+
     def create_ptr(self):
         """Creates a PTR record for A record creating a domain if necessary."""
         if self.type != 'A':
@@ -460,12 +464,14 @@ class Record(TimeTrackable, Owned):
         else:
             return
 
+        self.delete_ptr()
         Record.objects.create(
             type='PTR',
             domain=domain,
             name='.'.join([number, domain_name]),
             content=self.name,
             depends_on=self,
+            owner=self.owner,
         )
 
 
@@ -481,6 +487,7 @@ def update_serial(sender, instance, **kwargs):
 @receiver(post_save, sender=Record, dispatch_uid='record_create_ptr')
 def create_ptr(sender, instance, **kwargs):
     if instance.auto_ptr == AutoPtrOptions.NEVER or instance.type != 'A':
+        instance.delete_ptr()
         return
     instance.create_ptr()
 
