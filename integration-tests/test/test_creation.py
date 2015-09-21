@@ -14,15 +14,13 @@ class TestCreation(TestBase):
                 'template': 'http://dnsaas:8080/api/domain-templates/1/',
             }
         )
-        print(domain_create_rq.status_code)
-        print(domain_create_rq.text)
         self.domain_url = domain_create_rq.headers['Location']
         record_create_rq = self.post(
             'http://dnsaas:8080/api/records/', data={
                 'type': 'A',
                 'name': 'www.example2.com',
                 'content': '192.168.2.11',
-                'auto_ptr': '1',
+                'auto_ptr': 2,
                 'domain': self.domain_url,
             }
         )

@@ -5,7 +5,7 @@ machine:
         - docker
 dependencies:
     override:
-        - pip install docker-compose
+        - pip install docker-compose==1.2.0
 test:
     override:
         - cd integration-tests && docker-compose run runner

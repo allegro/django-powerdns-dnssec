@@ -22,7 +22,7 @@ class TestSerial(TestBase):
             'http://dnsaas:8080/api/domains/',
             {'name': 'example.com'}
         )
-        domain_url = get_domain_request.json()[0]['url']
+        domain_url = get_domain_request.json()['results'][0]['url']
         create_record_request = self.post(
             'http://dnsaas:8080/api/records/',
             {
