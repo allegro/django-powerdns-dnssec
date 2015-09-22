@@ -137,7 +137,7 @@ class Domain(TimeTrackable, Owned):
         ('NATIVE', 'NATIVE'),
         ('SLAVE', 'SLAVE'),
     )
-    record_fields = ['record_auto_ptr']
+    copy_fields = ['record_auto_ptr']
     name = models.CharField(
         _("name"),
         unique=True,
