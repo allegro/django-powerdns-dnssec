@@ -45,6 +45,14 @@ class TestRecordValidators(RecordTestCase):
             content='www.example.com'
         )
 
+    def test_record_asterisk_name(self):
+        """CNAME record validates with name beginning in asterisk"""
+        self.validate(
+            name='*.site.example.com',
+            type='CNAME',
+            content='www.example.com'
+        )
+
     def test_cname_record_trailing_dot(self):
         """CNAME record doesn't validate with trailing dot"""
         self.check_invalid(
@@ -60,7 +68,7 @@ class TestRecordValidators(RecordTestCase):
             type='CNAME',
             content='www,example.com'
         )
-        
+
     def test_cname_record_multidot(self):
         """CNAME record doesn't validate with a several dots in a row"""
         self.check_invalid(
