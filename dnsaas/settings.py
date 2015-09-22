@@ -197,7 +197,5 @@ OWNER_NOTIFICATIONS = {
     )
 }
 
-SITE_TITLE = 'Powerdns'
-
 
 from settings_local import *  # noqa
