@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.contrib import admin
 from django.contrib.admin.widgets import AdminRadioSelect
 from django.db import models
@@ -203,17 +202,10 @@ class RecordTemplateAdmin(ForeignKeyAutocompleteAdmin):
     )
 
 
-class PowerdsAdminSite(admin.AdminSite):
-    site_title = settings.SITE_TITLE
-    site_header = settings.SITE_TITLE
-    index_title = settings.SITE_TITLE
-
-admin_site = PowerdsAdminSite()
-
-admin_site.register(Domain, DomainAdmin)
-admin_site.register(Record, RecordAdmin)
-admin_site.register(SuperMaster, SuperMasterAdmin)
-admin_site.register(DomainMetadata, DomainMetadataAdmin)
-admin_site.register(CryptoKey, CryptoKeyAdmin)
-admin_site.register(DomainTemplate, DomainTemplateAdmin)
-admin_site.register(RecordTemplate, RecordTemplateAdmin)
+admin.site.register(Domain, DomainAdmin)
+admin.site.register(Record, RecordAdmin)
+admin.site.register(SuperMaster, SuperMasterAdmin)
+admin.site.register(DomainMetadata, DomainMetadataAdmin)
+admin.site.register(CryptoKey, CryptoKeyAdmin)
+admin.site.register(DomainTemplate, DomainTemplateAdmin)
+admin.site.register(RecordTemplate, RecordTemplateAdmin)
