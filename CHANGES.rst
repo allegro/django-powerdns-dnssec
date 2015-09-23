@@ -1,6 +1,18 @@
 Change Log
 ----------
 
+2.0
+~~~~~
+
+* Templates for domains and records
+* Automated PTR
+* Domain and record ownership
+* REST API via django_rest_framework
+* Lot of validation improvements
+* Improved unittest code coverage
+* Added integration tests via docker
+* Created docker configuration for testing purposes
+
 0.9.3
 ~~~~~
 
