@@ -45,6 +45,14 @@ class TestRecordValidators(RecordTestCase):
             content='www.example.com'
         )
 
+    def test_valid_record_underscores(self):
+        """Underscores are allowed in domain name"""
+        self.validate(
+            name='something._domainkey.example.com',
+            type='TXT',
+            content='v=DKIM1; k=RSA;'
+        )
+
     def test_record_asterisk_name(self):
         """CNAME record validates with name beginning in asterisk"""
         self.validate(

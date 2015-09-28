@@ -72,7 +72,7 @@ b32_trans = maketrans_func(
 # with a period so this custom validator is used to catch them
 
 validate_domain_name = RegexValidator(
-    r'^(\*\.)?([A-Za-z0-9-]+\.)*([A-Za-z0-9])+$'
+    r'^(\*\.)?([_A-Za-z0-9-]+\.)*([A-Za-z0-9])+$'
 )
 validate_dn_optional_dot = RegexValidator(
     '^[A-Za-z0-9.-]*$'

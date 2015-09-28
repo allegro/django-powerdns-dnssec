@@ -26,6 +26,7 @@ class TestUniquenessConstraints(RecordTestCase):
         self.validate(type='A', name='wiki.example.com', content='192.168.1.2')
 
     def test_noconflict_with_itself(self):
+        """A CNAME record can be resaved (it doesn't conflict with itself.)"""
         self.cname_record.full_clean()
 
     def test_conflicting_a_record(self):
