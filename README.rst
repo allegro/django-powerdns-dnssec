@@ -21,3 +21,10 @@ Application written by `Peter Nixon <mailto:listuser@peternixon.net>`_ and
 work with `django-powerdns-manager
 <https://bitbucket.org/gnotaras/django-powerdns-manager>`_.
 The application is now developed by `Allegro pyLabs <pylabs@allegro.pl>`
+
+|CircleCI|_ |ReadTheDocs|_
+
+.. |CircleCI| image:: https://circleci.com/gh/allegro/django-powerdns-dnssec.png?style=shield
+.. _CircleCI: https://circleci.com/gh/allegro/django-powerdns-dnssec/tree/develop
+.. |ReadTheDocs| image:: https://readthedocs.org/projects/django-powerdns-dnssec/badge/?version=latest
+.. _ReadTheDocs: http://django-powerdns-dnssec.readthedocs.org/en/latest/?badge=latest
