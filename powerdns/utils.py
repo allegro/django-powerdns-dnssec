@@ -1,10 +1,15 @@
 """Utilities for powerdns models"""
 
+from pkg_resources import working_set, Requirement
+
 from django.conf import settings
 from django.core.mail import send_mail
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from dj.choices import Choices
+
+
+VERSION = working_set.find(Requirement.parse('django-powerdns-dnssec')).version
 
 
 class TimeTrackable(models.Model):

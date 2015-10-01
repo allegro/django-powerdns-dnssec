@@ -1,4 +1,3 @@
-from pkg_resources import working_set, Requirement
 
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
@@ -6,10 +5,12 @@ from django.conf import settings
 from rest_framework.routers import DefaultRouter
 from rest_framework.authtoken.views import obtain_auth_token
 
+from powerdns.utils import VERSION
 from powerdns.views import (
     CryptoKeyViewSet,
     DomainMetadataViewSet,
     DomainViewSet,
+    HomeView,
     RecordViewSet,
     SuperMasterViewSet,
     DomainTemplateViewSet,
@@ -19,10 +20,7 @@ from powerdns.views import (
 admin.autodiscover()
 
 title = settings.SITE_TITLE
-title_v = ' '.join([
-    title,
-    working_set.find(Requirement.parse('django-powerdns-dnssec')).version
-])
+title_v = ' '.join([title, VERSION])
 
 admin.site.site_title = title
 admin.site.site_header = title_v
@@ -40,6 +38,7 @@ router.register(r'record-templates', RecordTemplateViewSet)
 
 urlpatterns = patterns(
     '',
+    url(r'^$', HomeView.as_view()),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^api/', include(router.urls)),
     url(r'^api-token-auth/', obtain_auth_token),
