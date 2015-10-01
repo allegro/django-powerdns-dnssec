@@ -1,5 +1,7 @@
 """Views and viewsets for DNSaaS API"""
 
+from django.views.generic.base import TemplateView
+
 from powerdns.models import (
     CryptoKey,
     Domain,
@@ -21,6 +23,7 @@ from powerdns.serializers import (
     RecordTemplateSerializer,
     SuperMasterSerializer,
 )
+from powerdns.utils import VERSION
 
 
 class FiltersMixin(object):
@@ -86,3 +89,18 @@ class RecordTemplateViewSet(FiltersMixin, ModelViewSet):
     queryset = RecordTemplate.objects.all()
     serializer_class = RecordTemplateSerializer
     filter_fields = ('domain_template', 'name', 'content')
+
+
+class HomeView(TemplateView):
+
+    """Homepage. This page should point user to API or admin site. This package
+    will provide some minimal homepage template. The administrators of
+    DNSaaS solutions are encouraged however to create their own ones."""
+
+    template_name = "powerdns/home.html"
+
+    def get_context_data(self, **kwargs):
+
+        return {
+            'version': VERSION,
+        }
