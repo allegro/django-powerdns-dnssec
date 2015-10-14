@@ -6,25 +6,26 @@ import time
 import rules
 from dj.choices.fields import ChoiceField
 from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_ipv4_address, RegexValidator
 from django.db import models, transaction
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
-from django.core.urlresolvers import reverse
 from django.utils.deconstruct import deconstructible
+from django.core.urlresolvers import reverse
 from IPy import IP
 from threadlocals.threadlocals import get_current_user
 
 from powerdns.utils import (
     AutoPtrOptions,
+    is_authorised,
+    is_owner,
+    no_object,
     Owned,
     TimeTrackable,
     to_reverse,
-    no_object,
-    is_owner,
-    is_authorised,
 )
 
 
@@ -171,7 +172,55 @@ class SubDomainValidator():
         return domain_name
 
 
-class Domain(TimeTrackable, Owned):
+class WithRequests(models.Model):
+
+    class Meta:
+        abstract = True
+
+    def request_factory(operation):
+        def result(self):
+            def fmt(str_, **kwargs):
+                return str_.format(
+                    obj=type(self)._meta.object_name.lower(),
+                    opr=operation,
+                    **kwargs
+                )
+
+            if get_current_user().has_perm(
+                fmt('powerdns.{opr}_{obj}'),
+                self
+            ):
+                return '<a href={}>{}</a>'.format(
+                    reverse(
+                        fmt('admin:powerdns_{obj}_{opr}'),
+                        args=(self.pk,)
+                    ),
+                    operation.capitalize()
+                )
+            if operation == 'delete':
+                return '<a href="{}">Request deletion</a>'.format(
+                    reverse(
+                        fmt('admin:powerdns_deleterequest_add')
+                    ) + '?target_id={}&content_type={}'.format(
+                        self.pk,
+                        ContentType.objects.get_for_model(type(self)).pk,
+                    )
+                )
+
+            return '<a href="{}">Request change</a>'.format(
+                reverse(
+                    fmt('admin:powerdns_{obj}request_add')
+                ) + '?domain={}'.format(self.pk)
+            )
+        result.allow_tags = True
+        result.__name__ = 'request_' + operation
+        return result
+
+    request_change = request_factory('change')
+    request_deletion = request_factory('delete')
+
+
+class Domain(TimeTrackable, Owned, WithRequests):
     '''
     PowerDNS domains
     '''
@@ -222,6 +271,9 @@ class Domain(TimeTrackable, Owned):
     record_auto_ptr = ChoiceField(
         choices=AutoPtrOptions,
         default=AutoPtrOptions.ALWAYS,
+        help_text=_(
+            'Should A records have auto PTR by default'
+        )
     )
 
     class Meta:
@@ -248,20 +300,30 @@ class Domain(TimeTrackable, Owned):
         except Record.DoesNotExist:
             return
 
-    def add_record_url(self):
+    def add_record_url(self, authorised):
         """Return URL for 'Add record' action"""
+        model = 'record' if authorised else 'recordrequest'
         return (
-            reverse('admin:powerdns_record_add') +
+            reverse('admin:powerdns_{}_add'.format(model)) +
             '?domain={}'.format(self.pk)
         )
 
     def add_record_link(self):
-        return '<a href="{}">Add record</a>'.format(self.add_record_url())
+        authorised = get_current_user().has_perm(
+            'powerdns.change_domain', self
+        )
+        return '<a href="{}">{}</a>'.format(
+            self.add_record_url(authorised),
+            ('Add record' if authorised else 'Request record')
+        )
 
     add_record_link.allow_tags = True
 
     def extra_buttons(self):
-        yield (self.add_record_url(), 'Add record')
+        authorised = get_current_user().has_perm(
+            'powerdns.change_domain', self
+        )
+        yield (self.add_record_url(authorised), 'Add record')
 
 
 rules.add_perm('powerdns', rules.is_authenticated)
@@ -270,7 +332,7 @@ rules.add_perm('powerdns.change_domain', can_edit)
 rules.add_perm('powerdns.delete_domain', can_delete)
 
 
-class Record(TimeTrackable, Owned):
+class Record(TimeTrackable, Owned, WithRequests):
     '''
     PowerDNS DNS records
     '''
@@ -328,7 +390,7 @@ class Record(TimeTrackable, Owned):
     disabled = models.BooleanField(
         _("Disabled"),
         help_text=_(
-            "This field should not be used for actual DNS queries."
+            "This record should not be used for actual DNS queries."
             " Note - this field works for pdns >= 3.4.0"
         ),
         default=False,
@@ -527,6 +589,22 @@ class Record(TimeTrackable, Owned):
             depends_on=self,
             owner=self.owner,
         )
+
+    # def request_change(self):
+    #     if get_current_user().has_perm(
+    #         'powerdns.change_record', self
+    #     ):
+    #         return '<a href={}>Change</a>'.format(
+    #             reverse(
+    #                 'admin:powerdns_record_change', args=(self.pk,)
+    #             )
+    #         )
+    #     return '<a href="{}">Request change</a>'.format(
+    #         reverse(
+    #             'admin:powerdns_recordrequest_add'
+    #         ) + '?record={}'.format(self.pk)
+    #     )
+    # request_change.allow_tags = True
 
 rules.add_perm('powerdns.add_record', rules.is_authenticated)
 rules.add_perm('powerdns.change_record', can_edit)

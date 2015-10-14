@@ -1,14 +1,19 @@
 """Views and viewsets for DNSaaS API"""
 
+from django.core.urlresolvers import reverse
+from django.shortcuts import redirect
 from django.views.generic.base import TemplateView
 
 from powerdns.models import (
     CryptoKey,
+    DeleteRequest,
     Domain,
     DomainMetadata,
     DomainTemplate,
+    DomainRequest,
     Record,
     RecordTemplate,
+    RecordRequest,
     SuperMaster,
 )
 from rest_framework.filters import DjangoFilterBackend
@@ -104,3 +109,23 @@ class HomeView(TemplateView):
         return {
             'version': VERSION,
         }
+
+
+def accept_request_factory(request_model, model_name=None):
+    def result(request, pk):
+        request = request_model.objects.get(pk=pk)
+        domain = request.accept()
+        if model_name:
+            return redirect(
+                reverse(
+                    'admin:powerdns_{}_change'.format(model_name),
+                    args=(domain.pk,)
+                )
+            )
+        else:
+            return redirect(reverse('admin:index'))
+    return result
+
+accept_domain_request = accept_request_factory(DomainRequest, 'domain')
+accept_record_request = accept_request_factory(RecordRequest, 'record')
+accept_delete_request = accept_request_factory(DeleteRequest)

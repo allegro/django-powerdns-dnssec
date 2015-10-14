@@ -21,12 +21,17 @@ from powerdns.models.powerdns import (
     SuperMaster,
 )
 from powerdns.models.authorisations import Authorisation
-
 from rules.contrib.admin import ObjectPermissionsModelAdmin
+
 
 from powerdns.models.templates import (
     DomainTemplate,
     RecordTemplate,
+)
+from powerdns.models.requests import (
+    DeleteRequest,
+    DomainRequest,
+    RecordRequest,
 )
 from powerdns.utils import Owned, PermissionValidator
 
@@ -85,7 +90,7 @@ class CopyingAdmin(admin.ModelAdmin):
         from_pk = request.GET.get(self.from_field)
         if from_pk is not None:
             from_object = self.FromModel.objects.get(pk=from_pk)
-            for field in self.FromModel.copy_fields:
+            for field in self.CopyFieldsModel.copy_fields:
                 form.base_fields[field[len(self.field_prefix):]].initial = \
                     getattr(from_object, field)
         return form
@@ -119,7 +124,10 @@ class RecordAdmin(OwnedAdmin, CopyingAdmin):
         'ttl',
         'prio',
         'change_date',
+        'request_change',
+        'request_deletion',
     )
+    list_display_links = None
     list_filter = ('type', 'ttl', 'auth', 'domain', 'created', 'modified')
     list_per_page = 250
     save_on_top = True
@@ -152,6 +160,7 @@ class RecordAdmin(OwnedAdmin, CopyingAdmin):
         },
     }
     FromModel = Domain
+    CopyFieldsModel = Domain
     from_field = 'domain'
     field_prefix = 'record_'
 
@@ -168,7 +177,16 @@ class DomainMetadataInline(admin.TabularInline):
 
 class DomainAdmin(OwnedAdmin, CopyingAdmin):
     inlines = [DomainMetadataInline]
-    list_display = ('name', 'type', 'last_check', 'account', 'add_record_link')
+    list_display = (
+        'name',
+        'type',
+        'last_check',
+        'account',
+        'add_record_link',
+        'request_change',
+        'request_deletion',
+    )
+    list_display_links = None
     list_filter = _domain_filters + ('created', 'modified')
     list_per_page = 250
     save_on_top = True
@@ -176,6 +194,7 @@ class DomainAdmin(OwnedAdmin, CopyingAdmin):
     radio_fields = {'type': admin.HORIZONTAL}
     readonly_fields = ('notified_serial', 'created', 'modified')
     FromModel = DomainTemplate
+    CopyFieldsModel = DomainTemplate
     field_prefix = ''
     from_field = 'template'
 
@@ -228,17 +247,36 @@ class DomainTemplateAdmin(ForeignKeyAutocompleteAdmin):
     inlines = [RecordTemplateInline]
     list_display = ['name', 'add_domain_link']
 
+RECORD_LIST_FIELDS = (
+    'name',
+    'type',
+    'content',
+    'ttl',
+    'prio',
+)
+
 
 class RecordTemplateAdmin(ForeignKeyAutocompleteAdmin):
     form = RecordAdminForm
-    list_display = (
-        'name',
-        'type',
-        'content',
-        'domain_template',
-        'ttl',
-        'prio',
-    )
+    list_display = RECORD_LIST_FIELDS
+
+
+class DomainRequestForm(autocomplete_light.ModelForm):
+    class Meta:
+        widgets = {
+            'state': HiddenInput(),
+            'owner': HiddenInput(),
+        }
+
+
+class DomainRequestAdmin(CopyingAdmin):
+    form = DomainRequestForm
+    list_display = ['name']
+    from_field = 'domain'
+    FromModel = Domain
+    CopyFieldsModel = DomainRequest
+    field_prefix = ''
+    readonly_fields = ['key']
 
 
 class AuthorisationForm(autocomplete_light.ModelForm):
@@ -266,6 +304,34 @@ class AuthorisationAdmin(ObjectPermissionsModelAdmin):
         return data
 
 
+class DeleteRequestForm(ModelForm):
+    class Meta:
+        model = DeleteRequest
+        fields = [
+            'owner',
+            'target_id',
+            'content_type',
+            'key',
+        ]
+        widgets = {
+            'owner': HiddenInput(),
+            'key': HiddenInput(),
+        }
+
+
+class DeleteRequestAdmin(ObjectPermissionsModelAdmin):
+    form = DeleteRequestForm
+    fields = ['owner', 'target_id', 'content_type']
+
+
+class RecordRequestAdmin(CopyingAdmin):
+    list_display = RECORD_LIST_FIELDS
+    from_field = 'record'
+    FromModel = Record
+    CopyFieldsModel = RecordRequest
+    field_prefix = ''
+
+
 admin.site.register(Domain, DomainAdmin)
 admin.site.register(Record, RecordAdmin)
 admin.site.register(SuperMaster, SuperMasterAdmin)
@@ -274,3 +340,6 @@ admin.site.register(CryptoKey, CryptoKeyAdmin)
 admin.site.register(DomainTemplate, DomainTemplateAdmin)
 admin.site.register(RecordTemplate, RecordTemplateAdmin)
 admin.site.register(Authorisation, AuthorisationAdmin)
+admin.site.register(DomainRequest, DomainRequestAdmin)
+admin.site.register(RecordRequest, RecordRequestAdmin)
+admin.site.register(DeleteRequest, DeleteRequestAdmin)

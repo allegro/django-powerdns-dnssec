@@ -2,6 +2,7 @@
 
 from pkg_resources import working_set, Requirement
 
+import rules
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericRelation
 from django.core.mail import send_mail
@@ -13,8 +14,6 @@ from dj.choices import Choices
 
 
 VERSION = working_set.find(Requirement.parse('django-powerdns-dnssec')).version
-
-import rules
 
 
 # Due to the idiotic way permissions work in admin, we need to give users
@@ -37,6 +36,7 @@ def is_authorised(user, object_):
         authorisation.authorised
         for authorisation in object_.authorisations.all()
     )
+    return not object_ or object_.owner == user
 
 
 class TimeTrackable(models.Model):
@@ -138,3 +138,44 @@ DOMAIN_TYPE = (
     ('NATIVE', 'NATIVE'),
     ('SLAVE', 'SLAVE'),
 )
+
+
+def format_recursive(template, arguments):
+    """
+    Performs str.format on the template in a recursive fashion iterating over
+    lists and dictionary values
+
+    >>> template = {
+    ... 'a': 'Value {a}',
+    ... 'b': {
+    ...     'a': 'Value {a}',
+    ...     'b': 'Value {b}',
+    ... },
+    ... 'c': ['Value {a}', 'Value {b}'],
+    ... 'd': 10,
+    ... }
+    >>> arguments = {
+    ... 'a': 'A',
+    ... 'b': 'B',
+    ... }
+    >>> result = format_recursive(template, arguments)
+    >>> result['a']
+    'Value A'
+    >>> result['b']['b']
+    'Value B'
+    >>> result['c'][0]
+    'Value A'
+    >>> result['d']
+    10
+    """
+    if isinstance(template, str):
+        return template.format(**arguments)
+    elif isinstance(template, dict):
+        return {
+            k: format_recursive(v, arguments)
+            for (k, v) in template.items()
+        }
+    elif isinstance(template, list):
+        return [format_recursive(v, arguments) for v in template]
+    else:
+        return template
