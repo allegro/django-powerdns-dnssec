@@ -136,6 +136,7 @@ INSTALLED_APPS = (
     'rest_framework_swagger',
     'powerdns',
     'dnsaas',
+    'autocomplete_light',
     'django.contrib.admin',
     'django.contrib.admindocs',
     'rules',

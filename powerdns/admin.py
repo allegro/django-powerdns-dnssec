@@ -1,8 +1,16 @@
+import autocomplete_light
 import rules
+from django.contrib.auth import get_user_model
 from django.contrib import admin
 from django.contrib.admin.widgets import AdminRadioSelect
 from django.db import models
-from django.forms import NullBooleanSelect, ModelForm, ValidationError
+from django.forms import (
+    HiddenInput,
+    NullBooleanSelect,
+    ModelForm,
+    ValidationError,
+    ModelChoiceField,
+)
 from django.utils.translation import ugettext_lazy as _
 from django_extensions.admin import ForeignKeyAutocompleteAdmin
 from powerdns.models.powerdns import (
@@ -12,6 +20,7 @@ from powerdns.models.powerdns import (
     Record,
     SuperMaster,
 )
+from powerdns.models.authorisations import Authorisation
 
 from rules.contrib.admin import ObjectPermissionsModelAdmin
 
@@ -232,6 +241,31 @@ class RecordTemplateAdmin(ForeignKeyAutocompleteAdmin):
     )
 
 
+class AuthorisationForm(autocomplete_light.ModelForm):
+    class Meta:
+        model = Authorisation
+        fields = [
+            'owner',
+            'authorised',
+            'target',
+        ]
+        autocomplete_fields = ['authorised', 'target']
+
+    owner = ModelChoiceField(
+        queryset=get_user_model().objects.all(),
+        widget=HiddenInput()
+    )
+
+
+class AuthorisationAdmin(ObjectPermissionsModelAdmin):
+    form = AuthorisationForm
+
+    def get_changeform_initial_data(self, request, *args, **kwargs):
+        data = super().get_changeform_initial_data(request, *args, **kwargs)
+        data['owner'] = request.user
+        return data
+
+
 admin.site.register(Domain, DomainAdmin)
 admin.site.register(Record, RecordAdmin)
 admin.site.register(SuperMaster, SuperMasterAdmin)
@@ -239,3 +273,4 @@ admin.site.register(DomainMetadata, DomainMetadataAdmin)
 admin.site.register(CryptoKey, CryptoKeyAdmin)
 admin.site.register(DomainTemplate, DomainTemplateAdmin)
 admin.site.register(RecordTemplate, RecordTemplateAdmin)
+admin.site.register(Authorisation, AuthorisationAdmin)

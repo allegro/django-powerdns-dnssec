@@ -50,6 +50,7 @@ setup(
     install_requires = [
         'Django>=1.8',
         'IPy>=0.82a',
+        'django-autocomplete-light>=2.2.10',
         'django-extensions>=1.5.5',
         'django-nose>=1.4',
         'dj.choices>=0.10.0',

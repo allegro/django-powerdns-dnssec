@@ -6,6 +6,8 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 
+from powerdns.models.authorisations import Authorisation
+
 from powerdns.tests.utils import (
     DomainFactory,
     RecordFactory,
@@ -72,6 +74,19 @@ class TestPermissions(TestCase):
         )
         self.assertEqual(request.status_code, 403)
 
+    def test_authorised_user_can_edit_other_domains(self):
+        """Normal user can edit domains she doesn't own if authorised."""
+        Authorisation.objects.create(
+            owner=self.superuser,
+            target=self.su_domain,
+            authorised=self.user
+        )
+        request = self.u_client.patch(
+            get_domain_url(self.su_domain),
+            {'type': 'NATIVE'},
+        )
+        self.assertEqual(request.status_code, 200)
+
     def test_user_can_edit_her_domains(self):
         """Normal user can edit domains she owns."""
         request = self.u_client.patch(
@@ -121,6 +136,19 @@ class TestPermissions(TestCase):
             {'content': '192.168.1.3'},
         )
         self.assertEqual(request.status_code, 403)
+
+    def test_authorised_user_can_edit_other_records(self):
+        """Normal user can edit record not owned by herself if authorised."""
+        Authorisation.objects.create(
+            owner=self.superuser,
+            target=self.su_record,
+            authorised=self.user,
+        )
+        request = self.u_client.patch(
+            get_record_url(self.su_record),
+            {'content': '192.168.1.3'},
+        )
+        self.assertEqual(request.status_code, 200)
 
     def test_u_can_edit_her_records(self):
         """Normal user can edit record not owned by herself."""

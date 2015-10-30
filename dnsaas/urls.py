@@ -1,4 +1,5 @@
 
+import autocomplete_light.shortcuts as al
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
 from django.conf import settings
@@ -17,10 +18,10 @@ from powerdns.views import (
     RecordTemplateViewSet,
 )
 
-admin.autodiscover()
-
 title = settings.SITE_TITLE
 title_v = ' '.join([title, VERSION])
+
+al.autodiscover()
 
 admin.site.site_title = title
 admin.site.site_header = title_v
@@ -43,4 +44,5 @@ urlpatterns = patterns(
     url(r'^api/', include(router.urls)),
     url(r'^api-token-auth/', obtain_auth_token),
     url(r'^api-docs/', include('rest_framework_swagger.urls')),
+    url(r'^autocomplete/', include('autocomplete_light.urls')),
 )

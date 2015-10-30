@@ -10,6 +10,7 @@ from django.core.validators import validate_ipv4_address, RegexValidator
 from django.db import models, transaction
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
+from django.utils.deconstruct import deconstructible
 from django.utils.translation import ugettext_lazy as _
 from django.core.urlresolvers import reverse
 from IPy import IP
@@ -20,7 +21,9 @@ from powerdns.utils import (
     Owned,
     TimeTrackable,
     to_reverse,
+    no_object,
     is_owner,
+    is_authorised,
     UserBasedValidator
 )
 
@@ -45,6 +48,10 @@ DOMAIN_NAME_RECORDS = ('CNAME', 'MX', 'NAPTR', 'NS', 'PTR')
 # would be unrecoverable. Thus this little helper function.
 
 DEFAULT_REVERSE_DOMAIN_TEMPLATE = None
+
+
+can_edit = rules.is_superuser | no_object | is_owner | is_authorised
+can_delete = rules.is_superuser | is_owner | is_authorised
 
 
 def get_default_reverse_domain():
@@ -135,6 +142,7 @@ def validate_ipv6_address(value):
         )
 
 
+@deconstructible
 class SubDomainValidator(UserBasedValidator):
 
     def __call__(self, domain_name):
@@ -147,7 +155,7 @@ class SubDomainValidator(UserBasedValidator):
                 super_domain = Domain.objects.get(name=super_domain)
             except Domain.DoesNotExist:
                 continue
-            if is_owner(self.user, super_domain):
+            if can_edit(self.user, super_domain):
                 # ALLOW - this user owns a superdomain
                 return domain_name
             else:
@@ -255,8 +263,8 @@ class Domain(TimeTrackable, Owned):
 
 rules.add_perm('powerdns', rules.is_authenticated)
 rules.add_perm('powerdns.add_domain', rules.is_authenticated)
-rules.add_perm('powerdns.change_domain', (is_owner | rules.is_superuser))
-rules.add_perm('powerdns.delete_domain', (is_owner | rules.is_superuser))
+rules.add_perm('powerdns.change_domain', can_edit)
+rules.add_perm('powerdns.delete_domain', can_delete)
 
 
 class Record(TimeTrackable, Owned):
@@ -518,8 +526,8 @@ class Record(TimeTrackable, Owned):
         )
 
 rules.add_perm('powerdns.add_record', rules.is_authenticated)
-rules.add_perm('powerdns.change_record', (is_owner | rules.is_superuser))
-rules.add_perm('powerdns.delete_record', (is_owner | rules.is_superuser))
+rules.add_perm('powerdns.change_record', can_edit)
+rules.add_perm('powerdns.delete_record', can_delete)
 
 
 # When we delete a record, the zone changes, but there no change_date is
