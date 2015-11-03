@@ -59,6 +59,7 @@ setup(
         'django-rest-swagger>=0.3.2',
         'django-filter>=0.10.0',
         'docutils>=0.12',
+        'rules>=0.4',
     ],
     zip_safe = False,  # if only because of the readme file
 )

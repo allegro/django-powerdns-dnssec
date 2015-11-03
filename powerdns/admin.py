@@ -1,3 +1,4 @@
+import rules
 from django.contrib import admin
 from django.contrib.admin.widgets import AdminRadioSelect
 from django.db import models
@@ -12,10 +13,13 @@ from powerdns.models.powerdns import (
     SuperMaster,
 )
 
+from rules.contrib.admin import ObjectPermissionsModelAdmin
+
 from powerdns.models.templates import (
     DomainTemplate,
     RecordTemplate,
 )
+from powerdns.utils import Owned, PermissionValidator
 
 
 class NullBooleanRadioSelect(NullBooleanSelect, AdminRadioSelect):
@@ -52,11 +56,17 @@ else:
 
 
 class RecordAdminForm(ModelForm):
+
     def clean_type(self):
         type = self.cleaned_data['type']
         if not type:
             raise ValidationError(_("Record type is required"))
         return type
+
+    def clean_domain(self):
+        validator = PermissionValidator('powerdns.change_domain')
+        validator.user = self.user
+        return validator(self.cleaned_data['domain'])
 
 
 class CopyingAdmin(admin.ModelAdmin):
@@ -72,19 +82,34 @@ class CopyingAdmin(admin.ModelAdmin):
         return form
 
 
-class OwnedAdmin(admin.ModelAdmin):
+class OwnedAdmin(ForeignKeyAutocompleteAdmin, ObjectPermissionsModelAdmin):
     """Admin for models with owner field"""
+
     def save_model(self, request, object_, form, change):
         if object_.owner is None:
             object_.owner = request.user
         object_.email_owner(request.user)
         super(OwnedAdmin, self).save_model(request, object_, form, change)
 
+    def get_related_filter(self, model, request):
+        return super(OwnedAdmin, self).get_related_filter(model, request)
+        user = request.user
+        if not issubclass(model, Owned) or rules.is_superuser(user):
+            return super(OwnedAdmin, self).get_related_filter(model, request)
+        return models.Q(owner=user)
 
-class RecordAdmin(ForeignKeyAutocompleteAdmin, OwnedAdmin, CopyingAdmin):
+
+class RecordAdmin(OwnedAdmin, CopyingAdmin):
     form = RecordAdminForm
     list_display = (
-        'name', 'type', 'content', 'domain', 'ttl', 'prio', 'change_date'
+        'name',
+        'type',
+        'content',
+        'domain',
+        'owner',
+        'ttl',
+        'prio',
+        'change_date',
     )
     list_filter = ('type', 'ttl', 'auth', 'domain', 'created', 'modified')
     list_per_page = 250
@@ -120,6 +145,11 @@ class RecordAdmin(ForeignKeyAutocompleteAdmin, OwnedAdmin, CopyingAdmin):
     FromModel = Domain
     from_field = 'domain'
     field_prefix = 'record_'
+
+    def get_form(self, request, *args, **kwargs):
+        form = super().get_form(request, *args, **kwargs)
+        form.user = request.user
+        return form
 
 
 class DomainMetadataInline(admin.TabularInline):
