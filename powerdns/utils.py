@@ -3,6 +3,7 @@
 from pkg_resources import working_set, Requirement
 
 from django.conf import settings
+from django.contrib.contenttypes.fields import GenericRelation
 from django.core.mail import send_mail
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -15,9 +16,26 @@ VERSION = working_set.find(Requirement.parse('django-powerdns-dnssec')).version
 import rules
 
 
+# Due to the idiotic way permissions work in admin, we need to give users
+# generic 'change' view (so they see the changelist), bo no generic 'delete'
+# view (so they can't bulk-delete).
+
+@rules.predicate
+def no_object(user, object_):
+    return object_ is None
+
+
 @rules.predicate
 def is_owner(user, object_):
-    return not object_ or object_.owner == user
+    return object_ and object_.owner == user
+
+
+@rules.predicate
+def is_authorised(user, object_):
+    return object_ and user in (
+        authorisation.authorised
+        for authorisation in object_.authorisations.all()
+    )
 
 
 class TimeTrackable(models.Model):
@@ -38,6 +56,10 @@ class Owned(models.Model):
     of this model, but can be overridden."""
 
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True)
+    authorisations = GenericRelation(
+        'Authorisation',
+        object_id_field='target_id'
+    )
 
     class Meta:
         abstract = True
