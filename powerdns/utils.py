@@ -21,6 +21,12 @@ class TimeTrackable(models.Model):
         verbose_name=_('last modified'), auto_now=True, editable=False,
     )
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._initial_values = {
+            k: v for k, v in self.__dict__.items() if not k.startswith('_')
+        }
+
     class Meta:
         abstract = True
 
