@@ -3,6 +3,7 @@ import hashlib
 import sys
 import time
 
+import rules
 from dj.choices.fields import ChoiceField
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -10,11 +11,11 @@ from django.core.validators import validate_ipv4_address, RegexValidator
 from django.db import models, transaction
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
-from django.utils.deconstruct import deconstructible
 from django.utils.translation import ugettext_lazy as _
 from django.core.urlresolvers import reverse
+from django.utils.deconstruct import deconstructible
 from IPy import IP
-import rules
+from threadlocals.threadlocals import get_current_user
 
 from powerdns.utils import (
     AutoPtrOptions,
@@ -24,7 +25,6 @@ from powerdns.utils import (
     no_object,
     is_owner,
     is_authorised,
-    UserBasedValidator
 )
 
 
@@ -142,11 +142,14 @@ def validate_ipv6_address(value):
         )
 
 
+# This is a class for historical reasons in order not to break migrations
 @deconstructible
-class SubDomainValidator(UserBasedValidator):
-
+class SubDomainValidator():
     def __call__(self, domain_name):
-        if rules.is_superuser(self.user):
+        """Validates if a not authorised user tries to subdomain a domain she
+        can't edit"""
+        user = get_current_user()
+        if rules.is_superuser(user):
             return domain_name
         domain_bits = domain_name.split('.')
         for i in range(-len(domain_bits), 0):
@@ -155,7 +158,7 @@ class SubDomainValidator(UserBasedValidator):
                 super_domain = Domain.objects.get(name=super_domain)
             except Domain.DoesNotExist:
                 continue
-            if can_edit(self.user, super_domain):
+            if can_edit(user, super_domain):
                 # ALLOW - this user owns a superdomain
                 return domain_name
             else:
