@@ -59,6 +59,7 @@ setup(
         'djangorestframework>=3.1.2',
         'django-rest-swagger>=0.3.2',
         'django-filter>=0.10.0',
+        'django-threadlocals>=0.8',
         'docutils>=0.12',
         'rules>=0.4',
     ],

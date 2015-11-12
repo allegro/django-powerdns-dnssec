@@ -8,6 +8,7 @@ from django.core.mail import send_mail
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from threadlocals.threadlocals import get_current_user
 from dj.choices import Choices
 
 
@@ -102,14 +103,7 @@ class Owned(models.Model):
             )
 
 
-class UserBasedValidator():
-    """Generic validator which logic depends on the current user"""
-
-    def set_context(self, field):
-        self.user = field.parent.context['request'].user
-
-
-class PermissionValidator(UserBasedValidator):
+class PermissionValidator():
     """A validator that only allows objects that user has permission for"""
 
     def __init__(self, permission, *args, **kwargs):
@@ -117,7 +111,7 @@ class PermissionValidator(UserBasedValidator):
         super().__init__(*args, **kwargs)
 
     def __call__(self, object_):
-        if not self.user.has_perm(self.permission, object_):
+        if not get_current_user().has_perm(self.permission, object_):
             raise ValidationError("You don't have permission to use this")
         return object_
 
