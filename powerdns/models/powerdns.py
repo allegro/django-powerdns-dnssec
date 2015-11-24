@@ -210,7 +210,10 @@ class WithRequests(models.Model):
             return '<a href="{}">Request change</a>'.format(
                 reverse(
                     fmt('admin:powerdns_{obj}request_add')
-                ) + '?domain={}'.format(self.pk)
+                ) + '?{}={}'.format(
+                    type(self)._meta.object_name.lower(),
+                    self.pk
+                )
             )
         result.allow_tags = True
         result.__name__ = 'request_' + operation
