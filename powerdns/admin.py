@@ -22,6 +22,7 @@ from powerdns.models.powerdns import (
 )
 from powerdns.models.authorisations import Authorisation
 from rules.contrib.admin import ObjectPermissionsModelAdmin
+from threadlocals.threadlocals import get_current_user
 
 
 from powerdns.models.templates import (
@@ -33,7 +34,7 @@ from powerdns.models.requests import (
     DomainRequest,
     RecordRequest,
 )
-from powerdns.utils import Owned, PermissionValidator
+from powerdns.utils import Owned, PermissionValidator, is_owner
 
 
 class NullBooleanRadioSelect(NullBooleanSelect, AdminRadioSelect):
@@ -293,6 +294,13 @@ class AuthorisationForm(autocomplete_light.ModelForm):
         queryset=get_user_model().objects.all(),
         widget=HiddenInput()
     )
+
+    def clean_target(self):
+        target = self.cleaned_data['target']
+        user = get_current_user()
+        if not (user.is_superuser or is_owner(user, target)):
+            raise ValidationError(_("You cannot authorize for this"))
+        return target
 
 
 class AuthorisationAdmin(ObjectPermissionsModelAdmin):
