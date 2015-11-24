@@ -207,4 +207,6 @@ OWNER_NOTIFICATIONS = {
 
 SITE_TITLE = 'Django powerdns'
 
-from settings_local import *  # noqa
+
+if not TESTING:
+    from settings_local import *  # noqa

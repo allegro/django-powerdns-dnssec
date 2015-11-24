@@ -8,6 +8,9 @@ from rest_framework.authtoken.views import obtain_auth_token
 
 from powerdns.utils import VERSION
 from powerdns.views import (
+    accept_domain_request,
+    accept_record_request,
+    accept_delete_request,
     CryptoKeyViewSet,
     DomainMetadataViewSet,
     DomainViewSet,
@@ -45,4 +48,19 @@ urlpatterns = patterns(
     url(r'^api-token-auth/', obtain_auth_token),
     url(r'^api-docs/', include('rest_framework_swagger.urls')),
     url(r'^autocomplete/', include('autocomplete_light.urls')),
+    url(
+        r'^accept-domain/(?P<pk>[0-9]+)$',
+        accept_domain_request,
+        name='accept_domain'
+    ),
+    url(
+        r'^accept-record/(?P<pk>[0-9]+)$',
+        accept_record_request,
+        name='accept_record'
+    ),
+    url(
+        r'^accept-delete/(?P<pk>[0-9]+)$',
+        accept_delete_request,
+        name='accept_delete'
+    ),
 )
