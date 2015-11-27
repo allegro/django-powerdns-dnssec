@@ -74,12 +74,16 @@ rules.add_perm('powerdns.add_deleterequest', rules.is_authenticated)
 class ChangeCreateRequest(Request):
     """Abstract change/create request"""
 
+    ignore_fields = {'owner', 'created', 'modified'}
+
     class Meta:
         abstract = True
 
     def accept(self):
         object_ = self.get_object()
         for field_name in type(self).copy_fields:
+            if field_name in self.ignore_fields:
+                continue
             setattr(object_, field_name, getattr(self, field_name))
         object_.save()
         self.state = RequestStates.ACCEPTED
@@ -174,7 +178,7 @@ class DomainRequest(ChangeCreateRequest):
         if self.domain is not None:
             return self.domain
         else:
-            return Domain()
+            return Domain(owner=self.owner)
 
 
 # rules.add_perm('powerdns', rules.is_authenticated)
@@ -272,7 +276,7 @@ class RecordRequest(ChangeCreateRequest):
         if self.record is not None:
             return self.record
         else:
-            return Record(domain=self.domain)
+            return Record(domain=self.domain, owner=self.owner)
 
 
 rules.add_perm('powerdns.add_recordrequest', rules.is_authenticated)
