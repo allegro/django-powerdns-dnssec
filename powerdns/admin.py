@@ -332,7 +332,16 @@ class DeleteRequestAdmin(ObjectPermissionsModelAdmin):
     fields = ['owner', 'target_id', 'content_type']
 
 
+class RecordRequestForm(autocomplete_light.ModelForm):
+    class Meta:
+        widgets = {
+            'state': HiddenInput(),
+            'owner': HiddenInput(),
+        }
+
+
 class RecordRequestAdmin(CopyingAdmin):
+    form = RecordRequestForm
     list_display = RECORD_LIST_FIELDS
     from_field = 'record'
     FromModel = Record
