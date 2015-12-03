@@ -79,6 +79,13 @@ class RecordAdminForm(ModelForm):
         return type
 
     def clean_domain(self):
+        if (
+            self.instance.pk and
+            self.instance.domain == self.cleaned_data['domain']
+        ):
+            # Domain unchanged. Maybe user was assigned the record in a domain
+            # She doesn't own.
+            return self.cleaned_data['domain']
         validator = PermissionValidator('powerdns.change_domain')
         validator.user = self.user
         return validator(self.cleaned_data['domain'])
