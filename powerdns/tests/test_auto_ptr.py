@@ -33,7 +33,7 @@ class TestAutoPtr(TestCase):
             ),
             domain_template = self.reverse_template,
         )
-        self.alt_soar_record = RecordTemplateFactory(
+        self.alt_soa_record = RecordTemplateFactory(
             type='SOA',
             name='{domain-name}',
             content=(
@@ -46,6 +46,7 @@ class TestAutoPtr(TestCase):
             name='example.com',
             template=None,
             reverse_template=None,
+            type='NATIVE',
         )
 
     def test_default_ptr_created(self):
@@ -59,6 +60,7 @@ class TestAutoPtr(TestCase):
             owner=self.user,
         )
         domain = Domain.objects.get(name='1.168.192.in-addr.arpa')
+        self.assertEqual(domain.type, 'NATIVE')
         self.assertTrue(domain.get_soa().content.endswith('600'))
         assert_does_exist(
             Record,

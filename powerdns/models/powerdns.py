@@ -570,10 +570,13 @@ class Record(TimeTrackable, Owned, WithRequests):
         if self.auto_ptr == AutoPtrOptions.ALWAYS:
             domain, created = Domain.objects.get_or_create(
                 name=domain_name,
-                defaults={'template': (
-                    self.domain.reverse_template or
-                    get_default_reverse_domain()
-                )}
+                defaults={
+                    'template': (
+                        self.domain.reverse_template or
+                        get_default_reverse_domain()
+                    ),
+                    'type': self.domain.type,
+                }
             )
         elif self.auto_ptr == AutoPtrOptions.ONLY_IF_DOMAIN:
             try:
