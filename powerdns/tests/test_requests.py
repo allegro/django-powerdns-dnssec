@@ -1,5 +1,6 @@
 import unittest
 
+from threadlocals.threadlocals import set_current_user
 from django.contrib.auth.models import User
 
 from powerdns.models.powerdns import Domain, Record
@@ -35,10 +36,10 @@ class TestRequests(unittest.TestCase):
             Model.objects.all().delete()
 
     def test_subdomain_creation(self):
+        set_current_user(self.user1)
         request = DomainRequest.objects.create(
             parent_domain=self.domain,
             name='subdomain.example.com',
-            owner=self.user1,
         )
         request.accept()
         assert_does_exist(

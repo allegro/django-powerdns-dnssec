@@ -50,6 +50,11 @@ class Request(Owned):
         if get_current_user().has_perm(perm, self):
             yield (reverse(self.view, kwargs={'pk': self.pk}), 'Accept')
 
+    def save(self, *args, **kwargs):
+        if self.owner is None:
+            self.owner = get_current_user()
+        super().save(*args, **kwargs)
+
 
 class DeleteRequest(Request):
     """A request for object deletion"""
