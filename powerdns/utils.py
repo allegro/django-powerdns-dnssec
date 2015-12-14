@@ -51,7 +51,8 @@ class TimeTrackable(models.Model):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._initial_values = {
-            k: v for k, v in self.__dict__.items() if not k.startswith('_')
+            field.name: getattr(self, field.name, None)
+            for field in self._meta.fields
         }
 
     class Meta:
