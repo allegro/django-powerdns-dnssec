@@ -38,6 +38,11 @@ class TestPermissions(TestCase):
             name='su.example.com',
             owner=self.superuser,
         )
+        self.unrestricted_domain = DomainFactory(
+            name='unrestricted.example.com',
+            owner=self.superuser,
+            unrestricted=True,
+        )
         self.u_domain = DomainFactory(
             name='u.example.com',
             owner=self.user,
@@ -184,6 +189,21 @@ class TestPermissions(TestCase):
                 'content': '192.168.1.4',
                 'type': 'A',
                 'domain': get_domain_url(self.u_domain),
+                'auto_ptr': AutoPtrOptions.NEVER.id,
+            },
+        )
+        self.assertEqual(request.status_code, 201)
+
+    def test_user_can_create_records_in_unrestricted_domain(self):
+        """Normal user can create records in domain that is marked as
+        'unrestricted'."""
+        request = self.u_client.post(
+            reverse('record-list'),
+            {
+                'name': 'site.u.example.com',
+                'content': '192.168.1.4',
+                'type': 'A',
+                'domain': get_domain_url(self.unrestricted_domain),
                 'auto_ptr': AutoPtrOptions.NEVER.id,
             },
         )

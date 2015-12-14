@@ -68,6 +68,7 @@ class TestRequests(unittest.TestCase):
             type='CNAME',
             name='site.example.com',
             content='www.example.com',
+            owner=self.user1
         )
         request.accept()
         assert_does_exist(Record, content='www.example.com')

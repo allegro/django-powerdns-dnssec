@@ -31,6 +31,16 @@ class DomainTemplate(models.Model):
         _("type"), max_length=6, blank=True, null=True,
         choices=Domain.DOMAIN_TYPE, help_text=_("Record type"),
     )
+    unrestricted = models.BooleanField(
+        _('Unrestricted'),
+        null=False,
+        default=False,
+        help_text=_(
+            "Can users that are not owners of this domain add records"
+            "to it without owner's permission?"
+        )
+    )
+
     record_auto_ptr = ChoiceField(
         choices=AutoPtrOptions,
         default=AutoPtrOptions.ALWAYS,
