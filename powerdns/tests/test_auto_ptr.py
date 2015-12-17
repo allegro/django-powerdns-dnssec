@@ -49,6 +49,10 @@ class TestAutoPtr(TestCase):
             type='NATIVE',
         )
 
+    def tearDown(self):
+        for Model in [Domain, Record, User]:
+            Model.objects.all().delete()
+
     def test_default_ptr_created(self):
         """A PTR record is created for an A record with default template"""
         RecordFactory(

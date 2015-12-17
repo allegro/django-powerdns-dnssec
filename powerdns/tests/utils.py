@@ -9,6 +9,7 @@ from rest_framework.test import APIClient
 
 from powerdns.models.powerdns import Record, Domain
 from powerdns.models.templates import RecordTemplate, DomainTemplate
+from powerdns.utils import AutoPtrOptions
 
 
 class DomainFactory(DjangoModelFactory):
@@ -35,7 +36,10 @@ class RecordTestCase(TestCase):
     """Base class for tests on records."""
 
     def setUp(self):
-        self.domain = DomainFactory(name='example.com', template=None)
+        self.domain = DomainFactory(
+            name='example.com',
+            template=None,
+        )
 
     def validate(self, **values):
         """

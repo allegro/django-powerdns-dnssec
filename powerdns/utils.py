@@ -117,6 +117,19 @@ class PermissionValidator():
         return object_
 
 
+class DomainForRecordValidator(PermissionValidator):
+    """A validator for 'domain' field in record forms and API"""
+    def __init__(self, *args, **kwargs):
+        super().__init__('powerdns.change_domain', *args, **kwargs)
+    
+
+    def __call__(self, object_):
+        if object_.unrestricted:
+            return object_
+        else:
+            return super().__call__(object_)
+
+
 def to_reverse(ip):
     """
     Given an ip address it will return a tuple of (domain, number)

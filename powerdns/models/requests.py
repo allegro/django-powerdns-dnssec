@@ -174,6 +174,16 @@ class DomainRequest(ChangeCreateRequest):
             'Should A records have auto PTR by default'
         )
     )
+    unrestricted = models.BooleanField(
+        _('Unrestricted'),
+        null=False,
+        default=False,
+        help_text=_(
+            "Can users that are not owners of this domain add records"
+            "to it without owner's permission?"
+        )
+    )
+
     view = 'accept_domain'
 
     def __str__(self):

@@ -34,7 +34,7 @@ from powerdns.models.requests import (
     DomainRequest,
     RecordRequest,
 )
-from powerdns.utils import Owned, PermissionValidator, is_owner
+from powerdns.utils import Owned, DomainForRecordValidator, is_owner
 
 
 class NullBooleanRadioSelect(NullBooleanSelect, AdminRadioSelect):
@@ -86,7 +86,7 @@ class RecordAdminForm(ModelForm):
             # Domain unchanged. Maybe user was assigned the record in a domain
             # She doesn't own.
             return self.cleaned_data['domain']
-        validator = PermissionValidator('powerdns.change_domain')
+        validator = DomainForRecordValidator()
         validator.user = self.user
         return validator(self.cleaned_data['domain'])
 

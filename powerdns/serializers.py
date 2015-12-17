@@ -15,7 +15,7 @@ from rest_framework.serializers import(
     HyperlinkedRelatedField,
     SlugRelatedField,
 )
-from powerdns.utils import PermissionValidator
+from powerdns.utils import DomainForRecordValidator
 
 
 class OwnerSerializer(HyperlinkedModelSerializer):
@@ -44,7 +44,7 @@ class RecordSerializer(OwnerSerializer):
     domain = HyperlinkedRelatedField(
         queryset=Domain.objects.all(),
         view_name='domain-detail',
-        validators=[PermissionValidator('powerdns.change_domain')],
+        validators=[DomainForRecordValidator()],
     )
 
 

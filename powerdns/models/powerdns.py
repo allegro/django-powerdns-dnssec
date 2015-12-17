@@ -279,6 +279,16 @@ class Domain(TimeTrackable, Owned, WithRequests):
         )
     )
 
+    unrestricted = models.BooleanField(
+        _('Unrestricted'),
+        null=False,
+        default=False,
+        help_text=_(
+            "Can users that are not owners of this domain add records"
+            "to it without owner's permission?"
+        )
+    )
+
     class Meta:
         db_table = u'domains'
         verbose_name = _("domain")
@@ -314,7 +324,7 @@ class Domain(TimeTrackable, Owned, WithRequests):
     def add_record_link(self):
         authorised = get_current_user().has_perm(
             'powerdns.change_domain', self
-        )
+        ) or self.unrestricted
         return '<a href="{}">{}</a>'.format(
             self.add_record_url(authorised),
             ('Add record' if authorised else 'Request record')

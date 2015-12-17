@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from django.core import mail
 from django.test import TestCase
 
+from powerdns.models.powerdns import Domain, Record
 from powerdns.tests.utils import DomainFactory, user_client
 
 
@@ -21,6 +22,10 @@ class TestOwnershipBase(TestCase):
         )
         self.client = user_client(self.user1)
         mail.outbox = []
+
+    def tearDown(self):
+        for Model in [Domain, Record, User]:
+            Model.objects.all().delete()
 
     def assertOwner(self, request, username, mailed):
         """Assert the owner in returned data is username and he
