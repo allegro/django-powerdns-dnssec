@@ -8,7 +8,7 @@ from dj.choices.fields import ChoiceField
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
-from django.core.validators import validate_ipv4_address, RegexValidator
+from django.core.validators import RegexValidator
 from django.db import models, transaction
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
@@ -24,8 +24,10 @@ from powerdns.utils import (
     is_owner,
     no_object,
     Owned,
+    RecordLike,
     TimeTrackable,
     to_reverse,
+    validate_domain_name,
 )
 
 
@@ -41,8 +43,6 @@ AUX_RECORD_TYPES = ('AFSDB', 'CERT', 'LOC', 'RP', 'SPF', 'SSHFP')
 RECORD_TYPES = sorted(set(
     BASIC_RECORD_TYPES + DNSSEC_RECORD_TYPES + AUX_RECORD_TYPES
 ))
-
-DOMAIN_NAME_RECORDS = ('CNAME', 'MX', 'NAPTR', 'NS', 'PTR')
 
 
 # If we try get the domain in the global scope then removing it
@@ -85,62 +85,6 @@ b32_trans = maketrans_func(
 # Validator for the domain names only in RFC-1035
 # PowerDNS considers the whole zone to be invalid if any of the records end
 # with a period so this custom validator is used to catch them
-
-validate_domain_name = RegexValidator(
-    r'^(\*\.)?([_A-Za-z0-9-]+\.)*([A-Za-z0-9])+$'
-)
-validate_dn_optional_dot = RegexValidator(
-    '^[A-Za-z0-9.-]*$'
-)
-
-
-validate_time = RegexValidator('^[0-9]+$')
-
-
-def validate_soa(value):
-    """Validator for a correct SOA record"""
-    try:
-        name, email, sn, refresh, retry, expiry, nx = value.split()
-    except ValueError:
-        raise ValidationError(_('Enter a valid SOA record'))
-    for subvalue, field in [
-        (name, 'Domain name'),
-        (email, 'e-mail'),
-    ]:
-        try:
-            validate_dn_optional_dot(subvalue)
-        except ValidationError:
-            raise ValidationError(
-                _('Incorrect {}. Should be a valid domain name.'.format(
-                    field
-                ))
-            )
-    for subvalue, field in [
-        (sn, 'Serial'),
-        (refresh, 'Refresh rate'),
-        (retry, 'Retry rate'),
-        (expiry, 'Expiry time'),
-        (nx, 'Negative resp. time'),
-    ]:
-        try:
-            validate_time(subvalue)
-        except ValidationError:
-            raise ValidationError(
-                _('Incorrect {}. Should be a valid domain name.'.format(
-                    field
-                ))
-            )
-
-
-def validate_ipv6_address(value):
-    try:
-        ip = IP(value)
-    except ValueError:
-        ip = None
-    if not ip or ip.version() == 4:
-        raise ValidationError(
-            _(u'Enter a valid IPv6 address.'), code='invalid',
-        )
 
 
 # This is a class for historical reasons in order not to break migrations
@@ -345,7 +289,7 @@ rules.add_perm('powerdns.change_domain', can_edit)
 rules.add_perm('powerdns.delete_domain', can_delete)
 
 
-class Record(TimeTrackable, Owned, WithRequests):
+class Record(TimeTrackable, Owned, RecordLike, WithRequests):
     '''
     PowerDNS DNS records
     '''
@@ -355,7 +299,10 @@ class Record(TimeTrackable, Owned, WithRequests):
         verbose_name=_("domain"),
     )
     name = models.CharField(
-        _("name"), max_length=255, blank=True, null=True,
+        _("name"),
+        max_length=255,
+        blank=False,
+        null=False,
         validators=[validate_domain_name],
         help_text=_("Actual name of a record. Must not end in a '.' and be"
                     " fully qualified - it is not relative to the name of the"
@@ -514,16 +461,6 @@ class Record(TimeTrackable, Owned, WithRequests):
         s.update(salt)
         return s.digest()
 
-    def clean_content_field(self):
-        """Perform a type-dependent validation of content field"""
-        if self.type == 'A':
-            validate_ipv4_address(self.content)
-        elif self.type == 'AAAA':
-            validate_ipv6_address(self.content)
-        elif self.type == 'SOA':
-            validate_soa(self.content)
-        elif self.type in DOMAIN_NAME_RECORDS:
-            validate_domain_name(self.content)
 
     def force_case(self):
         """Force the name and content case to upper and lower respectively"""
@@ -555,12 +492,6 @@ class Record(TimeTrackable, Owned, WithRequests):
                 type='CNAME',
                 name=self.name,
             )
-
-    def clean(self):
-        self.clean_content_field()
-        self.force_case()
-        self.validate_for_conflicts()
-        return super(Record, self).clean()
 
     def save(self, *args, **kwargs):
         self.change_date = int(time.time())
