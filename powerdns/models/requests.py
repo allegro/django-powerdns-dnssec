@@ -2,19 +2,20 @@
 
 from django.db import models
 from django.core.urlresolvers import reverse
-from powerdns.models import (
-    validate_domain_name,
-    Owned,
-    Domain,
-    Record
-)
-from powerdns.utils import AutoPtrOptions
 from dj.choices import Choices
 from dj.choices.fields import ChoiceField
 from django.contrib.contenttypes.fields import ContentType, GenericForeignKey
 from django.utils.translation import ugettext_lazy as _
 from threadlocals.threadlocals import get_current_user
 import rules
+
+from powerdns.models import (
+    validate_domain_name,
+    Owned,
+    Domain,
+    Record
+)
+from powerdns.utils import AutoPtrOptions, RecordLike
 
 
 class RequestStates(Choices):
@@ -132,7 +133,7 @@ class DomainRequest(ChangeCreateRequest):
     name = models.CharField(
         _("name"),
         max_length=255,
-        validators=[validate_domain_name]
+        validators=[validate_domain_name],
     )
     master = models.CharField(
         _("master"), max_length=128, blank=True, null=True,
@@ -200,7 +201,7 @@ class DomainRequest(ChangeCreateRequest):
 rules.add_perm('powerdns.add_domainrequest', rules.is_authenticated)
 
 
-class RecordRequest(ChangeCreateRequest):
+class RecordRequest(ChangeCreateRequest, RecordLike):
 
     copy_fields = [
         'domain',
@@ -279,6 +280,10 @@ class RecordRequest(ChangeCreateRequest):
 
     remarks = models.TextField(blank=True)
     view = 'accept_record'
+
+    def get_record_pk(self):
+        if self.record:
+            return self.record.pk
 
     def __str__(self):
         if self.prio is not None:

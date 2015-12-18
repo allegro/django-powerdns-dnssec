@@ -13,6 +13,14 @@ class TestRecordValidators(RecordTestCase):
             content='192.168.1.1'
         )
 
+    def test_nameless_record(self):
+        """Record with blank name is invalid"""
+        self.check_invalid(
+            name='',
+            type='A',
+            content='192.168.1.1'
+        )
+
     def test_invalid_a_record(self):
         """A record doesn't validate when provided with IPv6 address."""
         self.check_invalid(
