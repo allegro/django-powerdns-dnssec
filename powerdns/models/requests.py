@@ -134,6 +134,8 @@ class DomainRequest(ChangeCreateRequest):
         _("name"),
         max_length=255,
         validators=[validate_domain_name],
+        blank=False,
+        null=False,
     )
     master = models.CharField(
         _("master"), max_length=128, blank=True, null=True,
@@ -213,6 +215,7 @@ class RecordRequest(ChangeCreateRequest, RecordLike):
         'auth',
         'disabled',
         'remarks',
+        'ttl',
     ]
 
     domain = models.ForeignKey(
@@ -233,7 +236,7 @@ class RecordRequest(ChangeCreateRequest, RecordLike):
         ),
     )
     name = models.CharField(
-        _("name"), max_length=255, blank=True, null=True,
+        _("name"), max_length=255, blank=False, null=False,
         validators=[validate_domain_name],
         help_text=_("Actual name of a record. Must not end in a '.' and be"
                     " fully qualified - it is not relative to the name of the"
