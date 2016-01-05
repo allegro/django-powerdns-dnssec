@@ -92,6 +92,7 @@ def validate_soa(value):
 # generic 'change' view (so they see the changelist), bo no generic 'delete'
 # view (so they can't bulk-delete).
 
+
 @rules.predicate
 def no_object(user, object_):
     return object_ is None
@@ -193,7 +194,6 @@ class DomainForRecordValidator(PermissionValidator):
     """A validator for 'domain' field in record forms and API"""
     def __init__(self, *args, **kwargs):
         super().__init__('powerdns.change_domain', *args, **kwargs)
-    
 
     def __call__(self, object_):
         if object_.unrestricted:
@@ -271,7 +271,7 @@ class RecordLike(models.Model):
     """Object validated like a record"""
 
     class Meta:
-        abstract=True
+        abstract = True
 
     def clean(self):
         self.clean_content_field()
@@ -293,6 +293,7 @@ class RecordLike(models.Model):
     def validate_for_conflicts(self):
         """Ensure this record doesn't conflict with other records."""
         from powerdns.models.requests import Record
+
         def check_unique(comment, **kwargs):
             conflicting = Record.objects.filter(**kwargs)
             record_pk = self.get_record_pk()
