@@ -29,3 +29,5 @@ class Powerdns(AppConfig):
             User,
             search_fields=['username', 'first_name', 'last_name']
         )
+        al.register(Domain, search_fields=['name'])
+        al.register(Record, search_fields=['name', 'content'])

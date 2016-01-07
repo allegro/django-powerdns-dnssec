@@ -345,6 +345,7 @@ class RecordRequestForm(autocomplete_light.ModelForm):
             'state': HiddenInput(),
             'owner': HiddenInput(),
         }
+        autocomplete_fields = ['domain', 'record']
 
 
 class RecordRequestAdmin(CopyingAdmin):
