@@ -243,7 +243,7 @@ class RecordRequest(ChangeCreateRequest, RecordLike):
                     " domain!"),
     )
     type = models.CharField(
-        _("type"), max_length=6, blank=True, null=True,
+        _("type"), max_length=6, blank=False, null=False,
         choices=Record.RECORD_TYPE, help_text=_("Record qtype"),
     )
     content = models.CharField(
