@@ -93,6 +93,9 @@ class RecordAdminForm(ModelForm):
 
 class CopyingAdmin(admin.ModelAdmin):
 
+    field_prefix = ''
+    target_prefix = ''
+
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)
         from_pk = request.GET.get(self.from_field)
@@ -100,7 +103,7 @@ class CopyingAdmin(admin.ModelAdmin):
             from_object = self.FromModel.objects.get(pk=from_pk)
             for field in self.CopyFieldsModel.copy_fields:
                 form.base_fields[field[len(self.field_prefix):]].initial = \
-                    getattr(from_object, field)
+                    getattr(from_object, field[len(self.target_prefix):])
         return form
 
 
@@ -203,7 +206,6 @@ class DomainAdmin(OwnedAdmin, CopyingAdmin):
     readonly_fields = ('notified_serial', 'created', 'modified')
     FromModel = DomainTemplate
     CopyFieldsModel = DomainTemplate
-    field_prefix = ''
     from_field = 'template'
 
 
@@ -279,11 +281,11 @@ class DomainRequestForm(autocomplete_light.ModelForm):
 
 class DomainRequestAdmin(CopyingAdmin):
     form = DomainRequestForm
-    list_display = ['name']
+    list_display = ['domain']
     from_field = 'domain'
     FromModel = Domain
     CopyFieldsModel = DomainRequest
-    field_prefix = ''
+    target_prefix = 'target_'
     readonly_fields = ['key']
 
 
@@ -350,11 +352,11 @@ class RecordRequestForm(autocomplete_light.ModelForm):
 
 class RecordRequestAdmin(CopyingAdmin):
     form = RecordRequestForm
-    list_display = RECORD_LIST_FIELDS
+    list_display = ['target_' + field for field in RECORD_LIST_FIELDS]
     from_field = 'record'
     FromModel = Record
     CopyFieldsModel = RecordRequest
-    field_prefix = ''
+    target_prefix = 'target_'
 
 
 admin.site.register(Domain, DomainAdmin)

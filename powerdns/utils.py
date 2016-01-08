@@ -273,6 +273,14 @@ class RecordLike(models.Model):
     class Meta:
         abstract = True
 
+    def get_field(self, name):
+        """Get the value of a prefixed or not field"""
+        return getattr(self, self.prefix + name)
+
+    def set_field(self, name, value):
+        """Set the value of a prefixed or not field"""
+        return setattr(self, self.prefix + name, value)
+
     def clean(self):
         self.clean_content_field()
         self.force_case()
@@ -281,14 +289,16 @@ class RecordLike(models.Model):
 
     def clean_content_field(self):
         """Perform a type-dependent validation of content field"""
-        if self.type == 'A':
-            validate_ipv4_address(self.content)
-        elif self.type == 'AAAA':
-            validate_ipv6_address(self.content)
-        elif self.type == 'SOA':
-            validate_soa(self.content)
-        elif self.type in DOMAIN_NAME_RECORDS:
-            validate_domain_name(self.content)
+        type_ = self.get_field('type')
+        content = self.get_field('content')
+        if type_ == 'A':
+            validate_ipv4_address(content)
+        elif type_ == 'AAAA':
+            validate_ipv6_address(content)
+        elif type_ == 'SOA':
+            validate_soa(content)
+        elif type_ in DOMAIN_NAME_RECORDS:
+            validate_domain_name(content)
 
     def validate_for_conflicts(self):
         """Ensure this record doesn't conflict with other records."""
@@ -303,23 +313,23 @@ class RecordLike(models.Model):
                 raise ValidationError(comment.format(
                     ', '.join(str(record.id) for record in conflicting)
                 ))
-        if self.type == 'CNAME':
+        if self.get_field('type') == 'CNAME':
             check_unique(
                 'Cannot create CNAME record. Following conflicting '
                 'records exist: {}',
-                name=self.name,
+                name=self.get_field('name'),
             )
         else:
             check_unique(
                 'Cannot create a record. Following conflicting CNAME'
                 'record exists: {}',
                 type='CNAME',
-                name=self.name,
+                name=self.get_field('name'),
             )
 
     def force_case(self):
         """Force the name and content case to upper and lower respectively"""
-        if self.name:
-            self.name = self.name.lower()
-        if self.type:
-            self.type = self.type.upper()
+        if self.get_field('name'):
+            self.set_field('name', self.get_field('name').lower())
+        if self.get_field('type'):
+            self.set_field('type', self.get_field('type').upper())
