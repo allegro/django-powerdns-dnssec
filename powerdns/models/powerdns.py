@@ -8,7 +8,6 @@ from dj.choices.fields import ChoiceField
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
-from django.core.validators import RegexValidator
 from django.db import models, transaction
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
@@ -114,6 +113,9 @@ class SubDomainValidator():
                 )
         # Fallthrough - ALLOW - we don't manage any superdomain
         return domain_name
+
+    def __eq__(self, other):
+        return type(self) == type(other)
 
 
 class WithRequests(models.Model):
@@ -293,6 +295,7 @@ class Record(TimeTrackable, Owned, RecordLike, WithRequests):
     '''
     PowerDNS DNS records
     '''
+    prefix = ''
     RECORD_TYPE = [(r, r) for r in RECORD_TYPES]
     domain = models.ForeignKey(
         Domain,
@@ -460,7 +463,6 @@ class Record(TimeTrackable, Owned, RecordLike, WithRequests):
         s.update(value)
         s.update(salt)
         return s.digest()
-
 
     def force_case(self):
         """Force the name and content case to upper and lower respectively"""

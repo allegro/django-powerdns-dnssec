@@ -39,7 +39,8 @@ class TestRequests(unittest.TestCase):
         set_current_user(self.user1)
         request = DomainRequest.objects.create(
             parent_domain=self.domain,
-            name='subdomain.example.com',
+            target_name='subdomain.example.com',
+            target_owner=self.user1,
         )
         request.accept()
         assert_does_exist(
@@ -49,9 +50,10 @@ class TestRequests(unittest.TestCase):
     def test_domain_change(self):
         request = DomainRequest.objects.create(
             domain=self.domain,
-            name='example.com',
-            type='MASTER',
+            target_name='example.com',
+            target_type='MASTER',
             owner=self.user2,
+            target_owner=self.user1,
         )
         request.accept()
         assert_does_exist(
@@ -65,21 +67,26 @@ class TestRequests(unittest.TestCase):
     def test_record_creation(self):
         request = RecordRequest.objects.create(
             domain=self.domain,
-            type='CNAME',
-            name='site.example.com',
-            content='www.example.com',
-            owner=self.user1
+            target_type='CNAME',
+            target_name='site.example.com',
+            target_content='www.example.com',
+            owner=self.user1,
+            target_owner=self.user2,
         )
         request.accept()
-        assert_does_exist(Record, content='www.example.com')
+        assert_does_exist(
+            Record,
+            content='www.example.com',
+            owner=self.user2,
+        )
 
     def test_record_change(self):
         request = RecordRequest.objects.create(
             domain=self.domain,
             record=self.record,
-            type='CNAME',
-            name='forum.example.com',
-            content='djangobb.example.com',
+            target_type='CNAME',
+            target_name='forum.example.com',
+            target_content='djangobb.example.com',
         )
         request.accept()
         assert_does_exist(Record, content='djangobb.example.com')
