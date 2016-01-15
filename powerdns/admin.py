@@ -3,6 +3,7 @@ import rules
 from django.contrib.auth import get_user_model
 from django.contrib import admin
 from django.contrib.admin.widgets import AdminRadioSelect
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.forms import (
     HiddenInput,
@@ -331,12 +332,23 @@ class DeleteRequestForm(ModelForm):
         widgets = {
             'owner': HiddenInput(),
             'key': HiddenInput(),
+            'target_id': HiddenInput(),
+            'content_type': HiddenInput(),
         }
 
 
 class DeleteRequestAdmin(ObjectPermissionsModelAdmin):
     form = DeleteRequestForm
     fields = ['owner', 'target_id', 'content_type']
+
+    def add_view(self, request, extra_context=None):
+        extra_context = extra_context or {}
+        extra_context['deleted_item'] = str(
+            ContentType.objects.get(
+                pk=request.GET['content_type']
+            ).get_object_for_this_type(pk=request.GET['target_id'])
+        )
+        return super().add_view(request, extra_context=extra_context)
 
 
 class RecordRequestForm(autocomplete_light.ModelForm):
