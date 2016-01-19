@@ -101,10 +101,10 @@ class CopyingAdmin(admin.ModelAdmin):
         form = super().get_form(request, obj, **kwargs)
         from_pk = request.GET.get(self.from_field)
         if from_pk is not None:
-            from_object = self.FromModel.objects.get(pk=from_pk)
+            self.from_object = self.FromModel.objects.get(pk=from_pk)
             for field in self.CopyFieldsModel.copy_fields:
                 form.base_fields[field[len(self.field_prefix):]].initial = \
-                    getattr(from_object, field[len(self.target_prefix):])
+                    getattr(self.from_object, field[len(self.target_prefix):])
         return form
 
 
@@ -370,6 +370,10 @@ class RecordRequestAdmin(CopyingAdmin):
     CopyFieldsModel = RecordRequest
     target_prefix = 'target_'
 
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        form.base_fields['domain'].initial = self.from_object.domain
+        return form
 
 admin.site.register(Domain, DomainAdmin)
 admin.site.register(Record, RecordAdmin)

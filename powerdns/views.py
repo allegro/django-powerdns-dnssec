@@ -59,6 +59,7 @@ class RecordViewSet(OwnerViewSet):
     queryset = Record.objects.all()
     serializer_class = RecordSerializer
     filter_fields = ('name', 'type', 'content', 'domain')
+    search_fields = filter_fields
 
 
 class CryptoKeyViewSet(FiltersMixin, ModelViewSet):
