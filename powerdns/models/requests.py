@@ -225,7 +225,6 @@ class RecordRequest(ChangeCreateRequest, RecordLike):
         'target_type',
         'target_content',
         'target_prio',
-        'target_ordername',
         'target_auth',
         'target_disabled',
         'target_remarks',
@@ -274,9 +273,6 @@ class RecordRequest(ChangeCreateRequest, RecordLike):
         _("priority"), blank=True, null=True,
         help_text=_("For MX records, this should be the priority of the"
                     " mail exchanger specified"),
-    )
-    target_ordername = models.CharField(
-        _("DNSSEC Order"), max_length=255, blank=True, null=True,
     )
     target_auth = models.NullBooleanField(
         _("authoritative"),
