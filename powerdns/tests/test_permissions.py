@@ -110,7 +110,7 @@ class TestPermissions(TestCase):
             reverse('domain-list'),
             {'name': 'example2.com'}
         )
-        self.assertEqual(request.status_code, 201)
+        self.assertEqual(request.status_code, 403)
 
     def test_user_can_subdomain_her_own(self):
         """Normal user can create domain that is a child of domain she owns."""
@@ -118,7 +118,7 @@ class TestPermissions(TestCase):
             reverse('domain-list'),
             {'name': 'subdomain.u.example.com'}
         )
-        self.assertEqual(request.status_code, 201)
+        self.assertEqual(request.status_code, 403)
 
     def test_user_cant_subdomain_others(self):
         """Normal user can't create domain that is a child of not owned domain.
@@ -127,7 +127,7 @@ class TestPermissions(TestCase):
             reverse('domain-list'),
             {'name': 'subdomain.su.example.com'}
         )
-        self.assertEqual(request.status_code, 400)
+        self.assertEqual(request.status_code, 403)
 
     def test_su_can_edit_all_records(self):
         """Superuser can edit record not owned by herself."""

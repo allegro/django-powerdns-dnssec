@@ -286,7 +286,7 @@ class Domain(TimeTrackable, Owned, WithRequests):
 
 
 rules.add_perm('powerdns', rules.is_authenticated)
-rules.add_perm('powerdns.add_domain', rules.is_authenticated)
+rules.add_perm('powerdns.add_domain', rules.is_superuser)
 rules.add_perm('powerdns.change_domain', can_edit)
 rules.add_perm('powerdns.delete_domain', can_delete)
 
@@ -538,22 +538,6 @@ class Record(TimeTrackable, Owned, RecordLike, WithRequests):
             depends_on=self,
             owner=self.owner,
         )
-
-    # def request_change(self):
-    #     if get_current_user().has_perm(
-    #         'powerdns.change_record', self
-    #     ):
-    #         return '<a href={}>Change</a>'.format(
-    #             reverse(
-    #                 'admin:powerdns_record_change', args=(self.pk,)
-    #             )
-    #         )
-    #     return '<a href="{}">Request change</a>'.format(
-    #         reverse(
-    #             'admin:powerdns_recordrequest_add'
-    #         ) + '?record={}'.format(self.pk)
-    #     )
-    # request_change.allow_tags = True
 
 rules.add_perm('powerdns.add_record', rules.is_authenticated)
 rules.add_perm('powerdns.change_record', can_edit)
