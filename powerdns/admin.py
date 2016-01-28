@@ -110,6 +110,16 @@ class CopyingAdmin(admin.ModelAdmin):
         return form
 
 
+class RequestAdmin(CopyingAdmin):
+    """Admin for domain/record requests"""
+
+    def get_form(self, *args, **kwargs):
+        form = super().get_form(*args, **kwargs)
+        form.base_fields['target_owner'].initial =\
+            form.base_fields['target_owner'].initial or get_current_user()
+        return form
+
+
 class OwnedAdmin(ForeignKeyAutocompleteAdmin, ObjectPermissionsModelAdmin):
     """Admin for models with owner field"""
 
@@ -282,7 +292,7 @@ class DomainRequestForm(autocomplete_light.ModelForm):
         }
 
 
-class DomainRequestAdmin(CopyingAdmin):
+class DomainRequestAdmin(RequestAdmin):
     form = DomainRequestForm
     list_display = ['domain']
     from_field = 'domain'
@@ -361,10 +371,9 @@ class RecordRequestForm(autocomplete_light.ModelForm):
             'state': HiddenInput(),
             'owner': HiddenInput(),
         }
-        autocomplete_fields = ['domain', 'record']
 
 
-class RecordRequestAdmin(CopyingAdmin):
+class RecordRequestAdmin(RequestAdmin):
     form = RecordRequestForm
     list_display = ['target_' + field for field in RECORD_LIST_FIELDS]
     from_field = 'record'
