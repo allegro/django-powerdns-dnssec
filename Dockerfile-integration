@@ -1,0 +1,13 @@
+FROM zefciu/python-base
+MAINTAINER Pylabs <pylabs@allegro.pl>
+RUN pip install nose py3dns requests flake8
+RUN mkdir dnsaas-source
+ADD setup.py dnsaas-source/setup.py
+ADD README.rst dnsaas-source/README.rst
+ADD version.json dnsaas-source/version.json
+ADD powerdns dnsaas-source/powerdns
+ADD dnsaas dnsaas-source/dnsaas
+ADD manage.py dnsaas-source/manage.py
+RUN cd dnsaas-source && python3.4 setup.py install 
+ADD integration-tests integration-tests
+CMD /bin/sh integration-tests/runtests.sh

@@ -4,4 +4,9 @@ do
     sleep 3
 done
 
+
+cd dnsaas-source &&\
+flake8 --exclude=migrations powerdns &&\
+python3.4 manage.py test &&\
+cd ../integration-tests &&\
 nosetests

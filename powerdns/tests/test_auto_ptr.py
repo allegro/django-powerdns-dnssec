@@ -31,7 +31,7 @@ class TestAutoPtr(TestCase):
                 'ns1.{domain-name} hostmaster.{domain-name} '
                 '0 43200 600 1209600 600'
             ),
-            domain_template = self.reverse_template,
+            domain_template=self.reverse_template,
         )
         self.alt_soa_record = RecordTemplateFactory(
             type='SOA',
@@ -40,7 +40,7 @@ class TestAutoPtr(TestCase):
                 'nameserver1.{domain-name} hostmaster.{domain-name} '
                 '0 43200 1200 1209600 1200'
             ),
-            domain_template = self.alt_reverse_template,
+            domain_template=self.alt_reverse_template,
         )
         self.domain = DomainFactory(
             name='example.com',

@@ -2,7 +2,8 @@
 ---
 
 runner:
-    build: .
+    build: ".."
+    dockerfile: 'Dockerfile-integration'
     links:
         - "dnsaas:dnsaas"
         - "pdns:pdns"
