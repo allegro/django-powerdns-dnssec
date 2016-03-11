@@ -121,13 +121,6 @@ class TimeTrackable(models.Model):
         verbose_name=_('last modified'), auto_now=True, editable=False,
     )
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._initial_values = {
-            field.name: getattr(self, field.name, None)
-            for field in self._meta.fields
-        }
-
     class Meta:
         abstract = True
 

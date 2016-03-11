@@ -49,14 +49,14 @@ class OwnerViewSet(FiltersMixin, ModelViewSet):
 
 class DomainViewSet(OwnerViewSet):
 
-    queryset = Domain.objects.all()
+    queryset = Domain.objects.all().select_related('owner')
     serializer_class = DomainSerializer
     filter_fields = ('name', 'type')
 
 
 class RecordViewSet(OwnerViewSet):
 
-    queryset = Record.objects.all()
+    queryset = Record.objects.all().select_related('owner', 'domain')
     serializer_class = RecordSerializer
     filter_fields = ('name', 'type', 'content', 'domain')
     search_fields = filter_fields
