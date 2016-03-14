@@ -1,4 +1,5 @@
 # Django settings for standalone django_powerdns.
+import os
 import sys
 
 
@@ -25,6 +26,19 @@ if TESTING:
         }
     }
     EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
+    SKIP_MIGRATIONS = os.environ.get('SKIP_MIGRATIONS', None)
+    if SKIP_MIGRATIONS:
+        print('skipping migrations')
+
+        class DisableMigrations(object):
+
+            def __contains__(self, item):
+                return True
+
+            def __getitem__(self, item):
+                return "notmigrations"
+
+        MIGRATION_MODULES = DisableMigrations()
 else:
     DATABASES = {
         'default': {
