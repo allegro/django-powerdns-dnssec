@@ -2,6 +2,7 @@
 
 import functools as ft
 
+import factory
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from factory.django import DjangoModelFactory
@@ -11,24 +12,35 @@ from powerdns.models.powerdns import Record, Domain
 from powerdns.models.templates import RecordTemplate, DomainTemplate
 
 
+class DomainTemplateFactory(DjangoModelFactory):
+    class Meta:
+        model = DomainTemplate
+
+    name = factory.Sequence(lambda n: 'name%d' % n)
+
+
+class RecordTemplateFactory(DjangoModelFactory):
+    class Meta:
+        model = RecordTemplate
+
+    domain_template = factory.SubFactory(DomainTemplateFactory)
+
+
 class DomainFactory(DjangoModelFactory):
     class Meta:
         model = Domain
+
+    name = factory.Sequence(lambda n: 'name%d' % n)
+    template = factory.SubFactory(DomainTemplateFactory)
 
 
 class RecordFactory(DjangoModelFactory):
     class Meta:
         model = Record
 
+    domain = factory.SubFactory(DomainFactory)
+    template = factory.SubFactory(RecordTemplateFactory)
 
-class DomainTemplateFactory(DjangoModelFactory):
-    class Meta:
-        model = DomainTemplate
-
-
-class RecordTemplateFactory(DjangoModelFactory):
-    class Meta:
-        model = RecordTemplate
 
 
 class RecordTestCase(TestCase):
