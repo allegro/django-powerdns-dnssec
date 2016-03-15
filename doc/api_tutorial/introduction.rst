@@ -23,3 +23,30 @@ additional tools.
 
 Of course you can also send API requests with your favourite library or browser
 plugin.
+
+
+
+Filtering
+=========
+
+Endpoint `/api/records/`
+------------------------
+
+Two extra options are present:
+
+`ip`: gets `records` related to filtering `IP`
+
+    example urls:
+        - http://localhost:8080/api/records/?ip=192.168.0.1
+            returns all records related to "192.168.0.1" IP
+        - http://localhost:8080/api/records/?ip=192.168.0.1&ip=192.168.0.2
+            returns all records related to "192.168.0.1" or "192.168.0.2" IPs
+
+
+`type`: gets `records` related to filtering `types` ('A', 'CNAME', etc.)
+
+    example urls:
+        - http://localhost:8080/api/records/?type=NS
+            returns all records with type=NS
+        - http://localhost:8080/api/records/?type=NS&type=A
+            returns all records with type=NS OR type=A

@@ -1,6 +1,7 @@
 """Views and viewsets for DNSaaS API"""
 
 from django.core.urlresolvers import reverse
+from django.db.models import Q
 from django.shortcuts import redirect
 from django.views.generic.base import TemplateView
 
@@ -28,7 +29,7 @@ from powerdns.serializers import (
     RecordTemplateSerializer,
     SuperMasterSerializer,
 )
-from powerdns.utils import VERSION
+from powerdns.utils import VERSION, to_reverse
 
 
 class FiltersMixin(object):
@@ -58,8 +59,27 @@ class RecordViewSet(OwnerViewSet):
 
     queryset = Record.objects.all()
     serializer_class = RecordSerializer
-    filter_fields = ('name', 'type', 'content', 'domain')
+    filter_fields = ('name', 'content', 'domain')
     search_fields = filter_fields
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        ips = self.request.query_params.getlist('ip')
+        if ips:
+            a_records = Record.objects.filter(content__in=ips, type='A')
+            ptrs = [
+                "{1}.{0}".format(*to_reverse(r.content)) for r in a_records
+            ]
+            queryset = queryset.filter(
+                (Q(content__in=[r.content for r in a_records]) & Q(type='A')) |
+                (Q(content__in=[r.name for r in a_records]) & Q(type='CNAME')) | # noqa
+                (Q(name__in=[r.name for r in a_records]) & Q(type='TXT')) |
+                (Q(name__in=ptrs) & Q(type='PTR'))
+            )
+        types = self.request.query_params.getlist('type')
+        if types:
+            queryset = queryset.filter(type__in=types)
+        return queryset
 
 
 class CryptoKeyViewSet(FiltersMixin, ModelViewSet):

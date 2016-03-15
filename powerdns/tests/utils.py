@@ -23,15 +23,13 @@ class RecordTemplateFactory(DjangoModelFactory):
     class Meta:
         model = RecordTemplate
 
-    domain_template = factory.SubFactory(DomainTemplateFactory)
 
 
 class DomainFactory(DjangoModelFactory):
     class Meta:
         model = Domain
 
-    name = factory.Sequence(lambda n: 'name%d' % n)
-    template = factory.SubFactory(DomainTemplateFactory)
+    name = factory.Sequence(lambda n: 'name%d.com' % n)
 
 
 class RecordFactory(DjangoModelFactory):
@@ -39,7 +37,6 @@ class RecordFactory(DjangoModelFactory):
         model = Record
 
     domain = factory.SubFactory(DomainFactory)
-    template = factory.SubFactory(RecordTemplateFactory)
 
 
 
