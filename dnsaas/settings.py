@@ -223,4 +223,7 @@ SITE_TITLE = 'Django powerdns'
 
 
 if not TESTING:
-    from settings_local import *  # noqa
+    try:
+        from settings_local import *  # noqa
+    except ImportError:
+        pass
