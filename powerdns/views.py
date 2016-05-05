@@ -19,6 +19,7 @@ from powerdns.models import (
 )
 from rest_framework.filters import DjangoFilterBackend
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.permissions import DjangoObjectPermissions
 
 from powerdns.serializers import (
     CryptoKeySerializer,
@@ -30,6 +31,14 @@ from powerdns.serializers import (
     SuperMasterSerializer,
 )
 from powerdns.utils import VERSION, to_reverse
+
+
+class DomainPermission(DjangoObjectPermissions):
+
+    def has_permission(self, request, view):
+        if request.method == 'POST' and not request.user.is_superuser:
+            return False
+        return super().has_permission(request, view)
 
 
 class FiltersMixin(object):
@@ -53,6 +62,7 @@ class DomainViewSet(OwnerViewSet):
     queryset = Domain.objects.all().select_related('owner')
     serializer_class = DomainSerializer
     filter_fields = ('name', 'type')
+    permission_classes = (DomainPermission,)
 
 
 class RecordViewSet(OwnerViewSet):
@@ -119,9 +129,11 @@ class RecordTemplateViewSet(FiltersMixin, ModelViewSet):
 
 class HomeView(TemplateView):
 
-    """Homepage. This page should point user to API or admin site. This package
+    """
+    Homepage. This page should point user to API or admin site. This package
     will provide some minimal homepage template. The administrators of
-    DNSaaS solutions are encouraged however to create their own ones."""
+    DNSaaS solutions are encouraged however to create their own ones.
+    """
 
     template_name = "powerdns/home.html"
 
