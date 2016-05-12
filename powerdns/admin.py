@@ -286,10 +286,7 @@ class RecordTemplateAdmin(ForeignKeyAutocompleteAdmin):
 
 class DomainRequestForm(autocomplete_light.ModelForm):
     class Meta:
-        widgets = {
-            'state': HiddenInput(),
-            'owner': HiddenInput(),
-        }
+        exclude = ['owner', 'state']
 
 
 class DomainRequestAdmin(RequestAdmin):
@@ -367,10 +364,7 @@ class DeleteRequestAdmin(ObjectPermissionsModelAdmin):
 
 class RecordRequestForm(autocomplete_light.ModelForm):
     class Meta:
-        widgets = {
-            'state': HiddenInput(),
-            'owner': HiddenInput(),
-        }
+        exclude = ['owner', 'state']
 
 
 class RecordRequestAdmin(RequestAdmin):
