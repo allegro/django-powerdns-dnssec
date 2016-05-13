@@ -48,7 +48,7 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
     install_requires = [
-        'Django>=1.8',
+        'Django==1.8.13',
         'IPy>=0.82a',
         'django-autocomplete-light==2.3.3',
         'django-extensions>=1.5.5',
