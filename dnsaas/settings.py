@@ -46,7 +46,7 @@ else:
             'NAME': 'dnsaas',
             'USER': 'dnsaas',
             'PASSWORD': 'dnsaas',
-            'HOST': 'db',
+            'HOST': 'localhost',
             'PORT': '3306',
         }
     }
