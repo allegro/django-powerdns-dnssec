@@ -24,7 +24,6 @@ class RecordTemplateFactory(DjangoModelFactory):
         model = RecordTemplate
 
 
-
 class DomainFactory(DjangoModelFactory):
     class Meta:
         model = Domain
@@ -37,7 +36,6 @@ class RecordFactory(DjangoModelFactory):
         model = Record
 
     domain = factory.SubFactory(DomainFactory)
-
 
 
 class RecordTestCase(TestCase):
