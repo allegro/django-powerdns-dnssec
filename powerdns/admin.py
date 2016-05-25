@@ -284,7 +284,7 @@ class RecordTemplateAdmin(ForeignKeyAutocompleteAdmin):
     list_display = RECORD_LIST_FIELDS
 
 
-class DomainRequestForm(autocomplete_light.ModelForm):
+class DomainRequestForm(autocomplete_light.forms.ModelForm):
     class Meta:
         exclude = ['owner', 'state']
 
@@ -299,7 +299,7 @@ class DomainRequestAdmin(RequestAdmin):
     readonly_fields = ['key']
 
 
-class AuthorisationForm(autocomplete_light.ModelForm):
+class AuthorisationForm(autocomplete_light.forms.ModelForm):
     class Meta:
         model = Authorisation
         fields = [
@@ -362,7 +362,7 @@ class DeleteRequestAdmin(ObjectPermissionsModelAdmin):
         return super().add_view(request, extra_context=extra_context)
 
 
-class RecordRequestForm(autocomplete_light.ModelForm):
+class RecordRequestForm(autocomplete_light.forms.ModelForm):
     class Meta:
         exclude = ['owner', 'state']
 

@@ -1,7 +1,5 @@
 """Tests for record/domain ownership"""
 
-import base64
-
 from django.contrib.auth.models import User
 from django.core import mail
 from django.test import TestCase
