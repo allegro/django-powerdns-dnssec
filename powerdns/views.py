@@ -29,8 +29,10 @@ from powerdns.serializers import (
     RecordSerializer,
     RecordTemplateSerializer,
     SuperMasterSerializer,
+    TsigKeysTemplateSerializer,
 )
 from powerdns.utils import VERSION, to_reverse
+from powerdns.models.tsigkeys import TsigKeys
 
 
 class DomainPermission(DjangoObjectPermissions):
@@ -125,6 +127,13 @@ class RecordTemplateViewSet(FiltersMixin, ModelViewSet):
     queryset = RecordTemplate.objects.all()
     serializer_class = RecordTemplateSerializer
     filter_fields = ('domain_template', 'name', 'content')
+
+
+class TsigKeysViewSet(FiltersMixin, ModelViewSet):
+
+    queryset = TsigKeys.objects.all()
+    serializer_class = TsigKeysTemplateSerializer
+    filter_fields = ('name', 'secret')
 
 
 class HomeView(TemplateView):
