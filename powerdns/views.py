@@ -82,7 +82,7 @@ class RecordViewSet(OwnerViewSet):
             ]
             queryset = queryset.filter(
                 (Q(content__in=[r.content for r in a_records]) & Q(type='A')) |
-                (Q(content__in=[r.name for r in a_records]) & Q(type='CNAME')) | # noqa
+                (Q(content__in=[r.name for r in a_records]) & Q(type='CNAME')) |  # noqa
                 (Q(name__in=[r.name for r in a_records]) & Q(type='TXT')) |
                 (Q(name__in=ptrs) & Q(type='PTR'))
             )
