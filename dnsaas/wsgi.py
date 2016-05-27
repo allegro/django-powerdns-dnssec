@@ -1,6 +1,7 @@
 import os
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "dnsaas.settings")
-
 from django.core.wsgi import get_wsgi_application
+
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "dnsaas.settings")
 application = get_wsgi_application()

@@ -14,17 +14,21 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-if TESTING:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': ':memory:',
-            'USER': '',
-            'PASSWORD': '',
-            'HOST': '',
-            'PORT': '',
-        }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'dnsaas',
+        'USER': os.environ.get('DNSAAS_DB_USER', 'dnsaas'),
+        'PASSWORD': os.environ.get('DNSAAS_DB_PASSWORD', 'dnsaas'),
+        'HOST': os.environ.get('DNSAAS_DB_HOST', 'localhost'),
+        'PORT': '3306',
+        'TEST': {
+            'NAME': 'test_dnsaas',
+        },
     }
+}
+
+if TESTING:
     EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
     SKIP_MIGRATIONS = os.environ.get('SKIP_MIGRATIONS', None)
     if SKIP_MIGRATIONS:
@@ -39,17 +43,6 @@ if TESTING:
                 return "notmigrations"
 
         MIGRATION_MODULES = DisableMigrations()
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.mysql',
-            'NAME': 'dnsaas',
-            'USER': 'dnsaas',
-            'PASSWORD': 'dnsaas',
-            'HOST': os.environ.get('DNSAAS_MYSQL_HOST', 'localhost'),
-            'PORT': '3306',
-        }
-    }
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name

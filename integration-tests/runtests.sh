@@ -6,7 +6,7 @@ done
 
 
 cd dnsaas-source &&\
-flake8 --exclude=migrations powerdns &&\
+make flake &&\
 python3.4 manage.py test &&\
 cd ../integration-tests &&\
 nosetests

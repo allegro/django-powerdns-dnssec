@@ -1,4 +1,4 @@
-import unittest
+from django.test import TestCase
 
 from threadlocals.threadlocals import set_current_user
 from django.contrib.auth.models import User
@@ -8,7 +8,7 @@ from powerdns.models.requests import DomainRequest, RecordRequest
 from powerdns.tests.utils import assert_does_exist, assert_not_exists
 
 
-class TestRequests(unittest.TestCase):
+class TestRequests(TestCase):
     """Tests for domain/record requests"""
 
     def setUp(self):
@@ -30,10 +30,6 @@ class TestRequests(unittest.TestCase):
             content='phpbb.example.com',
             owner=self.user1,
         )
-
-    def tearDown(self):
-        for Model in [Domain, DomainRequest, Record, RecordRequest, User]:
-            Model.objects.all().delete()
 
     def test_subdomain_creation(self):
         set_current_user(self.user1)
@@ -87,6 +83,8 @@ class TestRequests(unittest.TestCase):
             target_type='CNAME',
             target_name='forum.example.com',
             target_content='djangobb.example.com',
+            target_owner=self.user2,
+            owner=self.user1,
         )
         request.accept()
         assert_does_exist(Record, content='djangobb.example.com')

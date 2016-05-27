@@ -45,7 +45,7 @@ class TestAutoPtr(TestCase):
         self.domain = DomainFactory(
             name='example.com',
             template=None,
-            reverse_template=None,
+            reverse_template=self.reverse_template,
             type='NATIVE',
         )
 

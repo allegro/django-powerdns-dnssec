@@ -9,7 +9,11 @@ from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIClient, APIRequestFactory
 
-from powerdns.tests.utils import DomainTemplateFactory, RecordFactory
+from powerdns.tests.utils import (
+    DomainFactory,
+    DomainTemplateFactory,
+    RecordFactory,
+)
 from powerdns.utils import AutoPtrOptions
 from powerdns.views import RecordViewSet
 from powerdns.models import Domain
@@ -29,21 +33,31 @@ class TestApi(TestCase):
         self.client = APIClient()
         self.client.login(username='test', password='test')
 
-        DomainTemplateFactory(
-            name='reverse', type=None, unrestricted=False, record_auto_ptr=2)
+        domain = DomainFactory(
+            name='example.com', type=None, unrestricted=False,
+            record_auto_ptr=2,
+            reverse_template=DomainTemplateFactory(name='reverse'),
+        )
         for i in range(3):
             RecordFactory(
                 type='A', name='example{}.com'.format(i),
                 content='192.168.0.{}'.format(i),
-                auto_ptr=AutoPtrOptions.ALWAYS)
+                auto_ptr=AutoPtrOptions.ALWAYS,
+                domain=domain,
+
+            )
             RecordFactory(
                 type='CNAME', name='www.example{}.com'.format(i),
                 content='example{}.com'.format(i),
-                auto_ptr=AutoPtrOptions.NEVER)
+                auto_ptr=AutoPtrOptions.NEVER,
+                domain=domain,
+            )
             RecordFactory(
                 type='TXT', name='example{}.com'.format(i),
                 content='Some information{}'.format(i),
-                auto_ptr=AutoPtrOptions.NEVER)
+                auto_ptr=AutoPtrOptions.NEVER,
+                domain=domain,
+            )
 
     def test_record_filters_by_ip_and_type(self):
         request = self.request_factory.get('/')

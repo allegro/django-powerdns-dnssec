@@ -45,7 +45,7 @@ class RecordTestCase(TestCase):
         self.domain = DomainFactory(
             name='example.com',
             template=None,
-            reverse_template=None,
+            reverse_template=DomainTemplateFactory(name='reverse'),
         )
 
     def validate(self, **values):

@@ -119,7 +119,10 @@ class TestTemplates(TestCase):
 
     def test_template_modify(self):
         """Record is changed when its template is modified"""
-        domain = Domain(name='example.com', template=self.domain_template1)
+        domain = Domain(
+            name='example.com', template=self.domain_template1,
+            reverse_template=self.reverse_template,
+        )
         domain.save()
         self.t1_ns_record.content = 'nsrv1.{domain-name}'
         self.t1_ns_record.save()
@@ -162,7 +165,10 @@ class TestTemplates(TestCase):
     def test_template_add(self):
         """Records are added if the domain template gets a new record
         template"""
-        domain = Domain(name='example.com', template=self.domain_template1)
+        domain = Domain(
+            name='example.com', template=self.domain_template1,
+            reverse_template=self.reverse_template,
+        )
         domain.save()
         self.t1_ns2_record = RecordTemplateFactory(
             type='NS',

@@ -3,6 +3,7 @@ MAINTAINER Pylabs <pylabs@allegro.pl>
 RUN pip install nose py3dns requests flake8
 RUN mkdir dnsaas-source
 ADD setup.py dnsaas-source/setup.py
+ADD Makefile dnsaas-source/Makefile
 ADD README.rst dnsaas-source/README.rst
 ADD version.json dnsaas-source/version.json
 ADD powerdns dnsaas-source/powerdns
