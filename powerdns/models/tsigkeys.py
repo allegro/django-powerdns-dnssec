@@ -2,7 +2,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.db import models
 
 
-class TsigKeys(models.Model):
+class TsigKey(models.Model):
     ALGORITHME_TYPE = (
         ('hmac-md5', 'hmac-md5'),
     )
