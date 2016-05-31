@@ -14,10 +14,10 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='TsigKeys',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', auto_created=True, serialize=False, primary_key=True)),
-                ('name', models.CharField(verbose_name='name', max_length=255)),
-                ('algorithm', models.CharField(verbose_name='algorithm', max_length=50, choices=[('hmac-md5', 'hmac-md5')])),
-                ('secret', models.CharField(verbose_name='secret', max_length=255)),
+                ('id', models.AutoField(primary_key=True, verbose_name='ID', auto_created=True, serialize=False)),
+                ('name', models.CharField(max_length=255, help_text='Key name', verbose_name='name')),
+                ('algorithm', models.CharField(max_length=50, verbose_name='algorithm', choices=[('hmac-md5', 'hmac-md5')])),
+                ('secret', models.CharField(max_length=255, help_text='Secret key', verbose_name='secret')),
             ],
             options={
                 'db_table': 'tsigkeys',
