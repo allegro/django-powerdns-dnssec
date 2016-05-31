@@ -36,6 +36,7 @@ from powerdns.models.requests import (
     RecordRequest,
 )
 from powerdns.utils import Owned, DomainForRecordValidator, is_owner
+from powerdns.models.tsigkeys import TsigKeys
 
 
 class NullBooleanRadioSelect(NullBooleanSelect, AdminRadioSelect):
@@ -392,3 +393,4 @@ admin.site.register(Authorisation, AuthorisationAdmin)
 admin.site.register(DomainRequest, DomainRequestAdmin)
 admin.site.register(RecordRequest, RecordRequestAdmin)
 admin.site.register(DeleteRequest, DeleteRequestAdmin)
+admin.site.register(TsigKeys)
