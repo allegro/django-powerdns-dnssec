@@ -1,0 +1,18 @@
+<div class="dropdown">
+  <span class="label label-default" [style.display]="showLabel ? 'inline-block' : 'none'">
+    {{ value }} &nbsp;&nbsp;
+    <span class="glyphicon glyphicon-remove" aria-hidden="true" (click)="removeCurrent()"></span>
+  </span>
+  <input
+    type="text"
+    #autocomplete_search
+    placeholder="{{ placeholder }}"
+    class="form-control"
+    [style.display]="showInput ? 'block' : 'none'"
+    (keyup)="onKey($event, autocomplete_search.value)"/>
+  <ul class="dropdown-menu" [style.display]="showResults ? 'block' : 'none'">
+    <li *ngFor="let item of results" [class.active]="isActive(item)" (mouseenter)="selectActive(item)">
+      <a (click)="onSelect(item)">{{ item[1] }}</a>
+    </li>
+  </ul>
+</div>

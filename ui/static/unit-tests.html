@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>DNSaaS App Unit Tests</title>
+  <script src="/static/lib/es6-shim/es6-shim.min.js"></script>
+  <script src="/static/lib/zone.js/dist/zone.js?main=browser"></script>
+  <script src="/static/lib/reflect-metadata/Reflect.js"></script>
+  <script src="/static/lib/systemjs/dist/system.src.js"></script>
+  <link rel="stylesheet" href="/static/lib/jasmine-core/lib/jasmine-core/jasmine.css">
+  <script src="/static/lib/jasmine-core/lib/jasmine-core/jasmine.js"></script>
+  <script src="/static/lib/jasmine-core/lib/jasmine-core/jasmine-html.js"></script>
+  <script src="/static/lib/jasmine-core/lib/jasmine-core/boot.js"></script>
+  <script src="/static/lib/systemjs/dist/system.src.js"></script>
+</head>
+<body>
+<script>
+    // #2. Configure systemjs to use the .js extension
+    //     for imports from the app folder
+    var map = {
+        'rxjs': '/static/lib/rxjs',
+    };
+    
+    var packages = {
+        'dist': {defaultExtension: 'js'},
+        'rxjs': {defaultExtension: 'js'},
+    };
+    var PackageNames = [
+        'common',
+        'compiler',
+        'core',
+        'http',
+        'platform-browser',
+        'platform-browser-dynamic',
+        'router-deprecated',
+        'upgrade',
+        'testing',
+        'platform/testing'
+    ];
+
+    // Add map entries for each angular package
+    PackageNames.forEach(function (pkgName) {
+        map['@angular/' + pkgName] = '/static/lib/@angular/' + pkgName;
+    });
+
+    // Add package entries for angular packages
+    PackageNames.forEach(function (pkgName) {
+        packages['@angular/' + pkgName] = {main: pkgName + '.umd.js', defaultExtension: 'js'};
+    });
+    
+    System.config({
+      packages: packages,
+      map: map
+    });
+
+    // #3. Import the spec file explicitly
+    Promise.all([
+      System.import('dist/local-storage.spec')
+    ])
+
+      // #4. wait for all imports to load ...
+      //     then re-execute `window.onload` which
+      //     triggers the Jasmine test-runner start
+      //     or explain what went wrong.
+      .then(window.onload)
+      .catch(console.error.bind(console));
+  </script>
+</body>
+</html>

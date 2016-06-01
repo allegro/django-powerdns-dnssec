@@ -3,6 +3,7 @@ MAINTAINER Pylabs <pylabs@allegro.pl>
 RUN mkdir dnsaas
 ADD dnsaas dnsaas/dnsaas
 ADD powerdns dnsaas/powerdns
+ADD ui dnsaas/ui
 ADD docker dnsaas/docker
 ADD setup.py dnsaas/setup.py
 ADD manage.py dnsaas/manage.py

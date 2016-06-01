@@ -1,0 +1,33 @@
+<nav class="navbar navbar-inverse navbar-fixed-top">
+  <div class="container">
+    <div class="navbar-header">
+        <a class="navbar-brand" href="/ui">DNSaaS</a>
+    </div>
+    <div id="navbar" class="collapse navbar-collapse">
+       <div [style.display]="isLoggedIn ? 'block' : 'none'">
+        <ul class="nav navbar-nav">
+          <li>
+            <a [routerLink]="['Records']">Records</a>
+          </li>
+          <li>
+            <a [routerLink]="['Domains']">Domains</a>
+          </li>
+          <li>
+            <a>My Tasks</a>
+          </li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+          <li>
+            <button [routerLink]="['AddRecord']" type="button" class="btn btn-success navbar-btn">Add record</button>
+          </li>
+          <li>
+            <a [routerLink]="['Logout']">Logout ({{ username }})</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</nav>
+<div class="container main">
+  <router-outlet></router-outlet>
+</div>

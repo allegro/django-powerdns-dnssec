@@ -1,0 +1,53 @@
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Records</h3>
+    <div class="btn-group btn-group-xs pull-right" role="group">
+      <button (click)="onSelectShowAllRecords()" type="button" class="btn {{ showAllRecords ? 'btn-default': 'btn-primary' }}">my recrods</button>
+      <button (click)="onSelectShowAllRecords('all')" type="button" class="btn {{ !showAllRecords ? 'btn-default': 'btn-primary' }}">all records</button>
+    </div>
+  </div>
+  <div class="panel-body">
+    <div *ngIf="errorMessage" class="alert alert-success alert-danger">
+      {{ errorMessage }}
+    </div>
+    <table class="table table-striped table-hover">
+      <thead>
+         <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Content</th>
+            <th>Owner</th>
+            <th>Delete</th>
+         </tr>
+      </thead>
+       <tbody>
+        <tr *ngFor="let record of records" class="{{ showAllRecords && activeUser == record.owner ? 'success': '' }}">
+            <td (click)="onSelect(record)" style="cursor:pointer;">
+              {{ record.name }}
+            </td>
+            <td>
+              {{ record.type }}
+            </td>
+            <td>
+              {{ record.content | slice:0:50 }}{{ record.content.length > 50 ? '...' : '' }}
+            </td>
+            <td>
+              {{ record.owner }}
+            </td>
+            <td>
+              <a class="btn btn-danger btn-xs" (click)="deleteConfirm(record)">Delete</a>
+            </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="panel-footer">
+    <pagination
+      routeName="Records"
+      [totalCount]="totalCount"
+      [perPage]="perPage"
+      [additionalRouteParams]="additionalRouteParams"
+      [currentOffset]="currentOffset">
+    </pagination>
+  </div>
+</div>

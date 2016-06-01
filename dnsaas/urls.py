@@ -22,6 +22,7 @@ from powerdns.views import (
     RecordRequestsViewSet,
     TsigKeysViewSet,
 )
+from ui.views import start_page
 
 title = settings.SITE_TITLE
 title_v = ' '.join([title, VERSION])
@@ -47,6 +48,7 @@ router.register(r'tsigkeys', TsigKeysViewSet)
 urlpatterns = patterns(
     '',
     url(r'^$', HomeView.as_view()),
+    url(r'^ui$', start_page),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^api/', include(router.urls)),
     url(r'^api-token-auth/', obtain_auth_token),

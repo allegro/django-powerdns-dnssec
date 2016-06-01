@@ -1,0 +1,23 @@
+ <div class="row">
+  <div class="col-md-4 col-md-offset-4">
+    <div class="panel panel-default" id="login">
+      <div class="panel-heading">
+        <h3 class="panel-title">DNSaaS</h3>
+      </div>
+      <div class="panel-body">
+        <form (ngSubmit)="onSubmit()">
+          <div class="form-group">
+            <label for="name">Login</label>
+            <input type="text"  class="form-control" required [(ngModel)]="user.username" >
+          </div>
+          <div class="form-group">
+            <label for="name">Password</label>
+            <input type="password" class="form-control" required [(ngModel)]="user.password" >
+          </div>
+          <button type="submit" class="btn btn-primary">Login</button>
+        </form>
+      </div>
+  </div>
+</div>
+</div>
+

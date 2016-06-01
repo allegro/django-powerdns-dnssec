@@ -1,0 +1,21 @@
+<html>
+<head>
+  <title>DNSaaS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/static/lib/bootstrap/dist/css/bootstrap.min.css">
+  <script type="text/javascript" src="/static/lib/jquery/dist/jquery.min.js"></script>
+  <script src="/static/lib/es6-shim/es6-shim.min.js"></script>
+  <script src="/static/lib/zone.js/dist/zone.js?main=browser"></script>
+  <script src="/static/lib/reflect-metadata/Reflect.js"></script>
+  <script src="/static/lib/systemjs/dist/system.src.js"></script>
+  <script src="/static/systemjs.config.js"></script>
+  <script>
+    System.import('/static/dist/main').then(null, console.error.bind(console));
+  </script>
+</head>
+<base href="/">
+<body>
+  <dnsaas-app>Loading...</dnsaas-app>
+  <script src="/static/lib/bootstrap/dist/js/bootstrap.min.js"></script>
+</body>
+</html>

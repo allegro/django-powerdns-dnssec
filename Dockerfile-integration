@@ -8,6 +8,7 @@ ADD README.rst dnsaas-source/README.rst
 ADD version.json dnsaas-source/version.json
 ADD powerdns dnsaas-source/powerdns
 ADD dnsaas dnsaas-source/dnsaas
+ADD ui dnsaas-source/ui
 ADD manage.py dnsaas-source/manage.py
 RUN cd dnsaas-source && python3.4 setup.py install 
 ADD integration-tests integration-tests
