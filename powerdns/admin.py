@@ -26,6 +26,7 @@ from rules.contrib.admin import ObjectPermissionsModelAdmin
 from threadlocals.threadlocals import get_current_user
 
 
+from powerdns.models.powerdns import can_delete, can_edit
 from powerdns.models.templates import (
     DomainTemplate,
     RecordTemplate,
@@ -139,6 +140,12 @@ class OwnedAdmin(ForeignKeyAutocompleteAdmin, ObjectPermissionsModelAdmin):
 
 
 class RecordAdmin(OwnedAdmin, CopyingAdmin):
+    def has_delete_permission(self, request, obj=None):
+        return can_delete(request.user, obj)
+
+    def has_change_permission(self, request, obj=None):
+        return can_edit(request.user, obj)
+
     form = RecordAdminForm
     list_display = (
         'name',

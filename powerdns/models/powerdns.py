@@ -284,6 +284,16 @@ class Domain(TimeTrackable, Owned, WithRequests):
         )
         yield (self.add_record_url(authorised), 'Add record')
 
+    def can_auto_accept(self, user):
+        return (
+            user.is_superuser or
+            self.unrestricted or
+            user == self.owner or
+            user.id in self.authorisations.values_list(
+                'authorised', flat=True
+            )
+        )
+
 
 rules.add_perm('powerdns', rules.is_authenticated)
 rules.add_perm('powerdns.add_domain', rules.is_superuser)
@@ -389,6 +399,58 @@ class Record(TimeTrackable, Owned, RecordLike, WithRequests):
         unique_together = ('name', 'type', 'content')
         verbose_name = _("record")
         verbose_name_plural = _("records")
+
+    @property
+    def opened_requests(self):
+        from powerdns.models import RequestStates
+        return self.requests.filter(state=RequestStates.OPEN.id).all()
+
+    def request_factory(operation):
+        def result(self):
+            def fmt(str_, **kwargs):
+                return str_.format(
+                    obj=type(self)._meta.object_name.lower(),
+                    opr=operation,
+                    **kwargs
+                )
+
+            if (
+                get_current_user().has_perm(
+                    fmt('powerdns.{opr}_{obj}'), self
+                ) and
+                can_edit(get_current_user(), self) or
+                can_delete(get_current_user(), self)
+            ):
+                return '<a href={}>{}</a>'.format(
+                    reverse(
+                        fmt('admin:powerdns_{obj}_{opr}'),
+                        args=(self.pk,)
+                    ),
+                    operation.capitalize()
+                )
+            if operation == 'delete':
+                return '<a href="{}">Request deletion</a>'.format(
+                    reverse(
+                        fmt('admin:powerdns_deleterequest_add')
+                    ) + '?target_id={}&content_type={}'.format(
+                        self.pk,
+                        ContentType.objects.get_for_model(type(self)).pk,
+                    )
+                )
+
+            return '<a href="{}">Request change</a>'.format(
+                reverse(
+                    fmt('admin:powerdns_{obj}request_add')
+                ) + '?{}={}'.format(
+                    type(self)._meta.object_name.lower(),
+                    self.pk
+                )
+            )
+        result.allow_tags = True
+        result.__name__ = 'request_' + operation
+        return result
+    request_change = request_factory('change')
+    request_deletion = request_factory('delete')
 
     def __str__(self):
         if self.prio is not None:
@@ -539,9 +601,19 @@ class Record(TimeTrackable, Owned, RecordLike, WithRequests):
             owner=self.owner,
         )
 
+    def can_auto_accept(self, user):
+        return (
+            user.is_superuser or
+            user == self.owner or
+            user.id in self.authorisations.values_list(
+                'authorised', flat=True
+            )
+        )
+
+
 rules.add_perm('powerdns.add_record', rules.is_authenticated)
-rules.add_perm('powerdns.change_record', can_edit)
-rules.add_perm('powerdns.delete_record', can_delete)
+rules.add_perm('powerdns.change_record', rules.is_authenticated)
+rules.add_perm('powerdns.delete_record', rules.is_authenticated)
 
 
 # When we delete a record, the zone changes, but there no change_date is

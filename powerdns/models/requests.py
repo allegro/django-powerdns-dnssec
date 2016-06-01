@@ -1,5 +1,7 @@
 """Model for change requests"""
 
+import logging
+
 from django.db import models
 from django.conf import settings
 from django.core.urlresolvers import reverse
@@ -17,6 +19,9 @@ from powerdns.models import (
     Record
 )
 from powerdns.utils import AutoPtrOptions, RecordLike
+
+
+log = logging.getLogger(__name__)
 
 
 class RequestStates(Choices):
@@ -101,6 +106,21 @@ class ChangeCreateRequest(Request):
         self.state = RequestStates.ACCEPTED
         self.save()
         return object_
+
+    def copy_records_data(self, fields_to_copy):
+        """Sets data from `fields_to_copy` on self
+
+        args:
+            fields_to_copy: [(key, value), ..]
+        """
+        all_fields = self._meta.get_all_field_names()
+        for field_name, value in fields_to_copy:
+            if field_name in all_fields:
+                setattr(self, field_name, value)
+            elif 'target_' + field_name in all_fields:
+                setattr(self, 'target_' + field_name, value)
+            else:
+                log.warning("Unknown field")
 
 
 class DomainRequest(ChangeCreateRequest):
@@ -242,6 +262,8 @@ class RecordRequest(ChangeCreateRequest, RecordLike):
     )
     record = models.ForeignKey(
         Record,
+        # these two used for history purpose
+        on_delete=models.DO_NOTHING, db_constraint=False,
         related_name='requests',
         null=True,
         blank=True,
@@ -319,5 +341,9 @@ class RecordRequest(ChangeCreateRequest, RecordLike):
         else:
             return Record(domain=self.domain, owner=self.owner)
 
+    def accept_and_assign_record(self):
+        record = self.accept()
+        self.record = record
+        self.save()
 
 rules.add_perm('powerdns.add_recordrequest', rules.is_authenticated)

@@ -3,13 +3,23 @@
 import functools as ft
 
 import factory
+from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from factory.django import DjangoModelFactory
 from rest_framework.test import APIClient
 
 from powerdns.models.powerdns import Record, Domain
+from powerdns.models.requests import RecordRequest
 from powerdns.models.templates import RecordTemplate, DomainTemplate
+
+
+class UserFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = User
+        django_get_or_create = ('username',)
+
+    username = factory.Sequence(lambda n: "user_%d" % n)
 
 
 class DomainTemplateFactory(DjangoModelFactory):
@@ -36,6 +46,16 @@ class RecordFactory(DjangoModelFactory):
         model = Record
 
     domain = factory.SubFactory(DomainFactory)
+    owner = factory.SubFactory(UserFactory)
+
+
+class RecordRequestFactory(DjangoModelFactory):
+    class Meta:
+        model = RecordRequest
+
+    record = factory.SubFactory(RecordFactory)
+    domain = factory.SubFactory(DomainFactory)
+    owner = factory.SubFactory(UserFactory)
 
 
 class RecordTestCase(TestCase):

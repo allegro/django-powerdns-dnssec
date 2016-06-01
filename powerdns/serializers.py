@@ -7,6 +7,7 @@ from powerdns.models import (
     DomainMetadata,
     DomainTemplate,
     Record,
+    RecordRequest,
     RecordTemplate,
     SuperMaster,
 )
@@ -39,6 +40,18 @@ class DomainSerializer(OwnerSerializer):
         read_only_fields = ('notified_serial',)
 
 
+class RecordRequestSerializer(OwnerSerializer):
+    target_owner = SlugRelatedField(
+        slug_field='username',
+        queryset=User.objects.all(),
+        allow_null=True,
+        required=False,
+    )
+
+    class Meta:
+        model = RecordRequest
+
+
 class RecordSerializer(OwnerSerializer):
 
     id = ReadOnlyField()
@@ -51,6 +64,13 @@ class RecordSerializer(OwnerSerializer):
         queryset=Domain.objects.all(),
         view_name='domain-detail',
         validators=[DomainForRecordValidator()],
+    )
+
+
+class RecordSerializerV2(RecordSerializer):
+    domain = HyperlinkedRelatedField(
+        queryset=Domain.objects.all(),
+        view_name='domain-detail',
     )
 
 

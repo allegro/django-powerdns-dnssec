@@ -177,6 +177,9 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_PAGINATION_CLASS':
         'rest_framework.pagination.LimitOffsetPagination',
+    'DEFAULT_VERSIONING_CLASS':
+        'rest_framework.versioning.AcceptHeaderVersioning',
+    'DEFAULT_VERSION': 'v1',
     'PAGE_SIZE': 50,
 }
 
