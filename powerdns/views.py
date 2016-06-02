@@ -2,6 +2,7 @@
 import logging
 
 from django.core.urlresolvers import reverse
+from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import redirect
 from django.views.generic.base import TemplateView
@@ -23,6 +24,7 @@ from rest_framework.filters import DjangoFilterBackend
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from rest_framework.permissions import DjangoObjectPermissions
 from rest_framework.response import Response
+from rest_framework.authtoken.models import Token
 
 from powerdns.models.powerdns import can_delete, can_edit
 from powerdns.models.requests import RequestStates
@@ -40,6 +42,10 @@ from powerdns.serializers import (
 )
 from powerdns.utils import VERSION, to_reverse
 from powerdns.models.tsigkeys import TsigKey
+from rest_framework.authtoken.views import ObtainAuthToken
+
+
+log = logging.getLogger(__name__)
 
 
 log = logging.getLogger(__name__)
@@ -298,6 +304,21 @@ class TsigKeysViewSet(FiltersMixin, ModelViewSet):
     queryset = TsigKey.objects.all()
     serializer_class = TsigKeysTemplateSerializer
     filter_fields = ('name', 'secret')
+
+
+class ObtainAuthToken(ObtainAuthToken):
+    @transaction.atomic
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({
+            'user_id': user.id,
+            'token': token.key,
+            'user': user.get_full_name() or user.username,
+        })
+obtain_auth_token = ObtainAuthToken.as_view()
 
 
 class HomeView(TemplateView):
