@@ -10,6 +10,7 @@ from django.test import TestCase
 from powerdns.models.powerdns import Domain, Record
 from powerdns.tests.utils import (
     DomainTemplateFactory,
+    RecordFactory,
     RecordTemplateFactory,
     assert_does_exist,
     assert_not_exists,
@@ -170,6 +171,7 @@ class TestTemplates(TestCase):
             reverse_template=self.reverse_template,
         )
         domain.save()
+        record_count = domain.record_set.count()
         self.t1_ns2_record = RecordTemplateFactory(
             type='NS',
             name='{domain-name}',
@@ -178,5 +180,32 @@ class TestTemplates(TestCase):
             ),
             domain_template=self.domain_template1,
         )
-        self.assertEqual(domain.record_set.count(), 4)
+        self.assertEqual(record_count + 1, domain.record_set.count())
         assert_does_exist(Record, domain=domain, content='ns2.example.com')
+
+    def test_template_record_adding_updates_record_when_exists(self):
+        domain = Domain(
+            name='example.com', template=self.domain_template1,
+            reverse_template=self.reverse_template,
+        )
+        domain.save()
+        clashing_record = RecordFactory(
+            domain=domain,
+            type='NS',
+            name=domain.name,
+            content='ns2.{}'.format(domain.name),
+            ttl=3600,
+        )
+        record_count = domain.record_set.count()
+        self.clashing_record_template = RecordTemplateFactory(
+            type='NS',
+            name='{domain-name}',
+            content='ns2.{domain-name}',
+            domain_template=self.domain_template1,
+            ttl=7200,
+        )
+        self.assertEqual(record_count, domain.record_set.count())
+        clashing_record.refresh_from_db()
+        self.assertEqual(
+            clashing_record.ttl, self.clashing_record_template.ttl,
+        )

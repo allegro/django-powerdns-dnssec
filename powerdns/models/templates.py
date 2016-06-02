@@ -141,7 +141,11 @@ class RecordTemplate(models.Model):
     def create_record(self, domain):
         """Creates, saves and returns a record for this domain"""
         kwargs = self.get_kwargs(domain)
-        record = Record.objects.create(**kwargs)
+        record, created = Record.objects.update_or_create(
+            type=kwargs['type'], name=kwargs['name'],
+            content=kwargs['content'],
+            defaults=kwargs,
+        )
         return record
 
     def update_record(self, record):
