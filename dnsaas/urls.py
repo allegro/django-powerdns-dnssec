@@ -4,13 +4,13 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 from django.conf import settings
 from rest_framework.routers import DefaultRouter
-from rest_framework.authtoken.views import obtain_auth_token
 
 from powerdns.utils import VERSION
 from powerdns.views import (
     accept_domain_request,
     accept_record_request,
     accept_delete_request,
+    obtain_auth_token,
     CryptoKeyViewSet,
     DomainMetadataViewSet,
     DomainViewSet,
@@ -51,7 +51,7 @@ urlpatterns = patterns(
     url(r'^ui$', start_page),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^api/', include(router.urls)),
-    url(r'^api-token-auth/', obtain_auth_token),
+    url(r'^api-token-auth/', obtain_auth_token, name='get-api-token'),
     url(r'^api-docs/', include('rest_framework_swagger.urls')),
     url(r'^autocomplete/', include('autocomplete_light.urls')),
     url(

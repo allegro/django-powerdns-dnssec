@@ -19,6 +19,7 @@ from powerdns.tests.utils import (
     DomainTemplateFactory,
     RecordFactory,
     RecordRequestFactory,
+    UserFactory
 )
 from powerdns.utils import AutoPtrOptions
 from powerdns.views import RecordViewSet
@@ -331,3 +332,30 @@ class TestRecords(BaseApiTestCase):
             ).count(),
             0,
         )
+
+
+class TestObtainAuthToken(TestCase):
+
+    def setUp(self):  # noqa
+        self.client = APIClient()  # do not login
+        self.user = UserFactory()
+
+    def test_should_return_token_when_correct_credentials_were_sent(self):
+        response = self.client.post(
+            reverse('get-api-token'),
+            {'username': self.user.username, 'password': 'password'},
+            format='json',
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.data['token'],
+            str(self.user.auth_token),
+        )
+
+    def test_should_return_400_when_incorrect_credentials_were_sent(self):
+        response = self.client.post(
+            reverse('get-api-token'),
+            {'username': self.user.username, 'password': 'bad-password'},
+            format='json',
+        )
+        self.assertEqual(response.status_code, 400)

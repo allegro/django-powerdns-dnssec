@@ -21,6 +21,13 @@ class UserFactory(factory.django.DjangoModelFactory):
 
     username = factory.Sequence(lambda n: "user_%d" % n)
 
+    @classmethod
+    def _generate(cls, create, attrs):
+        user = super(UserFactory, cls)._generate(create, attrs)
+        user.set_password('password')
+        user.save()
+        return user
+
 
 class DomainTemplateFactory(DjangoModelFactory):
     class Meta:
