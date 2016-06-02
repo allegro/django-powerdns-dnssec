@@ -44,7 +44,7 @@ export class RecordService {
   }
 
   deleteRecord(record: Record) {
-    let url: string = `/api/records/${record.id};`;
+    let url: string = `/api/records/${record.id}/`;
     return this.http.delete(url).catch(this.handleError);
   }
 

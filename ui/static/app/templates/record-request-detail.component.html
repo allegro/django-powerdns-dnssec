@@ -1,0 +1,36 @@
+<div class="page-header">
+  <h1>Record Request</h1>
+</div>
+<div class="panel panel-default">
+  <div class="panel-heading">
+  </div>
+  <div class="panel-body">
+    <div *ngIf="errorMessage" class="alert alert-success alert-danger">
+        {{ errorMessage }}
+    </div>
+    
+    <table class="table table-striped table-hover" *ngIf="recordRequest">
+      <tbody>
+        <tr>
+          <td>Name</td><td>{{ recordRequest.target_name }}</td>
+        </tr>
+        <tr>
+          <td>Type</td><td>{{ recordRequest.target_type }}</td>
+        </tr>
+        <tr>
+          <td>Content</td><td>{{ recordRequest.target_content }}</td>
+        </tr>
+        <tr>
+          <td>Priority</td><td>{{ recordRequest.target_prio }}</td>
+        </tr>
+        <tr>
+          <td>TTL</td><td>{{ recordRequest.target_ttl }}</td>
+        </tr>
+        <tr>
+          <td>Remarks</td><td>{{ recordRequest.target_remarks }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="panel-footer"></div>
+</div>

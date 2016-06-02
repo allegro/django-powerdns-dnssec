@@ -2,6 +2,8 @@ import { Component, OnInit } from "@angular/core";
 import { FormBuilder, FORM_DIRECTIVES, Control, ControlGroup, Validators } from "@angular/common";
 import { CanActivate, Router, RouteParams } from "@angular/router-deprecated";
 import { HTTP_PROVIDERS } from "@angular/http";
+import { AuthService } from "../auth/auth.service";
+import { TooltipDirective } from "../tooltip.directive";
 import { AutocompleteComponent } from "../autocomplete/autocomplete.component";
 import { DomainService } from "../domain/domain.service";
 import { RecordService } from "./record.service";
@@ -13,7 +15,7 @@ import "rxjs/add/observable/throw";
 @Component({
   templateUrl: "/static/app/templates/record-detail.component.html",
   providers: [HTTP_PROVIDERS, RecordService, DomainService],
-  directives: [FORM_DIRECTIVES, AutocompleteComponent],
+  directives: [FORM_DIRECTIVES, AutocompleteComponent, TooltipDirective],
   styles: [".ng-invalid { border-color:#ebccd1;}"]
 })
 @CanActivate(() => isLoggedin())
@@ -32,10 +34,9 @@ export class RecordDetailComponent implements OnInit {
       private routeParams: RouteParams,
       private recordService: RecordService,
       private domainService: DomainService,
+      private authService: AuthService,
       private formBuilder: FormBuilder
     ) {
-        // name: If IP is private and domain is public raise Validation Error,
-        // validated by API
         this.recordForm = formBuilder.group({
           name: ["", Validators.required],
           content: ["", Validators.required],
@@ -50,6 +51,7 @@ export class RecordDetailComponent implements OnInit {
       let recordId: any = this.routeParams.get("id");
       if (!recordId) {
         this.record = new Record();
+        this.record.owner = this.authService.getUsername();
         this.isCreate = true;
       } else {
         this.isCreate = false;
@@ -69,13 +71,7 @@ export class RecordDetailComponent implements OnInit {
       if (this.recordForm.valid) {
         this.recordService.updateOrCreateRecord(this.record).subscribe(
           record => {
-            if (this.isCreate) {
-              this.router.navigate(["Records"]);
-            }
-            this.record = record;
-            this.isMxRecord = (record.type === "MX") ? true : false;
-            this.errorMessage = "";
-            this.save = true;
+            this.router.navigate(["Records"]);
           },
           error => this.errorMessage = <any>error
         );

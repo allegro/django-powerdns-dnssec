@@ -6,14 +6,14 @@
     <div id="navbar" class="collapse navbar-collapse">
        <div [style.display]="isLoggedIn ? 'block' : 'none'">
         <ul class="nav navbar-nav">
-          <li>
+          <li [class.active]="router.isRouteActive(router.generate(['/Records']))">
             <a [routerLink]="['Records']">Records</a>
           </li>
-          <li>
+          <li [class.active]="router.isRouteActive(router.generate(['/Domains']))">
             <a [routerLink]="['Domains']">Domains</a>
           </li>
-          <li>
-            <a>My Tasks</a>
+          <li [class.active]="router.isRouteActive(router.generate(['/RecordRequests']))">
+            <a [routerLink]="['RecordRequests']">My Requests</a>
           </li>
         </ul>
         <ul class="nav navbar-nav navbar-right">

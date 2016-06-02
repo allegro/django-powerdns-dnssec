@@ -148,6 +148,31 @@ class TestRecords(BaseApiTestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
 
+    def test_validation_ip_address_if_domain_is_public(self):
+        domain = DomainFactory(
+            name='example2.com', owner=self.regular_user2,
+            template=DomainTemplateFactory(
+                is_public_domain=True, name="Public"
+            )
+        )
+        self.client.login(username='regular_user1', password='regular_user1')
+
+        data = {
+            'type': 'A',
+            'domain': '/api/domains/' + str(domain.id) + '/',
+            'name': 'example2.com',
+            'content': '10.0.0.0',
+        }
+        response = self.client.post(
+            reverse('record-list'), data, format='json',
+            **{'HTTP_ACCEPT': 'application/json; version=v2'}
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            response.data['non_field_errors'],
+            ['IP address can not be private.']
+        )
+
     #
     # updates
     #

@@ -83,11 +83,11 @@ class DomainViewSet(OwnerViewSet):
     permission_classes = (DomainPermission,)
 
 
-class RecordRequestsViewSet(ReadOnlyModelViewSet):
+class RecordRequestsViewSet(FiltersMixin, ReadOnlyModelViewSet):
     queryset = RecordRequest.objects.all().select_related(
         'owner', 'domain', 'record', 'target_owner',
-    )
-    filter_fields = ('owner',)
+    ).order_by('-id')
+    filter_fields = ('owner', 'state')
     serializer_class = RecordRequestSerializer
 
 
