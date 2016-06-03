@@ -30,6 +30,8 @@ export class AuthService {
         if (res.token) {
           this.localStorage.set("auth_token", res.token);
           this.localStorage.set("auth_username", username);
+          this.localStorage.set("auth_user_id", res.user_id);
+          this.localStorage.set("auth_user_fullname", res.user);
           return true;
         }
         return false;
@@ -51,6 +53,10 @@ export class AuthService {
 
   getUsername(): string {
     return this.localStorage.get("auth_username");
+  }
+
+  getUserId(): number {
+    return Number(this.localStorage.get("auth_user_id"));
   }
 }
 

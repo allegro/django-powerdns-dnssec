@@ -6,7 +6,12 @@ import { AutocompleteServiceInterface } from "./autocomplete.service";
   selector: "autocomplete",
   templateUrl: "/static/app/autocomplete/autocomplete.component.html",
   styles: [`
-    a {cursor:pointer;} .label { font-size:13px;padding:5px;padding-left:10px;padding-right:10px; }
+    a {cursor:pointer;}
+    .empty-control { padding-top:8px; }
+    .label {
+      font-size:13px;padding:5px;padding-left:10px;padding-right:10px;margin-left: -9px;
+      background-color: rgba(153, 153, 149, 0.22);color:rgba(0, 0, 0, 0.66);
+    }
     .glyphicon { cursor:pointer }
   `]
 })

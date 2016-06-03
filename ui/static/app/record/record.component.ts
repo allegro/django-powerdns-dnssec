@@ -12,7 +12,14 @@ import "rxjs/add/observable/throw";
   templateUrl: "/static/app/templates/record.component.html",
   providers: [HTTP_PROVIDERS, RecordService],
   directives: [PaginationComponent],
-  styles: ["h3 {float: left;} .panel-heading {overflow:hidden;}"]
+  styles: [`
+    .panel-heading {overflow:hidden;} td { cursor:pointer;}
+    .legend {float:left;padding-top:5px;}
+    .legend span {
+      background-color: #dff0d8;width:20px;height:20px;
+      border: 1px solid #ddd;margin-right:5px;
+    }
+  `]
 })
 @CanActivate(() => isLoggedin())
 export class RecordComponent implements OnInit {
@@ -47,7 +54,7 @@ export class RecordComponent implements OnInit {
     params.set("offset",  String(this.currentOffset));
 
     if (!this.showAllRecords) {
-      params.set("owner", "1"); // TODO: change to a user ID
+      params.set("owner", String(this.authService.getUserId()));
     }
 
     this.recordService.getRecords(params).map(

@@ -1,4 +1,5 @@
 """Serializer classes for DNSaaS API"""
+import ipaddress
 
 from django.contrib.auth.models import User
 from powerdns.models import (
@@ -17,6 +18,7 @@ from rest_framework.serializers import(
     HyperlinkedRelatedField,
     SlugRelatedField,
     ReadOnlyField,
+    ValidationError,
 )
 from powerdns.utils import DomainForRecordValidator
 from powerdns.models.tsigkeys import TsigKey
@@ -42,6 +44,8 @@ class DomainSerializer(OwnerSerializer):
 
 
 class RecordRequestSerializer(OwnerSerializer):
+
+    id = ReadOnlyField()
     target_owner = SlugRelatedField(
         slug_field='username',
         queryset=User.objects.all(),
@@ -74,6 +78,21 @@ class RecordSerializerV2(RecordSerializer):
         queryset=Domain.objects.all(),
         view_name='domain-detail',
     )
+
+    def validate(self, attrs):
+        domain, content, record_type = (
+            attrs.get('domain'), attrs.get('content'), attrs.get('type')
+        )
+        if (
+            domain and domain.template and
+            domain.template.is_public_domain and
+            content and record_type == 'A'
+        ):
+            address = ipaddress.ip_address(content)
+            if address.is_private:
+                raise ValidationError('IP address can not be private.')
+
+        return attrs
 
 
 class CryptoKeySerializer(HyperlinkedModelSerializer):

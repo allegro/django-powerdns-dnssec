@@ -1,8 +1,13 @@
+<div class="page-header">
+  <h1>Records</h1>
+</div>
 <div class="panel panel-default">
   <div class="panel-heading">
-    <h3 class="panel-title">Records</h3>
-    <div class="btn-group btn-group-xs pull-right" role="group">
-      <button (click)="onSelectShowAllRecords()" type="button" class="btn {{ showAllRecords ? 'btn-default': 'btn-primary' }}">my recrods</button>
+    <div class="legend" [style.display]="showAllRecords ? 'block' : 'none'">
+      <span class="legend"></span> - Your records
+    </div>
+    <div class="btn-group btn-group-sm pull-right" role="group">
+      <button (click)="onSelectShowAllRecords()" type="button" class="btn {{ showAllRecords ? 'btn-default': 'btn-primary' }}">my records</button>
       <button (click)="onSelectShowAllRecords('all')" type="button" class="btn {{ !showAllRecords ? 'btn-default': 'btn-primary' }}">all records</button>
     </div>
   </div>
@@ -16,22 +21,26 @@
             <th>Name</th>
             <th>Type</th>
             <th>Content</th>
+            <th>TTL</th>
             <th>Owner</th>
             <th>Delete</th>
          </tr>
       </thead>
        <tbody>
         <tr *ngFor="let record of records" class="{{ showAllRecords && activeUser == record.owner ? 'success': '' }}">
-            <td (click)="onSelect(record)" style="cursor:pointer;">
+            <td (click)="onSelect(record)">
               {{ record.name }}
             </td>
-            <td>
+            <td (click)="onSelect(record)">
               {{ record.type }}
             </td>
-            <td>
+            <td (click)="onSelect(record)">
               {{ record.content | slice:0:50 }}{{ record.content.length > 50 ? '...' : '' }}
             </td>
-            <td>
+            <td (click)="onSelect(record)">
+              {{ record.ttl }}
+            </td>
+            <td (click)="onSelect(record)">
               {{ record.owner }}
             </td>
             <td>

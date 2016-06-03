@@ -216,7 +216,7 @@ class DomainAdmin(OwnedAdmin, CopyingAdmin):
         'account',
         'add_record_link',
         'request_change',
-        'request_deletion',
+        'request_deletion'
     )
     list_display_links = None
     list_filter = _domain_filters + ('created', 'modified')
@@ -276,7 +276,7 @@ class RecordTemplateInline(admin.StackedInline):
 
 class DomainTemplateAdmin(ForeignKeyAutocompleteAdmin):
     inlines = [RecordTemplateInline]
-    list_display = ['name', 'add_domain_link']
+    list_display = ['name', 'add_domain_link', 'is_public_domain']
 
 RECORD_LIST_FIELDS = (
     'name',

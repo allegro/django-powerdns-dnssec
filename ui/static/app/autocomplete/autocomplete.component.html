@@ -1,8 +1,10 @@
 <div class="dropdown">
-  <span class="label label-default" [style.display]="showLabel ? 'inline-block' : 'none'">
-    {{ value }} &nbsp;&nbsp;
-    <span class="glyphicon glyphicon-remove" aria-hidden="true" (click)="removeCurrent()"></span>
-  </span>
+  <div class="form-control empty-control" [style.display]="showLabel ? 'inline-block' : 'none'">
+    <span class="label label-default autocomplete-label">
+      {{ value }} &nbsp;&nbsp;
+      <span class="glyphicon glyphicon-remove" aria-hidden="true" (click)="removeCurrent()"></span>
+    </span>
+  </div>
   <input
     type="text"
     #autocomplete_search
