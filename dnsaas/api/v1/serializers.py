@@ -13,7 +13,6 @@ from powerdns.models import (
     SuperMaster,
 )
 from rest_framework.serializers import(
-    IntegerField,
     HyperlinkedModelSerializer,
     HyperlinkedRelatedField,
     SlugRelatedField,
@@ -60,11 +59,10 @@ class RecordRequestSerializer(OwnerSerializer):
 class RecordSerializer(OwnerSerializer):
 
     id = ReadOnlyField()
-    domain_id = IntegerField(source='domain.id', read_only=True)
 
     class Meta:
         model = Record
-        read_only_fields = ('change_date', 'ordername')
+        read_only_fields = ('change_date', 'ordername',)
 
     domain = HyperlinkedRelatedField(
         queryset=Domain.objects.all(),

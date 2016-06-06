@@ -17,7 +17,9 @@ from powerdns.tests.utils import (
 
 
 def get_url(model, obj_):
-    return reverse(model + '-detail', kwargs={'pk': obj_.pk})
+    return reverse(
+        'api:default:' + model + '-detail', kwargs={'pk': obj_.pk}
+    )
 
 
 get_domain_url = ft.partial(get_url, 'domain')
@@ -107,7 +109,7 @@ class TestPermissions(TestCase):
         """Normal user can create domain that is not a child of other domain.
         """
         request = self.u_client.post(
-            reverse('domain-list'),
+            reverse('api:default:domain-list'),
             {'name': 'example2.com'}
         )
         self.assertEqual(request.status_code, 403)
@@ -115,7 +117,7 @@ class TestPermissions(TestCase):
     def test_user_can_subdomain_her_own(self):
         """Normal user can create domain that is a child of domain she owns."""
         request = self.u_client.post(
-            reverse('domain-list'),
+            reverse('api:default:domain-list'),
             {'name': 'subdomain.u.example.com'}
         )
         self.assertEqual(request.status_code, 403)
@@ -124,7 +126,7 @@ class TestPermissions(TestCase):
         """Normal user can't create domain that is a child of not owned domain.
         """
         request = self.u_client.post(
-            reverse('domain-list'),
+            reverse('api:default:domain-list'),
             {'name': 'subdomain.su.example.com'}
         )
         self.assertEqual(request.status_code, 403)
@@ -169,7 +171,7 @@ class TestPermissions(TestCase):
     def test_su_can_create_records(self):
         """Superuser can create records in domain she doesn't own."""
         request = self.su_client.post(
-            reverse('record-list'),
+            reverse('api:default:record-list'),
             {
                 'name': 'site.u.example.com',
                 'content': '192.168.1.4',
@@ -183,7 +185,7 @@ class TestPermissions(TestCase):
     def test_user_can_create_records_in_her_domain(self):
         """Normal user can create records in domain she owns."""
         request = self.su_client.post(
-            reverse('record-list'),
+            reverse('api:default:record-list'),
             {
                 'name': 'site.u.example.com',
                 'content': '192.168.1.4',
@@ -198,7 +200,7 @@ class TestPermissions(TestCase):
         """Normal user can create records in domain that is marked as
         'unrestricted'."""
         request = self.u_client.post(
-            reverse('record-list'),
+            reverse('api:default:record-list'),
             {
                 'name': 'site.u.example.com',
                 'content': '192.168.1.4',
@@ -212,7 +214,7 @@ class TestPermissions(TestCase):
     def test_user_cant_create_records_in_other_domains(self):
         """Normal user can't create records in domain she doesn't own."""
         request = self.u_client.post(
-            reverse('record-list'),
+            reverse('api:default:record-list'),
             {
                 'name': 'site.u.example.com',
                 'content': '192.168.1.4',

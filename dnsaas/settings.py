@@ -119,6 +119,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'threadlocals.middleware.ThreadLocalMiddleware',
+    'dnsaas.api.middleware.VersionSwitch',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
@@ -178,7 +179,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS':
         'rest_framework.pagination.LimitOffsetPagination',
     'DEFAULT_VERSIONING_CLASS':
-        'rest_framework.versioning.AcceptHeaderVersioning',
+        'rest_framework.versioning.NamespaceVersioning',
     'DEFAULT_VERSION': 'v1',
     'PAGE_SIZE': 50,
 }
