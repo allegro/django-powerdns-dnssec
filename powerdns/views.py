@@ -44,7 +44,7 @@ class HomeView(TemplateView):
     DNSaaS solutions are encouraged however to create their own ones.
     """
 
-    template_name = "powerdns/home.html"
+    template_name = "admin/powerdns/home.html"
 
     def get_context_data(self, **kwargs):
 
