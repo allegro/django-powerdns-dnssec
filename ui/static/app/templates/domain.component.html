@@ -3,6 +3,23 @@
 </div>
 <div class="panel panel-default">
   <div class="panel-heading">
+    <div class="row">
+      <div class="col-md-6">
+        <div class="input-group">
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Search by name, owner"
+            value="{{ searchValue }}"
+            #searchInput
+            (keyup)="onKeyUp($event, searchInput.value)"
+          />
+          <div class="input-group-addon">
+            <span class="glyphicon glyphicon-search"></span>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
   <div class="panel-body">
     <div *ngIf="errorMessage" class="alert alert-success alert-danger">
@@ -40,6 +57,7 @@
       routeName="Domains"
       [totalCount]="totalCount"
       [perPage]="perPage"
+      [additionalRouteParams]="additionalRouteParams"
       [currentOffset]="currentOffset">
     </pagination>
   </div>

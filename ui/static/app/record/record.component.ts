@@ -1,9 +1,9 @@
 import { Component, OnInit } from "@angular/core";
 import { CanActivate, Router, RouteParams } from "@angular/router-deprecated";
 import { URLSearchParams, HTTP_PROVIDERS } from "@angular/http";
-import { RecordService } from "./record.service";
-import { Record } from "./record";
 import { AuthService, isLoggedin }  from "../auth/auth.service";
+import { Record } from "./record";
+import { RecordService } from "./record.service";
 import { PaginationComponent } from "../pagination/pagination.component";
 import "rxjs/add/observable/throw";
 
@@ -31,7 +31,11 @@ export class RecordComponent implements OnInit {
   totalCount: number;
   showAllRecords: boolean = false;
   activeUser: string;
-  additionalRouteParams: {[key: string]: string} = {"showAll": "false"};
+  searchValue: string;
+  additionalRouteParams: {[key: string]: string} = {
+    "showAll": "false",
+    "search": this.searchValue
+  };
 
   constructor(
     private router: Router,
@@ -47,6 +51,16 @@ export class RecordComponent implements OnInit {
     this.getRecords();
   }
 
+  onKeyUp(event: KeyboardEvent, value: string) {
+    if (value.length > 1) {
+      this.searchValue = value;
+      this.getRecords();
+    } else {
+      this.searchValue = null;
+      this.getRecords();
+    }
+  }
+
   getRecords() {
     let params: URLSearchParams = new URLSearchParams();
     this.currentOffset = Number(this.routeParams.get("offset"));
@@ -55,6 +69,9 @@ export class RecordComponent implements OnInit {
 
     if (!this.showAllRecords) {
       params.set("owner", String(this.authService.getUserId()));
+    }
+    if (this.searchValue) {
+      params.set("search", this.searchValue);
     }
 
     this.recordService.getRecords(params).map(

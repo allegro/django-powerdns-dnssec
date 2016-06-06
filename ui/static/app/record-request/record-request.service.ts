@@ -18,12 +18,12 @@ export class RecordRequestService {
 
   getRequests(search: URLSearchParams): Observable<Response> {
     search.set("owner", String(this.authService.getUserId()));
-    let url: string = "/api/record-requests/";
+    let url: string = "/api/v2/record-requests/";
     return this.http.get(url, search).catch(this.handleError);
   }
 
   getRequestById(id: string): Observable<RecordRequest> {
-    let url: string = `/api/record-requests/${id}/`;
+    let url: string = `/api/v2/record-requests/${id}/`;
     return this.http.get(url).map(
         this.extractSingleData
     ).catch(this.handleError);

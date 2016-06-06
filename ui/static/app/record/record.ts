@@ -3,8 +3,7 @@ import { Domain } from "../domain/domain";
 
 export class Record {
   public id: number;
-  public domain: string;
-  public domain_id: number; // TODO: remove if API will be ready!
+  public domain: number;
   public name: string;
   public content: string;
   public type: string;

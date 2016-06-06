@@ -1,5 +1,6 @@
 
 """Views and viewsets for DNSaaS API"""
+import django_filters
 import logging
 
 from django.core.urlresolvers import reverse
@@ -17,7 +18,7 @@ from powerdns.models import (
     SuperMaster,
 )
 from rest_framework import status
-from rest_framework.filters import DjangoFilterBackend
+from rest_framework import filters
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from rest_framework.permissions import DjangoObjectPermissions
 from rest_framework.response import Response
@@ -51,7 +52,7 @@ class DomainPermission(DjangoObjectPermissions):
 
 class FiltersMixin(object):
 
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (filters.DjangoFilterBackend,)
 
 
 class OwnerViewSet(FiltersMixin, ModelViewSet):
@@ -65,12 +66,22 @@ class OwnerViewSet(FiltersMixin, ModelViewSet):
             object_.email_owner(self.request.user)
 
 
+class DomainFilter(django_filters.FilterSet):
+    name = django_filters.CharFilter(name='name', lookup_type='icontains')
+
+    class Meta:
+        model = Domain
+        fields = ['name', 'owner', 'type']
+
+
 class DomainViewSet(OwnerViewSet):
 
     queryset = Domain.objects.all().select_related('owner')
     serializer_class = DomainSerializer
-    filter_fields = ('name', 'type', 'owner',)
     permission_classes = (DomainPermission,)
+    filter_backends = (filters.DjangoFilterBackend, filters.SearchFilter)
+    filter_class = DomainFilter
+    search_fields = ['name', 'owner__username']
 
 
 class RecordRequestsViewSet(FiltersMixin, ReadOnlyModelViewSet):
@@ -81,12 +92,26 @@ class RecordRequestsViewSet(FiltersMixin, ReadOnlyModelViewSet):
     serializer_class = RecordRequestSerializer
 
 
+class RecordFilter(django_filters.FilterSet):
+    content = django_filters.CharFilter(
+        name='content', lookup_type='icontains'
+    )
+    name = django_filters.CharFilter(
+        name='name', lookup_type='icontains'
+    )
+
+    class Meta:
+        model = Record
+        fields = ['name', 'content', 'domain', 'owner']
+
+
 class RecordViewSet(OwnerViewSet):
 
     queryset = Record.objects.all().select_related('owner', 'domain')
     serializer_class = RecordSerializer
-    filter_fields = ('name', 'content', 'domain', 'owner',)
-    search_fields = filter_fields
+    filter_backends = (filters.DjangoFilterBackend, filters.SearchFilter)
+    filter_class = RecordFilter
+    search_fields = ['name', 'content', 'domain__name', 'owner__username']
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)

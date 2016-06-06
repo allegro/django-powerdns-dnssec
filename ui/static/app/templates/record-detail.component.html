@@ -18,15 +18,14 @@
     <form *ngIf="record" [ngFormModel]="recordForm" (ngSubmit)="onSubmit()" class="form-horizontal">
       <fieldset>
       <div class="form-group">
-        <label for="domain_id" class="col-sm-2 control-label">Domain
+        <label for="domain" class="col-sm-2 control-label">Domain
           <span class="glyphicon glyphicon-info-sign" tooltip data-toggle="tooltip" data-placement="top" title="Use the left field to do Domain lookups in the fields name." aria-hidden="true"></span>
         </label>
         <div class="col-sm-6">
-          <!-- change domain_id to domain -->
           <autocomplete
             [forNgModel]="record"
             [service]="domainService"
-            ngModelField="domain_id"
+            ngModelField="domain"
             placeholder="Search domain">
           </autocomplete>
         </div>  

@@ -14,21 +14,20 @@ export class DomainService implements AutocompleteServiceInterface {
   constructor(private http: HttpClient) {}
 
   getDomains(search: URLSearchParams): Observable<Response> {
-    let url: string = "/api/domains/";
+    let url: string = "/api/v2/domains/";
     return this.http.get(url, search).catch(this.handleError);
   }
 
   getAutocompleteSearchResults(value: string): Observable<Domain[]> {
     let result: Array<{0: number, 1: string}> = [];
-    let url: string = "/api/domains/";
+    let url: string = "/api/v2/domains/";
     let params: URLSearchParams = new URLSearchParams();
-    params.set("domain_name", value);
-
+    params.set("name", value);
     return this.http.get(url, params).map(this.extractData).catch(this.handleError);
   }
 
   getAutocompleteCurrentValue(id: number): Observable<string> {
-      let url: string = `/api/domains/${id}/`;
+      let url: string = `/api/v2/domains/${id}/`;
       return this.http.get(url).map(
         response => {
           let json = response.json();

@@ -3,12 +3,33 @@
 </div>
 <div class="panel panel-default">
   <div class="panel-heading">
-    <div class="legend" [style.display]="showAllRecords ? 'block' : 'none'">
-      <span class="legend"></span> - Your records
-    </div>
-    <div class="btn-group btn-group-sm pull-right" role="group">
-      <button (click)="onSelectShowAllRecords()" type="button" class="btn {{ showAllRecords ? 'btn-default': 'btn-primary' }}">my records</button>
-      <button (click)="onSelectShowAllRecords('all')" type="button" class="btn {{ !showAllRecords ? 'btn-default': 'btn-primary' }}">all records</button>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="input-group">
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Search by name, content, domain name"
+            value="{{ searchValue }}"
+            #searchInput
+            (keyup)="onKeyUp($event, searchInput.value)"
+          />
+          <div class="input-group-addon">
+            <span class="glyphicon glyphicon-search"></span>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-2">
+        <div class="legend" [style.display]="showAllRecords ? 'block' : 'none'">
+          <span class="legend"></span> - Your records
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="btn-group btn-group-sm pull-right" role="group">
+          <button (click)="onSelectShowAllRecords()" type="button" class="btn {{ showAllRecords ? 'btn-default': 'btn-primary' }}">my records</button>
+          <button (click)="onSelectShowAllRecords('all')" type="button" class="btn {{ !showAllRecords ? 'btn-default': 'btn-primary' }}">all records</button>
+        </div>
+      </div>
     </div>
   </div>
   <div class="panel-body">

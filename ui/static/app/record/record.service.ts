@@ -14,25 +14,23 @@ export class RecordService {
   constructor(private http: HttpClient) { }
 
   getRecords(search: URLSearchParams): Observable<Response>  {
-    let url: string = "/api/records/";
+    let url: string = "/api/v2/records/";
     return this.http.get(url, search).catch(this.handleError);
   }
 
   getRecordById(id: string): Observable<Record> {
-    let url: string = `/api/records/${id}/`;
+    let url: string = `/api/v2/records/${id}/`;
     return this.http.get(url).map(
         this.extractSingleData
     ).catch(this.handleError);
   }
 
   updateOrCreateRecord(record: Record): Observable<Record> {
-    let url: string = "/api/records/";
-    // TODO change this to ID!
-    record.domain = `/api/domains/${record.domain_id}/`;
+    let url: string = "/api/v2/records/";
     let body = JSON.stringify(record);
     let request: any;
     if (record.id) {
-      url = `/api/records/${record.id}/`;
+      url = `/api/v2/records/${record.id}/`;
       request = this.http.patch(url, body);
     } else {
       request = this.http.post(url, body);
@@ -44,7 +42,7 @@ export class RecordService {
   }
 
   deleteRecord(record: Record) {
-    let url: string = `/api/records/${record.id}/`;
+    let url: string = `/api/v2/records/${record.id}/`;
     return this.http.delete(url).catch(this.handleError);
   }
 
