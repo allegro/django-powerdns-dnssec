@@ -1,6 +1,7 @@
 import { Injectable } from "@angular/core";
 import { URLSearchParams, Response } from "@angular/http";
 import { Observable } from "rxjs/Observable";
+import { ConfigService } from "../config.service";
 import { Record } from "./record";
 import { HttpClient } from "../http-client";
 
@@ -11,26 +12,29 @@ import "rxjs/add/operator/map";
 @Injectable()
 export class RecordService {
 
-  constructor(private http: HttpClient) { }
+  constructor(
+    private http: HttpClient,
+    private configervice: ConfigService
+  ) { }
 
   getRecords(search: URLSearchParams): Observable<Response>  {
-    let url: string = "/api/v2/records/";
+    let url: string = this.configervice.apiRecord;
     return this.http.get(url, search).catch(this.handleError);
   }
 
   getRecordById(id: string): Observable<Record> {
-    let url: string = `/api/v2/records/${id}/`;
+    let url: string = `${this.configervice.apiRecord}${id}/`;
     return this.http.get(url).map(
         this.extractSingleData
     ).catch(this.handleError);
   }
 
   updateOrCreateRecord(record: Record): Observable<Record> {
-    let url: string = "/api/v2/records/";
+    let url: string = this.configervice.apiRecord;
     let body = JSON.stringify(record);
     let request: any;
     if (record.id) {
-      url = `/api/v2/records/${record.id}/`;
+      url = `${this.configervice.apiRecord}${record.id}/`;
       request = this.http.patch(url, body);
     } else {
       request = this.http.post(url, body);
@@ -42,7 +46,7 @@ export class RecordService {
   }
 
   deleteRecord(record: Record) {
-    let url: string = `/api/v2/records/${record.id}/`;
+    let url: string = `${this.configervice.apiRecord}${record.id}/`;
     return this.http.delete(url).catch(this.handleError);
   }
 

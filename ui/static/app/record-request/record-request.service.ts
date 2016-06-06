@@ -1,6 +1,7 @@
 import { Injectable } from "@angular/core";
 import { URLSearchParams, Response } from "@angular/http";
 import { Observable } from "rxjs/Observable";
+import { ConfigService } from "../config.service";
 import { RecordRequest } from "./record-request";
 import { HttpClient } from "../http-client";
 import { AuthService } from "../auth/auth.service";
@@ -13,17 +14,18 @@ export class RecordRequestService {
 
   constructor(
     private http: HttpClient,
-    private authService: AuthService
+    private authService: AuthService,
+    private configService: ConfigService
   ) { }
 
   getRequests(search: URLSearchParams): Observable<Response> {
     search.set("owner", String(this.authService.getUserId()));
-    let url: string = "/api/v2/record-requests/";
+    let url: string = this.configService.apiRecordRequest;
     return this.http.get(url, search).catch(this.handleError);
   }
 
   getRequestById(id: string): Observable<RecordRequest> {
-    let url: string = `/api/v2/record-requests/${id}/`;
+    let url: string = `${this.configService.apiRecordRequest}${id}/`;
     return this.http.get(url).map(
         this.extractSingleData
     ).catch(this.handleError);

@@ -4,6 +4,7 @@ import { Observable } from "rxjs/Observable";
 import { HttpClient } from "../http-client";
 import { AutocompleteServiceInterface } from "../autocomplete/autocomplete.service";
 import { Domain } from "./domain";
+import { ConfigService } from "../config.service";
 import "rxjs/add/operator/catch";
 import "rxjs/add/operator/map";
 
@@ -11,23 +12,26 @@ import "rxjs/add/operator/map";
 @Injectable()
 export class DomainService implements AutocompleteServiceInterface {
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private configService: ConfigService
+  ) { }
 
   getDomains(search: URLSearchParams): Observable<Response> {
-    let url: string = "/api/v2/domains/";
+    let url: string = this.configService.apiDomain;
     return this.http.get(url, search).catch(this.handleError);
   }
 
   getAutocompleteSearchResults(value: string): Observable<Domain[]> {
     let result: Array<{0: number, 1: string}> = [];
-    let url: string = "/api/v2/domains/";
+    let url: string =  this.configService.apiDomain;
     let params: URLSearchParams = new URLSearchParams();
     params.set("name", value);
     return this.http.get(url, params).map(this.extractData).catch(this.handleError);
   }
 
   getAutocompleteCurrentValue(id: number): Observable<string> {
-      let url: string = `/api/v2/domains/${id}/`;
+      let url: string = `${this.configService.apiDomain}${id}/`;
       return this.http.get(url).map(
         response => {
           let json = response.json();
