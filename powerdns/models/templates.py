@@ -40,7 +40,7 @@ class DomainTemplate(models.Model):
             "to it without owner's permission?"
         )
     )
-    is_public_domain = models.BooleanField(default=False)
+    is_public_domain = models.BooleanField(default=True)
 
     record_auto_ptr = ChoiceField(
         choices=AutoPtrOptions,
