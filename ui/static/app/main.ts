@@ -6,6 +6,7 @@ import { Location, LocationStrategy, HashLocationStrategy } from "@angular/commo
 
 import { AppComponent } from "./app.component";
 import { AuthService } from "./auth/auth.service";
+import { ConfigService } from "./config.service";
 import { HttpClient } from "./http-client";
 import { LocalStorage } from "./local-storage";
 
@@ -16,5 +17,6 @@ bootstrap(AppComponent, [
   provide(LocationStrategy, { useClass: HashLocationStrategy }),
   provide(LocalStorage, { useClass: LocalStorage }),
   provide(AuthService, { useClass: AuthService }),
-  provide(HttpClient, { useClass: HttpClient})
+  provide(HttpClient, { useClass: HttpClient}),
+  provide(ConfigService, { useClass: ConfigService } ),
 ]);
