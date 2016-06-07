@@ -30,7 +30,7 @@ gulp.task('tslint', function() {
 });
 
 
-gulp.task("libs", () => {
+gulp.task("libs", function () {
     return gulp.src([
         'es6-shim/es6-shim.min.js',
         'systemjs/dist/system-polyfills.js',
@@ -46,7 +46,7 @@ gulp.task("libs", () => {
 });
 
 
-gulp.task("dev_libs", () => {
+gulp.task("dev_libs", function () {
     return gulp.src([
         'jasmine-core/lib/jasmine-core/jasmine.css',
         'jasmine-core/lib/jasmine-core/jasmine.js',
