@@ -11,8 +11,8 @@ from powerdns.models import (
     RecordRequest,
     RecordTemplate,
     SuperMaster,
-    ValidationError,
 )
+from rest_framework import serializers
 from rest_framework.serializers import(
     PrimaryKeyRelatedField,
     ReadOnlyField,
@@ -67,6 +67,18 @@ class RecordSerializer(OwnerSerializer):
         domain, content, record_type = (
             attrs.get('domain'), attrs.get('content'), attrs.get('type')
         )
+
+        if (
+            record_type == 'A'
+        ):
+            try:
+                ipaddress.ip_address(content)
+            except ValueError:
+                raise serializers.ValidationError(
+                    {'content':
+                     ['Content should be IP valid address when type="A".']}
+                )
+
         if (
             domain and domain.template and
             domain.template.is_public_domain and
@@ -74,7 +86,9 @@ class RecordSerializer(OwnerSerializer):
         ):
             address = ipaddress.ip_address(content)
             if address.is_private:
-                raise ValidationError('IP address can not be private.')
+                raise serializers.ValidationError(
+                    {'content': ['IP address cannot be private.']}
+                )
 
         return attrs
 

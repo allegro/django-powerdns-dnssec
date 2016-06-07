@@ -169,9 +169,51 @@ class TestRecords(BaseApiTestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
-            response.data['non_field_errors'],
-            ['IP address can not be private.']
+            response.data['content'], ['IP address cannot be private.']
         )
+
+    def test_user_is_set_correct_when_adding_record_with_owner(self):
+        self.client.login(username='super_user', password='super_user')
+        domain = DomainFactory(name='example.com', owner=self.super_user)
+        data = {
+            'type': 'cname'.upper(),
+            'domain': domain.id,
+            'name': 'example.com',
+            'content': '192.168.0.1',
+            'owner': self.regular_user1.username,
+        }
+        response = self.client.post(
+            reverse('api:v2:record-list'), data, format='json',
+            **{'HTTP_ACCEPT': 'application/json; version=v2'}
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['owner'], self.regular_user1.username)
+        record_request = RecordRequest.objects.get(
+            record__id=response.data['id'],
+        )
+        self.assertEqual(record_request.owner, self.super_user)
+        self.assertEqual(record_request.target_owner, self.regular_user1)
+
+    def test_user_is_set_correct_when_adding_record_without_owner(self):
+        self.client.login(username='super_user', password='super_user')
+        domain = DomainFactory(name='example.com', owner=self.super_user)
+        data = {
+            'type': 'cname'.upper(),
+            'domain': domain.id,
+            'name': 'example.com',
+            'content': '192.168.0.1',
+        }
+        response = self.client.post(
+            reverse('api:v2:record-list'), data, format='json',
+            **{'HTTP_ACCEPT': 'application/json; version=v2'}
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['owner'], self.super_user.username)
+        record_request = RecordRequest.objects.get(
+            record__id=response.data['id'],
+        )
+        self.assertEqual(record_request.owner, self.super_user)
+        self.assertEqual(record_request.target_owner, self.super_user)
 
     #
     # updates
@@ -284,6 +326,55 @@ class TestRecords(BaseApiTestCase):
             2,
         )
 
+    def test_user_is_set_correct_when_updating_record_with_owner(self):
+        self.client.login(username='super_user', password='super_user')
+        record = RecordFactory(
+            auto_ptr=AutoPtrOptions.NEVER.id,
+            type='A',
+            name='blog.com',
+            content='192.168.1.0',
+            owner=self.regular_user1,
+        )
+        new_name = 'new-' + record.name
+        response = self.client.patch(
+            reverse('api:v2:record-detail', kwargs={'pk': record.pk}),
+            data={
+                'name': new_name,
+                'owner': self.regular_user2.username,
+            },
+            format='json',
+            **{'HTTP_ACCEPT': 'application/json; version=v2'}
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        record.refresh_from_db()
+        self.assertEqual(record.owner, self.regular_user2)
+        record_request = RecordRequest.objects.get(record__id=record.id)
+        self.assertEqual(record_request.owner, self.super_user)
+        self.assertEqual(record_request.target_owner, self.regular_user2)
+
+    def test_user_is_set_correct_when_updating_record_without_owner(self):
+        self.client.login(username='super_user', password='super_user')
+        record = RecordFactory(
+            auto_ptr=AutoPtrOptions.NEVER.id,
+            type='A',
+            name='blog.com',
+            content='192.168.1.0',
+            owner=self.regular_user1,
+        )
+        new_name = 'new-' + record.name
+        response = self.client.patch(
+            reverse('api:v2:record-detail', kwargs={'pk': record.pk}),
+            data={'name': new_name},
+            format='json',
+            **{'HTTP_ACCEPT': 'application/json; version=v2'}
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        record.refresh_from_db()
+        self.assertEqual(record.owner, self.regular_user1)
+        record_request = RecordRequest.objects.get(record__id=record.id)
+        self.assertEqual(record_request.owner, self.super_user)
+        self.assertEqual(record_request.target_owner, None)
+
     #
     # deletion
     #
@@ -375,6 +466,40 @@ class TestRecords(BaseApiTestCase):
             ).count(),
             0,
         )
+
+
+class TestRecordValidation(BaseApiTestCase):
+    def test_validation_error_when_A_record_name_is_bad(self):
+        self.client.login(username='super_user', password='super_user')
+        domain = DomainFactory(name='example.com', owner=self.super_user)
+        data = {
+            'type': 'A',
+            'domain': domain.id,
+            'name': 'this-is-bad-bad-value-for-name',
+            'content': 'this-is-bad-bad-value-for-content',
+        }
+        response = self.client.post(
+            reverse('api:v2:record-list'), data, format='json',
+            **{'HTTP_ACCEPT': 'application/json; version=v2'}
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertTrue(response.data['name'])
+
+    def test_validation_error_when_A_record_content_is_bad(self):
+        self.client.login(username='super_user', password='super_user')
+        domain = DomainFactory(name='example.com', owner=self.super_user)
+        data = {
+            'type': 'A',
+            'domain': domain.id,
+            'name': 'www.' + domain.name,
+            'content': 'ThisIsBadBadValueForContent',
+        }
+        response = self.client.post(
+            reverse('api:v2:record-list'), data, format='json',
+            **{'HTTP_ACCEPT': 'application/json; version=v2'}
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertTrue(response.data['content'])
 
 
 class TestObtainAuthToken(TestCase):

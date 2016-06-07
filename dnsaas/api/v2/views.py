@@ -113,15 +113,21 @@ class RecordViewSet(OwnerViewSet):
     filter_class = RecordFilter
     search_fields = ['name', 'content', 'domain__name', 'owner__username']
 
+    def _set_owner(self, data):
+        if 'owner' not in data:
+            data['owner'] = self.request.user.username
+        return data
+
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+        serializer = self.get_serializer(
+            data=self._set_owner(request.data.copy())
+        )
         serializer.is_valid(raise_exception=True)
 
-        record_request = RecordRequest(
-            domain_id=serializer.validated_data['domain'],
-            owner_id=request.user.id,
-        )
+        record_request = RecordRequest()
         record_request.copy_records_data(serializer.validated_data.items())
+        record_request.owner = request.user
+        record_request.target_owner = serializer.validated_data['owner']
         record_request.save()
 
         if serializer.validated_data['domain'].can_auto_accept(
@@ -166,11 +172,7 @@ class RecordViewSet(OwnerViewSet):
                 headers={},
             )
 
-        record_request = RecordRequest(
-            domain_id=serializer.instance.domain_id,
-            owner_id=request.user.id,
-            record_id=serializer.instance.id,
-        )
+        record_request = RecordRequest()
         # in validated_data lands fields required by model, even if they
         # weren't changed, so filter it by matching validated vs initial
         data_to_copy = [
@@ -181,13 +183,19 @@ class RecordViewSet(OwnerViewSet):
             )
         ]
         record_request.copy_records_data(data_to_copy)
+        record_request.domain = serializer.instance.domain
+        record_request.owner = request.user
+        record_request.target_owner = serializer.validated_data.get('owner')
+        record_request.record = serializer.instance
         record_request.save()
 
         if (
-            serializer.instance.domain.can_auto_accept(self.request.user) and
+            serializer.instance.domain.can_auto_accept(request.user) and
             instance.can_auto_accept(request.user)
         ):
-            record_request.accept_and_assign_record()
+            record_request.state = RequestStates.ACCEPTED
+            record_request.save()
+            serializer.save()
             code = status.HTTP_200_OK
             headers = {}
         else:
@@ -218,11 +226,11 @@ class RecordViewSet(OwnerViewSet):
             )
 
         delete_request = DeleteRequest(
-            owner=self.request.user, target=instance,
+            owner=request.user, target=instance,
         )
         delete_request.save()
         if (
-            instance.domain.can_auto_accept(self.request.user) and
+            instance.domain.can_auto_accept(request.user) and
             instance.can_auto_accept(request.user)
         ):
             delete_request.accept()
