@@ -4,6 +4,7 @@ import { URLSearchParams } from "@angular/http";
 import { DomainService } from "./domain.service";
 import { Domain } from "./domain";
 import { isLoggedin }  from "../auth/auth.service";
+import { SearchComponent } from "../search.component";
 import { PaginationComponent } from "../pagination/pagination.component";
 import "rxjs/add/observable/throw";
 
@@ -14,33 +15,38 @@ import "rxjs/add/observable/throw";
   directives: [PaginationComponent]
 })
 @CanActivate(() => isLoggedin())
-export class DomainComponent implements OnInit {
+export class DomainComponent extends SearchComponent implements OnInit {
 
   domains: Domain[];
   errorMessage: string;
   currentOffset: number = 0;
-  perPage: number = 20;
+  perPage: number = 100;
   totalCount: number;
   searchValue: string;
   additionalRouteParams: {[key: string]: string} = {
-    "search": this.searchValue
+    "search": null
   };
 
   constructor(
     private domainService: DomainService,
     private router: Router,
     private routeParams: RouteParams
-  ) { }
+  ) {
+    super();
+  }
 
   ngOnInit() {
+    let url_offset: string = this.routeParams.get("offset");
+    this.currentOffset = url_offset ? Number(url_offset) : 0;
+    this.searchValue = this.routeParams.get("search");
     this.getDomains();
   }
 
   getDomains() {
     let params: URLSearchParams = new URLSearchParams();
-    this.currentOffset = Number(this.routeParams.get("offset"));
     params.set("limit", String(this.perPage));
-    params.set("offset",  String(this.currentOffset));
+    params.set("offset", String(this.currentOffset));
+    this.additionalRouteParams["search"] = this.searchValue;
 
     if (this.searchValue) {
       params.set("search", this.searchValue);
@@ -57,7 +63,8 @@ export class DomainComponent implements OnInit {
     );
   }
 
-  onKeyUp(event: KeyboardEvent, value: string) {
+  search(value: string) {
+    this.currentOffset = 0;
     if (value.length > 1) {
       this.searchValue = value;
       this.getDomains();

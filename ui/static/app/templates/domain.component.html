@@ -12,7 +12,7 @@
             placeholder="Search by name, owner"
             value="{{ searchValue }}"
             #searchInput
-            (keyup)="onKeyUp($event, searchInput.value)"
+            (keyup)="onKeyUpSearch($event, searchInput.value)"
           />
           <div class="input-group-addon">
             <span class="glyphicon glyphicon-search"></span>

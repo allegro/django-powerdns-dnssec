@@ -13,8 +13,14 @@ import { Router } from "@angular/router-deprecated";
               <span aria-hidden="true">&laquo;</span>
             </a>
           </li>
+          <li *ngIf="pages[0][1] > 1">
+            <a>...</a>
+          </li>
           <li *ngFor="let page of pages" [class.active]="page[0] == currentOffset">
             <a (click)="onSelect(page[0])">{{ page[1] }}</a>
+          </li>
+          <li *ngIf="pages[pages.length - 1][1] < allPages">
+            <a>...</a>
           </li>
           <li [style.display]="showNext ? 'inline' : 'none'">
             <a (click)="onSelect(nextOffset)" aria-label="Next">
@@ -28,13 +34,13 @@ import { Router } from "@angular/router-deprecated";
   styles: ["a { cursor:pointer; }"],
 })
 export class PaginationComponent {
-
   @Input() totalCount: number;
   @Input() perPage: number;
   @Input() currentOffset: number;
   @Input() routeName: string;
   @Input() additionalRouteParams: {[key: string]: string} = {};
 
+  allPages: number;
   nextOffset: number = 0;
   prevOffset: number = 0;
   showNext: boolean = false;
@@ -44,9 +50,29 @@ export class PaginationComponent {
 
   get pages(): Array<{0: number, 1: number}> {
     let result: Array<{0: number, 1: number}> = [];
-    let allPages: number = Number(Math.ceil(this.totalCount / this.perPage));
+    let startPage: number = 1;
+    let totalPage: number = Number(Math.ceil(this.totalCount / this.perPage));
+    this.allPages = totalPage;
+    let paginationLimit: number = 5;
 
-    for (let i: number = 1; i <= allPages; i++) {
+    if (totalPage > paginationLimit) {
+      let currentPage: number = 1;
+      if (this.currentOffset !== 0) {
+        currentPage = Math.ceil(this.currentOffset / this.perPage + 1);
+      }
+      startPage = currentPage - Math.floor(paginationLimit / 2);
+      if (startPage < 1) {
+        startPage = 1;
+      }
+      let endPage: number = startPage + paginationLimit - 1 ;
+      if (endPage < totalPage) {
+        totalPage = endPage;
+      } else {
+        startPage = totalPage - (paginationLimit - 1);
+      }
+    }
+
+    for (let i: number = startPage; i <= totalPage; i++) {
       let offset: number = (i - 1) * this.perPage;
       result.push([offset, i]);
     }

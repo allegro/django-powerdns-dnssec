@@ -5,6 +5,7 @@ import { AuthService, isLoggedin }  from "../auth/auth.service";
 import { Record } from "./record";
 import { RecordService } from "./record.service";
 import { PaginationComponent } from "../pagination/pagination.component";
+import { SearchComponent } from "../search.component";
 import "rxjs/add/observable/throw";
 
 
@@ -22,19 +23,19 @@ import "rxjs/add/observable/throw";
   `]
 })
 @CanActivate(() => isLoggedin())
-export class RecordComponent implements OnInit {
+export class RecordComponent extends SearchComponent implements OnInit {
 
   records: Record[];
   errorMessage: any;
   currentOffset: number = 0;
-  perPage: number = 20;
+  perPage: number = 100;
   totalCount: number;
   showAllRecords: boolean = false;
   activeUser: string;
   searchValue: string;
   additionalRouteParams: {[key: string]: string} = {
     "showAll": "false",
-    "search": this.searchValue
+    "search": null
   };
 
   constructor(
@@ -42,16 +43,22 @@ export class RecordComponent implements OnInit {
     private routeParams: RouteParams,
     private recordService: RecordService,
     private authService: AuthService
-  ) { }
+  ) {
+    super();
+  }
 
   ngOnInit() {
     this.activeUser = this.authService.getUsername();
     this.showAllRecords = this.routeParams.get("showAll") === "true" ? true : false;
     this.additionalRouteParams["showAll"] = this.routeParams.get("showAll");
+    let url_offset: string = this.routeParams.get("offset");
+    this.currentOffset = url_offset ? Number(url_offset) : 0;
+    this.searchValue = this.routeParams.get("search");
     this.getRecords();
   }
 
-  onKeyUp(event: KeyboardEvent, value: string) {
+  search(value: string) {
+    this.currentOffset = 0;
     if (value.length > 1) {
       this.searchValue = value;
       this.getRecords();
@@ -63,13 +70,15 @@ export class RecordComponent implements OnInit {
 
   getRecords() {
     let params: URLSearchParams = new URLSearchParams();
-    this.currentOffset = Number(this.routeParams.get("offset"));
     params.set("limit", String(this.perPage));
     params.set("offset",  String(this.currentOffset));
 
     if (!this.showAllRecords) {
       params.set("owner", String(this.authService.getUserId()));
     }
+
+    this.additionalRouteParams["search"] = this.searchValue;
+
     if (this.searchValue) {
       params.set("search", this.searchValue);
     }
