@@ -9,32 +9,38 @@
     <div *ngIf="errorMessage" class="alert alert-success alert-danger">
         {{ errorMessage }}
     </div>
-    <div *ngIf="save" class="alert alert-success alert-dismissible">
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-        Record was save successfully.
-    </div>
     <form *ngIf="record" [ngFormModel]="recordForm" (ngSubmit)="onSubmit()" class="form-horizontal">
       <fieldset>
-      <div class="form-group">
-        <label for="domain" class="col-sm-2 control-label">Domain
-          <span class="glyphicon glyphicon-info-sign" tooltip data-toggle="tooltip" data-placement="top" title="Use the left field to do Domain lookups in the fields name." aria-hidden="true"></span>
+      <div class="form-group" *ngIf="!isCreate">
+        <label for="domain" class="col-sm-2 control-label">Owner
         </label>
+        <div class="col-sm-6">
+          <p class="form-control-static">
+            {{ record.owner }}
+          </p>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="domain" class="col-sm-2 control-label">Domain</label>
         <div class="col-sm-6">
           <autocomplete
             [forNgModel]="record"
             [service]="domainService"
             ngModelField="domain"
+            [readOnly]="!isCreate"
+            [afterSelectAction]="onDomainSelectForAutocomplete"
+            [afterRemoveAction]="onDomainRemoveForAutocomplete"
             placeholder="Search domain">
           </autocomplete>
-        </div>  
+        </div>
       </div>
        <div class="form-group">
         <label for="type" class="col-sm-2 control-label">Type</label>
-         <div class="col-sm-3">
+         <div class="col-sm-2">
           <div *ngIf="!isCreate">
-            <input type="text" class="form-control" value="{{ record.type }}" disabled />
+            <p class="form-control-static">
+              {{ record.type }}
+            </p>
           </div>
           <select
               [style.display]="isCreate ? 'block' : 'none'"
@@ -42,38 +48,47 @@
               class="form-control"
               required
               [(ngModel)]="record.type"
-              (ngModelChange)="onChangeType($event)"
+              (ngModelChange)="onChangeType()"
               ngControl="type"
+              [disabled]="!domain"
               #type="ngForm">
-              <option *ngFor="let type of recordTypes" [value]="type" >{{ type }}</option>
+              <option *ngFor="let type of recordTypes" [value]="type[0]" >{{ type[0] }}</option>
           </select>
           <div [hidden]="type.valid || type.pristine" class="alert alert-danger">
             <p *ngIf="type.errors && type.errors.required">Type is required.</p>
           </div>
          </div>
+         <div class="col-sm-6">
+           <p class="form-control-static">
+            <span class="type-help-text" *ngFor="let rtype of recordTypes" [style.display]="type.value == rtype[0] ? 'block': 'none'">
+              {{ rtype[1] }}
+            </span>
+           </p>
+        </div>
       </div>
       <div class="form-group">
-        <label for="name" class="col-sm-2 control-label">Name
-          <span class="glyphicon glyphicon-info-sign" tooltip data-toggle="tooltip" data-placement="top" title="Actual name of a record. Must not end in a '.' and be fully qualified - it is not relative to the name of the domain!" aria-hidden="true"></span>
-        </label>
+        <label for="name" class="col-sm-2 control-label">Name</label>
         <div class="col-sm-6">
-          <input
-              type="text"
-              id="name"
-              class="form-control"
-              required
-              [(ngModel)]="record.name"
-              ngControl="name"
-              #name="ngForm" />
-          <div [hidden]="name.valid || name.pristine" class="alert alert-danger">
-            <p *ngIf="name.errors && name.errors.required">Name is required.</p>
+          <div class="input-group">
+            <input
+                type="text"
+                id="name"
+                class="form-control"
+                [(ngModel)]="recordName"
+                #inputName
+                (keyup)="onKeyUpName(inputName.value)"
+                [disabled]="!domain"
+                />
+            <div class="input-group-addon">
+              <span *ngIf="domain">
+                {{ domainDot }}{{ domain.name }}
+              </span>
+            </div>
           </div>
         </div>
       </div>
       <div class="form-group">
-        <label for="content" class="col-sm-2 control-label">Content
-          <span class="glyphicon glyphicon-info-sign" tooltip data-toggle="tooltip" data-placement="top" title="The 'right hand side' of a DNS record. For an A record, this is the IP address" aria-hidden="true"></span>
-        </label>
+        <label for="content" class="col-sm-2 control-label">Content</label>
         <div class="col-sm-6">
           <input
               type="text"
@@ -82,7 +97,9 @@
               required
               [(ngModel)]="record.content"
               ngControl="content"
-              #content="ngForm" />
+              #content="ngForm"
+              [disabled]="!domain"
+              #inputContent />
           <div [hidden]="content.valid || content.pristine" class="alert alert-danger">
             <p *ngIf="content.errors && content.errors.required">Content is required.</p>
           </div>
@@ -94,6 +111,7 @@
           <textarea
               id="remarks"
               class="form-control"
+              [disabled]="!domain"
               [(ngModel)]="record.remarks">
           </textarea>
         </div>
@@ -101,7 +119,7 @@
       </fieldset>
       <fieldset>
         <legend>Advanced options</legend>
-        <div class="form-group" [style.display]="isMxRecord ? 'block' : 'none'">
+        <div class="form-group" [style.display]="type.value == 'MX' ? 'block' : 'none'">
           <label for="prio" class="col-sm-2 control-label">Priority
             <span class="glyphicon glyphicon-info-sign" tooltip data-toggle="tooltip" data-placement="top" title="For MX records, this should be the priority of the mail exchanger specified" aria-hidden="true"></span>
           </label>
@@ -112,12 +130,13 @@
               class="form-control"
               [(ngModel)]="record.prio"
               ngControl="prio"
+              [disabled]="!domain"
               #prio="ngForm" />
           </div>
         </div>
         <div class="form-group">
           <label for="ttl" class="col-sm-2 control-label">TTL
-            <span class="glyphicon glyphicon-info-sign" tooltip data-toggle="tooltip" data-placement="top" title="TTL in seconds" aria-hidden="true"></span>
+            <span class="glyphicon glyphicon-info-sign" tooltip data-toggle="tooltip" data-placement="top" title="If you query for that record, you will get cached information for TTL time (in seconds). After that you will get fresh data." aria-hidden="true"></span>
           </label>
           <div class="col-sm-2">
             <input
@@ -127,6 +146,7 @@
               required
               [(ngModel)]="record.ttl"
               ngControl="ttl"
+              [disabled]="!domain"
               #ttl="ngForm" />
             <div [hidden]="ttl.valid || ttl.pristine" class="alert alert-danger">
               <p *ngIf="ttl.errors && ttl.errors.required">TTL is required.</p>
@@ -136,16 +156,19 @@
       </fieldset>
       <div class="row">
         <div class="col-sm-12">
-          <button type="submit" class="btn btn-success" [disabled]="!recordForm.valid">
+          <button type="submit" class="btn btn-success" [disabled]="!recordForm.valid && !domain">
             <span *ngIf="isCreate">
-              <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+              <span *ngIf="saved" class="glyphicon glyphicon-refresh glyphicon-spin" aria-hidden="true"></span>
+              <span *ngIf="!saved" class="glyphicon glyphicon-plus" aria-hidden="true"></span>
               Add record
             </span>
             <span *ngIf="!isCreate">
-              <span class="glyphicon glyphicon-floppy-saved" aria-hidden="true"></span>
+              <span *ngIf="saved" class="glyphicon glyphicon-refresh glyphicon-spin" aria-hidden="true"></span>
+              <span *ngIf="!saved" class="glyphicon glyphicon-floppy-saved" aria-hidden="true"></span>
               Save
             </span>
           </button>
+          <button type="button" class="btn btn-default" (click)="onBack()">Back</button>
         </div>
       </div>
     </form>

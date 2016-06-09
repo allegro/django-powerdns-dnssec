@@ -6,10 +6,9 @@
   </div>
   <div class="panel-body">
     <div *ngIf="errorMessage" class="alert alert-success alert-danger">
-        {{ errorMessage }}
+      {{ errorMessage }}
     </div>
-    
-    <table class="table table-striped table-hover" *ngIf="recordRequest">
+    <table class="table table-striped table-hover" *ngIf="recordRequest && domain && record">
       <tbody>
         <tr>
           <td>Name</td><td>{{ recordRequest.target_name }}</td>
@@ -28,6 +27,15 @@
         </tr>
         <tr>
           <td>Remarks</td><td>{{ recordRequest.target_remarks }}</td>
+        </tr>
+        <tr>
+          <td>Domain</td><td>{{ domain.name }}</td>
+        </tr>
+        <tr>
+          <td>Record</td>
+          <td>
+            <span (click)="onSelectRecord(record)">{{ record.name }}</span>
+          </td>
         </tr>
       </tbody>
     </table>

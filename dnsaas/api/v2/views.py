@@ -111,7 +111,9 @@ class RecordViewSet(OwnerViewSet):
     serializer_class = RecordSerializer
     filter_backends = (filters.DjangoFilterBackend, filters.SearchFilter)
     filter_class = RecordFilter
-    search_fields = ['name', 'content', 'domain__name', 'owner__username']
+    search_fields = [
+        'name', 'content', 'type', 'domain__name', 'owner__username'
+    ]
 
     def _set_owner(self, data):
         if 'owner' not in data:

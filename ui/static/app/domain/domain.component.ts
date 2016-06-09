@@ -6,13 +6,14 @@ import { Domain } from "./domain";
 import { isLoggedin }  from "../auth/auth.service";
 import { SearchComponent } from "../search.component";
 import { PaginationComponent } from "../pagination/pagination.component";
+import { HighlightDirective } from "../directives/highlight.directive";
 import "rxjs/add/observable/throw";
 
 
 @Component({
   templateUrl: "/static/app/templates/domain.component.html",
   providers: [DomainService],
-  directives: [PaginationComponent]
+  directives: [PaginationComponent, HighlightDirective]
 })
 @CanActivate(() => isLoggedin())
 export class DomainComponent extends SearchComponent implements OnInit {

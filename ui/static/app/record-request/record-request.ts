@@ -10,4 +10,5 @@ export class RecordRequest {
   target_auth: string;
   target_remarks: string;
   domain: number;
+  record: number;
 }
