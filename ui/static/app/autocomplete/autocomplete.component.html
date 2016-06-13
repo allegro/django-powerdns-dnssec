@@ -1,8 +1,10 @@
 <div class="dropdown">
-  <div class="form-control empty-control" [style.display]="showLabel ? 'inline-block' : 'none'">
+  <div class="form-control empty-control {{ isReadOnly ? 'read-only' : ''}}" [style.display]="showLabel ? 'inline-block' : 'none'">
     <span class="label label-default autocomplete-label">
-      {{ value }} &nbsp;&nbsp;
-      <span class="glyphicon glyphicon-remove" aria-hidden="true" (click)="removeCurrent()"></span>
+      {{ value }}
+      <span *ngIf="!isReadOnly">&nbsp;&nbsp;
+        <span class="glyphicon glyphicon-remove" aria-hidden="true" (click)="removeCurrent()"></span>
+      </span>
     </span>
   </div>
   <input

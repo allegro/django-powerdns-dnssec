@@ -13,6 +13,7 @@ import { AutocompleteServiceInterface } from "./autocomplete.service";
       background-color: rgba(153, 153, 149, 0.22);color:rgba(0, 0, 0, 0.66);
     }
     .glyphicon { cursor:pointer }
+    .read-only { padding-top: 10px; }
   `]
 })
 export class AutocompleteComponent implements AfterViewInit {
@@ -20,6 +21,9 @@ export class AutocompleteComponent implements AfterViewInit {
   @Input("service") service: AutocompleteServiceInterface;
   @Input("forNgModel") ngModel: any;
   @Input("ngModelField") ngModelField: string;
+  @Input("readOnly") isReadOnly: boolean = false;
+  @Input("afterSelectAction") afterSelectAction: Function;
+  @Input("afterRemoveAction") afterRemoveAction: Function;
 
   activeIndex: number = 0;
   selectValue: number;
@@ -113,6 +117,10 @@ export class AutocompleteComponent implements AfterViewInit {
     this.showInput = true;
     this.showLabel = false;
     this.ngModel[this.ngModelField] = null;
+
+    if (this.afterRemoveAction) {
+      this.afterRemoveAction();
+    }
   }
 
   onSelect(item: {0: number, 1: string}) {
@@ -123,5 +131,9 @@ export class AutocompleteComponent implements AfterViewInit {
     this.results = [];
     this.showInput = false;
     this.showLabel = true;
+
+    if (this.afterSelectAction) {
+      this.afterSelectAction();
+    }
   }
 }

@@ -6,20 +6,22 @@ import { Record } from "./record";
 import { RecordService } from "./record.service";
 import { PaginationComponent } from "../pagination/pagination.component";
 import { SearchComponent } from "../search.component";
+import { HighlightDirective } from "../directives/highlight.directive";
 import "rxjs/add/observable/throw";
 
 
 @Component({
   templateUrl: "/static/app/templates/record.component.html",
   providers: [HTTP_PROVIDERS, RecordService],
-  directives: [PaginationComponent],
+  directives: [PaginationComponent, HighlightDirective],
   styles: [`
     .panel-heading {overflow:hidden;} td { cursor:pointer;}
-    .legend {float:left;padding-top:5px;}
+    .legend { float:left;padding-top:5px; }
     .legend span {
       background-color: #dff0d8;width:20px;height:20px;
       border: 1px solid #ddd;margin-right:5px;
     }
+    .read-only td { color:silver; cursor: not-allowed; }
   `]
 })
 @CanActivate(() => isLoggedin())
@@ -37,6 +39,7 @@ export class RecordComponent extends SearchComponent implements OnInit {
     "showAll": "false",
     "search": null
   };
+  showResults: boolean = false;
 
   constructor(
     private router: Router,
@@ -68,7 +71,15 @@ export class RecordComponent extends SearchComponent implements OnInit {
     }
   }
 
+  get isRecords(): boolean {
+    if (typeof this.records === "object") {
+      return this.records.length === 0 ? false : true;
+    }
+    return false;
+  }
+
   getRecords() {
+    this.showResults = false;
     let params: URLSearchParams = new URLSearchParams();
     params.set("limit", String(this.perPage));
     params.set("offset",  String(this.currentOffset));
@@ -88,22 +99,23 @@ export class RecordComponent extends SearchComponent implements OnInit {
     ).subscribe((json) => {
       this.totalCount = json.count;
       this.records = json.results;
+      this.showResults = true;
     }, error => this.errorMessage = <any>error);
   }
 
   onSelectShowAllRecords(show?: string) {
     if (show === "all") {
-      this.showAllRecords = true;
       this.additionalRouteParams["showAll"] = "true";
     } else {
       this.additionalRouteParams["showAll"] = "false";
-      this.showAllRecords = false;
     }
-    this.getRecords();
+    this.router.navigate(["Records", this.additionalRouteParams]);
   }
 
   onSelect(record: Record) {
-    this.router.navigate(["RecordDetail", { id: record.id }]);
+    if (record.type !== "PTR") {
+      this.router.navigate(["RecordDetail", { id: record.id }]);
+    }
   }
 
   deleteConfirm(record: Record) {

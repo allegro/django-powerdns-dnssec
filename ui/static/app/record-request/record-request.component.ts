@@ -4,11 +4,13 @@ import { CanActivate, Router, RouteParams } from "@angular/router-deprecated";
 import { AuthService, isLoggedin }  from "../auth/auth.service";
 import { RecordRequest } from "./record-request";
 import { RecordRequestService } from "./record-request.service";
+import { HighlightDirective } from "../directives/highlight.directive";
 
 
 @Component({
   templateUrl: "/static/app/templates/record-request.component.html",
   providers: [RecordRequestService],
+  directives: [HighlightDirective],
   styles: [".panel-heading {overflow:hidden;}"]
 })
 @CanActivate(() => isLoggedin())

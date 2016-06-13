@@ -22,11 +22,22 @@ export class DomainService implements AutocompleteServiceInterface {
     return this.http.get(url, search).catch(this.handleError);
   }
 
+  getDomainById(id: number): Observable<Domain> {
+    let url: string = `${this.configService.apiDomain}${id}/`;
+    return this.http.get(url).map(
+      response => {
+        let json = response.json();
+        return json || {};
+      }
+    ).catch(this.handleError);
+  }
+
   getAutocompleteSearchResults(value: string): Observable<Domain[]> {
     let result: Array<{0: number, 1: string}> = [];
     let url: string =  this.configService.apiDomain;
     let params: URLSearchParams = new URLSearchParams();
     params.set("name", value);
+    params.set("limit", "10");
     return this.http.get(url, params).map(this.extractData).catch(this.handleError);
   }
 

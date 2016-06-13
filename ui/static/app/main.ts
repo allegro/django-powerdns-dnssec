@@ -14,9 +14,9 @@ import { LocalStorage } from "./local-storage";
 bootstrap(AppComponent, [
   ROUTER_PROVIDERS,
   HTTP_PROVIDERS,
-  provide(LocationStrategy, { useClass: HashLocationStrategy }),
-  provide(LocalStorage, { useClass: LocalStorage }),
-  provide(AuthService, { useClass: AuthService }),
-  provide(HttpClient, { useClass: HttpClient}),
-  provide(ConfigService, { useClass: ConfigService } ),
+  provide(LocationStrategy, {useClass: HashLocationStrategy}),
+  provide(LocalStorage, {useClass: LocalStorage}),
+  provide(AuthService, {useClass: AuthService}),
+  provide(HttpClient, {useClass: HttpClient}),
+  provide(ConfigService, {useClass: ConfigService}),
 ]);

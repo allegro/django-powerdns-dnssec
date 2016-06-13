@@ -32,11 +32,14 @@
       </div>
     </div>
   </div>
-  <div class="panel-body">
+  <div class="panel-body" [style.display]="(showResults) ? 'block' : 'none'">
     <div *ngIf="errorMessage" class="alert alert-success alert-danger">
       {{ errorMessage }}
     </div>
-    <table class="table table-striped table-hover">
+    <div [style.display]="(!showAllRecords && !isRecords) ? 'block' : 'none'" class="alert alert-info">
+      You do not own any records, switch to "all records" to display a full list
+    </div>
+    <table class="table table-striped {{ !(isRecords) ? 'hidden': '' }}" >
       <thead>
          <tr>
             <th>Name</th>
@@ -44,11 +47,11 @@
             <th>Content</th>
             <th>TTL</th>
             <th>Owner</th>
-            <th>Delete</th>
+            <th>Action</th>
          </tr>
       </thead>
        <tbody>
-        <tr *ngFor="let record of records" class="{{ showAllRecords && activeUser == record.owner ? 'success': '' }}">
+        <tr *ngFor="let record of records" class="{{ showAllRecords && activeUser == record.owner ? 'success': '' }}{{ record.type == 'PTR' ? 'read-only': '' }}" [highlight]>
             <td (click)="onSelect(record)">
               {{ record.name }}
             </td>
@@ -65,7 +68,16 @@
               {{ record.owner }}
             </td>
             <td>
-              <a class="btn btn-danger btn-xs" (click)="deleteConfirm(record)">Delete</a>
+              <div *ngIf="record.type !== 'PTR'">
+                <div *ngIf="activeUser == record.owner">
+                  <a class="btn btn-primary btn-xs" (click)="onSelect(record)">Edit</a>
+                  <a class="btn btn-danger btn-xs" (click)="deleteConfirm(record)">Delete</a>
+                </div>
+                <div *ngIf="activeUser != record.owner">
+                  <a class="btn btn-primary btn-xs" (click)="onSelect(record)">Request Edit</a>
+                  <a class="btn btn-danger btn-xs" (click)="deleteConfirm(record)">Request Delete</a>
+                </div>
+              </div>
             </td>
         </tr>
       </tbody>
