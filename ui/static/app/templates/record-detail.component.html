@@ -56,6 +56,7 @@
           </select>
           <div [hidden]="type.valid || type.pristine" class="alert alert-danger">
             <p *ngIf="type.errors && type.errors.required">Type is required.</p>
+            <p *ngIf="type.errors && type.errors.apiError">{{ type.errors.apiError }}</p>
           </div>
          </div>
          <div class="col-sm-6">
@@ -73,6 +74,8 @@
             <input
                 type="text"
                 id="name"
+                #name="ngForm"
+                ngControl="name"
                 class="form-control"
                 [(ngModel)]="recordName"
                 #inputName
@@ -84,6 +87,9 @@
                 {{ domainDot }}{{ domain.name }}
               </span>
             </div>
+          </div>
+          <div [hidden]="name.valid || name.pristine" class="alert alert-danger">
+            <p *ngIf="name.errors && name.errors.apiError">{{ name.errors.apiError }}</p>
           </div>
         </div>
       </div>
@@ -102,6 +108,7 @@
               #inputContent />
           <div [hidden]="content.valid || content.pristine" class="alert alert-danger">
             <p *ngIf="content.errors && content.errors.required">Content is required.</p>
+            <p *ngIf="content.errors && content.errors.apiError">{{ content.errors.apiError }}</p>
           </div>
          </div>
       </div>
@@ -109,10 +116,10 @@
         <label for="type" class="col-sm-2 control-label">Remarks</label>
         <div class="col-sm-6">
           <textarea
-              id="remarks"
-              class="form-control"
-              [disabled]="!domain"
-              [(ngModel)]="record.remarks">
+            id="remarks"
+            class="form-control"
+            [disabled]="!domain"
+            [(ngModel)]="record.remarks">
           </textarea>
         </div>
       </div>
@@ -132,6 +139,9 @@
               ngControl="prio"
               [disabled]="!domain"
               #prio="ngForm" />
+            <div [hidden]="prio.valid || prio.pristine" class="alert alert-danger">
+              <p *ngIf="prio.errors && prio.errors.apiError">{{ prio.errors.apiError }}</p>
+            </div>
           </div>
         </div>
         <div class="form-group">
@@ -150,6 +160,7 @@
               #ttl="ngForm" />
             <div [hidden]="ttl.valid || ttl.pristine" class="alert alert-danger">
               <p *ngIf="ttl.errors && ttl.errors.required">TTL is required.</p>
+              <p *ngIf="ttl.errors && ttl.errors.apiError">{{ ttl.errors.apiError }}</p>
             </div>
           </div>
         </div>

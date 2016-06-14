@@ -62,6 +62,9 @@ class RecordSerializer(OwnerSerializer):
     domain = PrimaryKeyRelatedField(
         queryset=Domain.objects.all(),
     )
+    modified = serializers.DateTimeField(
+        format='%Y-%m-%d %H:%M:%S', read_only=True
+    )
 
     def validate(self, attrs):
         domain, content, record_type = (

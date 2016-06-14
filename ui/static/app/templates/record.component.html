@@ -47,27 +47,35 @@
             <th>Content</th>
             <th>TTL</th>
             <th>Owner</th>
+            <th>Mod. date</th>
             <th>Action</th>
          </tr>
       </thead>
        <tbody>
         <tr *ngFor="let record of records" class="{{ showAllRecords && activeUser == record.owner ? 'success': '' }}{{ record.type == 'PTR' ? 'read-only': '' }}" [highlight]>
-            <td (click)="onSelect(record)">
-              {{ record.name }}
+            <td>
+              <div class="wrap" title="{{ record.name }}">
+                {{ record.name }}
+              </div>
             </td>
-            <td (click)="onSelect(record)">
+            <td class="type">
               {{ record.type }}
             </td>
-            <td (click)="onSelect(record)">
-              {{ record.content | slice:0:50 }}{{ record.content.length > 50 ? '...' : '' }}
+            <td>
+              <div class="wrap" title="{{ record.content }}">
+                {{ record.content }}
+              </div>
             </td>
-            <td (click)="onSelect(record)">
+            <td class="ttl">
               {{ record.ttl }}
             </td>
-            <td (click)="onSelect(record)">
+            <td>
               {{ record.owner }}
             </td>
             <td>
+              {{ record.modified }}
+            </td>
+            <td class="action">
               <div *ngIf="record.type !== 'PTR'">
                 <div *ngIf="activeUser == record.owner">
                   <a class="btn btn-primary btn-xs" (click)="onSelect(record)">Edit</a>

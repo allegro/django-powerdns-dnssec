@@ -15,13 +15,19 @@ import "rxjs/add/observable/throw";
   providers: [HTTP_PROVIDERS, RecordService],
   directives: [PaginationComponent, HighlightDirective],
   styles: [`
-    .panel-heading {overflow:hidden;} td { cursor:pointer;}
+    .panel-heading {overflow:hidden;} td { font-size:13px; }
     .legend { float:left;padding-top:5px; }
     .legend span {
       background-color: #dff0d8;width:20px;height:20px;
       border: 1px solid #ddd;margin-right:5px;
     }
     .read-only td { color:silver; cursor: not-allowed; }
+    .wrap { text-overflow:ellipsis;overflow:hidden;white-space:nowrap;max-width:200px; }
+    .action { max-width:150px; }
+    .action .btn { margin-top:2px; }
+    .ttl { max-width:60px; }
+    .type { max-width:60px; }
+    th { font-size:14px; }
   `]
 })
 @CanActivate(() => isLoggedin())

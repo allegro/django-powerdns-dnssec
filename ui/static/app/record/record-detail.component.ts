@@ -53,6 +53,7 @@ export class RecordDetailComponent implements OnInit {
       private location: Location
     ) {
       this.recordForm = formBuilder.group({
+        name: [],
         content: ["", Validators.required],
         type: ["", Validators.required],
         ttl: ["", Validators.required],
@@ -94,6 +95,18 @@ export class RecordDetailComponent implements OnInit {
       }
     }
 
+    setApiValidationErrors(errors: Object) {
+      for (let fieldName in errors) {
+        try {
+          this.recordForm.controls[fieldName].setErrors(
+            {"apiError": errors[fieldName]}, true
+          );
+        } catch (TypeError) {
+          this.errorMessage = errors[fieldName];
+        }
+      }
+    }
+
     onSubmit() {
       if (this.recordForm.valid && this.domain) {
         this.saved = true;
@@ -106,10 +119,18 @@ export class RecordDetailComponent implements OnInit {
 
         this.recordService.updateOrCreateRecord(this.record).subscribe(
           record => {
-            this.router.navigate(["Records"]);
+            if (record.owner !== this.authService.getUsername()) {
+              this.router.navigate(["RecordRequests"]);
+            } else {
+              this.router.navigate(["Records"]);
+            }
           },
           error => {
-            this.errorMessage = <any>error;
+            if (typeof error === "string") {
+              this.errorMessage = error;
+            } else {
+              this.setApiValidationErrors(error);
+            }
             this.saved = false;
           }
         );
@@ -146,6 +167,9 @@ export class RecordDetailComponent implements OnInit {
 
     get onDomainSelectForAutocomplete() {
       return () => {
+        if (this.isCreate) {
+          this.record.type = "A";
+        }
         this.getDomain();
       };
     }

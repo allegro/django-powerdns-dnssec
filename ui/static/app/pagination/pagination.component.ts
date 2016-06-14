@@ -9,6 +9,9 @@ import { Router } from "@angular/router-deprecated";
       <nav>
         <ul class="pagination pagination-sm">
           <li [style.display]="showPrev ? 'inline' : 'none'">
+            <a (click)="onSelect(0)" aria-label="First">first</a>
+          </li>
+          <li [style.display]="showPrev ? 'inline' : 'none'">
             <a (click)="onSelect(prevOffset)" aria-label="Previous">
               <span aria-hidden="true">&laquo;</span>
             </a>
@@ -26,6 +29,9 @@ import { Router } from "@angular/router-deprecated";
             <a (click)="onSelect(nextOffset)" aria-label="Next">
               <span aria-hidden="true">&raquo;</span>
             </a>
+          </li>
+          <li [style.display]="showNext ? 'inline' : 'none'">
+            <a (click)="onSelect(lastPageOffset)" aria-label="Last">last</a>
           </li>
         </ul>
       </nav>
@@ -47,6 +53,10 @@ export class PaginationComponent {
   showPrev: boolean = false;
 
   constructor(private router: Router) { }
+
+  get lastPageOffset(): number {
+    return this.allPages * this.perPage - this.perPage;
+  }
 
   get pages(): Array<{0: number, 1: number}> {
     let result: Array<{0: number, 1: number}> = [];
