@@ -13,7 +13,12 @@ import "rxjs/add/observable/throw";
 @Component({
   templateUrl: "/static/app/templates/domain.component.html",
   providers: [DomainService],
-  directives: [PaginationComponent, HighlightDirective]
+  directives: [PaginationComponent, HighlightDirective],
+  styles: [`
+    h1 small { font-size:14px; }
+    td { font-size:13px; }
+    th { font-size:14px; }
+  `]
 })
 @CanActivate(() => isLoggedin())
 export class DomainComponent extends SearchComponent implements OnInit {

@@ -11,7 +11,12 @@ import { HighlightDirective } from "../directives/highlight.directive";
   templateUrl: "/static/app/templates/record-request.component.html",
   providers: [RecordRequestService],
   directives: [HighlightDirective],
-  styles: [".panel-heading {overflow:hidden;}"]
+  styles: [`
+    .panel-heading {overflow:hidden;}
+    .wrap { text-overflow:ellipsis;overflow:hidden;white-space:nowrap;max-width:200px; }
+    td { font-size:13px; }
+    th { font-size:14px; }
+  `]
 })
 @CanActivate(() => isLoggedin())
 export class RecordRequestComponent implements OnInit {

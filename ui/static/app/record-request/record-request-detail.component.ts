@@ -12,14 +12,18 @@ import { RecordRequest } from "./record-request";
 @Component({
   templateUrl: "/static/app/templates/record-request-detail.component.html",
   providers: [DomainService, RecordService, RecordRequestService],
-  styles: ["td span { cursor:pointer; }"]
+  styles: [`
+    td span { cursor:pointer; }
+    :host >>> .new { color: green; }
+    :host >>> .old { color: red; }
+  `]
 })
 @CanActivate(() => isLoggedin())
 export class RecordRequestDetailComponent implements OnInit {
 
-  recordRequest: RecordRequest;
   domain: Domain;
   record: Record;
+  recordRequest: RecordRequest;
 
   constructor(
     private routeParams: RouteParams,
@@ -29,8 +33,25 @@ export class RecordRequestDetailComponent implements OnInit {
     private recordService: RecordService
   ) { }
 
+  getValue(fieldName: string): string {
+    let recordValue: string = String(this.record[fieldName]);
+    let recordRequestValue: string = String(
+      this.recordRequest[`target_${fieldName}`]
+    );
+
+    if (recordValue !== recordRequestValue) {
+      return `
+        <span class="old">${recordValue}</span> /
+        <span class="new">${recordRequestValue}</span>
+      `;
+    }
+    return `<span>${recordRequestValue}</span>`;
+  }
+
   getDomain() {
-    this.domainService.getDomainById(this.recordRequest.domain).subscribe(
+    this.domainService.getDomainById(
+      this.recordRequest.domain
+    ).subscribe(
       (domain) => this.domain = domain
     );
   }
@@ -59,6 +80,6 @@ export class RecordRequestDetailComponent implements OnInit {
   }
 
   onSelectRecord(record: Record) {
-   this.router.navigate(["RecordDetail", { id: record.id }]);
+    this.router.navigate(["RecordDetail", { id: record.id }]);
   }
 }

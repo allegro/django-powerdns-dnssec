@@ -26,20 +26,24 @@
        <tbody>
         <tr *ngFor="let request of recordRequests" (click)="onSelect(request)" style="cursor:pointer;" [highlight]>
           <td>
+            <div class="wrap" title="{{ request.target_name }}">
               {{ request.target_name }}
-            </td>
-            <td>
-              {{ request.target_type }}
-            </td>
-            <td>
-              {{ request.target_content | slice:0:50 }}{{ request.target_content.length > 50 ? '...' : '' }}
-            </td>
-            <td>
-              {{ request.target_ttl }}
-            </td>
-            <td>
-              {{ request.target_owner }}
-            </td>
+            </div>
+          </td>
+          <td>
+            {{ request.target_type }}
+          </td>
+          <td>
+            <div class="wrap" title="{{ request.target_content }}">
+              {{ request.target_content }}
+            </div>
+          </td>
+          <td>
+            {{ request.target_ttl }}
+          </td>
+          <td>
+            {{ request.target_owner }}
+          </td>
         </tr>
       </tbody>
     </table>

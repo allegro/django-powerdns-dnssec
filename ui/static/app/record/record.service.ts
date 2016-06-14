@@ -60,12 +60,8 @@ export class RecordService {
 
   private handleError(response: any) {
     if (response.status === 400) {
-      let errors: string = "";
       let body = JSON.parse(response._body);
-      for (let i in body) {
-        errors += `${i}: ${body[i][0]}`;
-      }
-      return Observable.throw(errors);
+      return Observable.throw(body);
     }
     let errMsg = response.message || "Server error";
     console.error(errMsg);
