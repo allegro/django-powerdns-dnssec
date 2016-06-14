@@ -599,6 +599,8 @@ class Record(TimeTrackable, Owned, RecordLike, WithRequests):
             content=self.name,
             depends_on=self,
             owner=self.owner,
+            ttl=self.ttl,
+            disabled=self.disabled,
         )
 
     def can_auto_accept(self, user):

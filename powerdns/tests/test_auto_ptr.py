@@ -96,6 +96,29 @@ class TestAutoPtr(TestCase):
             name='1.1.168.192.in-addr.arpa',
         )
 
+    def test_auto_ptr_fields_get_update_when_record_is_changed(self):
+        record = RecordFactory(
+            domain=self.domain,
+            type='A',
+            name='site.example.com',
+            content='192.168.1.1',
+            auto_ptr=AutoPtrOptions.ALWAYS,
+            ttl=3600,
+        )
+
+        record.content = '192.168.1.9'
+        new_ttl = 7200
+        record.ttl = new_ttl
+        record.disabled = True
+        record.save()
+
+        ptr_record = Record.objects.get(
+            domain=Domain.objects.get(name='1.168.192.in-addr.arpa'),
+            name='9.1.168.192.in-addr.arpa',
+        )
+        self.assertTrue(record.ttl == ptr_record.ttl == new_ttl)
+        self.assertTrue(record.disabled == ptr_record.disabled is True)
+
     def test_auto_ptr_off(self):
         """PTR is removed when setting auto_ptr to NEVER"""
         record = RecordFactory(
