@@ -36,6 +36,7 @@ gulp.task("libs", function () {
         'systemjs/dist/system-polyfills.js',
         'systemjs/dist/system.src.js',
         'reflect-metadata/Reflect.js',
+        'raven-js/dist/**',
         'rxjs/**',
         'zone.js/dist/**',
         '@angular/**',

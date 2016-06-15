@@ -1,62 +1,25 @@
+{% load staticfiles %}
 <html>
 <head>
   <title>DNSaaS</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="/static/lib/bootstrap/dist/css/bootstrap.min.css">
-  <script type="text/javascript" src="/static/lib/jquery/dist/jquery.min.js"></script>
-  <script src="/static/lib/es6-shim/es6-shim.min.js"></script>
-  <script src="/static/lib/zone.js/dist/zone.js?main=browser"></script>
-  <script src="/static/lib/reflect-metadata/Reflect.js"></script>
-  <script src="/static/lib/systemjs/dist/system.src.js"></script>
-  <script src="/static/systemjs.config.js"></script>
-  <style>
-    html, body {
-        height: 100%;
-    }
-    #wrap {
-        min-height: 100%;
-    }
-    #main {
-        overflow:auto;
-        padding-bottom:60px; /* this needs to be bigger than footer height*/
-    }
-    .footer {
-        position: relative;
-        margin-top: -60px; /* negative value of footer height */
-        height: 60px;
-        clear:both;
-        padding-top:20px;
-        border-top:1px solid silver;
-        background-color:#f5f5f5;
-    }
-    .glyphicon-spin {
-        -webkit-animation: spin 1000ms infinite linear;
-        animation: spin 1000ms infinite linear;
-    }
-    @-webkit-keyframes spin {
-        0% {
-            -webkit-transform: rotate(0deg);
-            transform: rotate(0deg);
-        }
-        100% {
-            -webkit-transform: rotate(359deg);
-            transform: rotate(359deg);
-        }
-    }
-    @keyframes spin {
-        0% {
-            -webkit-transform: rotate(0deg);
-            transform: rotate(0deg);
-        }
-        100% {
-            -webkit-transform: rotate(359deg);
-            transform: rotate(359deg);
-        }
-    }
-  </style>
+  <link rel="stylesheet" href="{% static "lib/bootstrap/dist/css/bootstrap.min.css" %}">
+  <link rel="stylesheet" href="{% static "app/app.css" %}">
+  <script type="text/javascript" src="{% static "lib/jquery/dist/jquery.min.js" %}"></script>
+  <script src="{% static "lib/raven-js/dist/raven.min.js" %}"></script>
+  <script src="{% static "lib/es6-shim/es6-shim.min.js" %}"></script>
+  <script src="{% static "lib/zone.js/dist/zone.js" %}?main=browser"></script>
+  <script src="{% static "lib/reflect-metadata/Reflect.js" %}"></script>
+  <script src="{% static "lib/systemjs/dist/system.src.js" %}"></script>
+  <script src="{% static "systemjs.config.js" %}"></script>
   <script>
     var debug = {% if settings.TEMPLATE_DEBUG %}true{% else %}false{% endif %};
-    System.import('/static/dist/main').then(null, console.error.bind(console));
+    var ravenEnabled = false;
+    {% if settings.SENTRY_JS_DSN %}
+       Raven.config("{{ settings.SENTRY_JS_DSN }}", {{ settings.SENTRY_JS_CONFIG|safe }}).install();
+       ravenEnabled = true;
+    {% endif %}
+    System.import('{% static "dist/main" %}').then(null, console.error.bind(console));
   </script>
 </head>
 <base href="/">
@@ -80,6 +43,6 @@
       </div>
     </div>
   </footer>
-  <script src="/static/lib/bootstrap/dist/js/bootstrap.min.js"></script>
+  <script src="{% static "lib/bootstrap/dist/js/bootstrap.min.js" %}"></script>
 </body>
 </html>

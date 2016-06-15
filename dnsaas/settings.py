@@ -138,6 +138,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'raven.contrib.django.raven_compat',
     'django_extensions',
     'django_nose',
     'rest_framework',
@@ -226,6 +227,8 @@ OWNER_NOTIFICATIONS = {
 SITE_TITLE = 'Django powerdns'
 REPORT_BUG_URL = ''
 NEW_FEATURE_URL = ''
+SENTRY_JS_DSN = ''
+SENTRY_JS_CONFIG = {}
 
 if not TESTING:
     try:

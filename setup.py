@@ -64,6 +64,7 @@ setup(
         'django-threadlocals>=0.8',
         'docutils>=0.12',
         'rules>=0.4',
+        'raven==5.20.0'
     ],
     zip_safe = False,  # if only because of the readme file
 )
