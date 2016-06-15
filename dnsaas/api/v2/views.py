@@ -107,7 +107,9 @@ class RecordFilter(django_filters.FilterSet):
 
 class RecordViewSet(OwnerViewSet):
 
-    queryset = Record.objects.all().select_related('owner', 'domain')
+    queryset = Record.objects.all().select_related(
+        'owner', 'domain'
+    ).order_by('-id')
     serializer_class = RecordSerializer
     filter_backends = (filters.DjangoFilterBackend, filters.SearchFilter)
     filter_class = RecordFilter

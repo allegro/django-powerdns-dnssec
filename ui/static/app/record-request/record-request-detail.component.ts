@@ -15,7 +15,7 @@ import { RecordRequest } from "./record-request";
   styles: [`
     td span { cursor:pointer; }
     :host >>> .new { color: green; }
-    :host >>> .old { color: red; }
+    :host >>> .old { color: silver; }
   `]
 })
 @CanActivate(() => isLoggedin())
@@ -41,7 +41,7 @@ export class RecordRequestDetailComponent implements OnInit {
 
     if (recordValue !== recordRequestValue) {
       return `
-        <span class="old">${recordValue}</span> /
+        <span class="old">${recordValue}</span> ->
         <span class="new">${recordRequestValue}</span>
       `;
     }
