@@ -16,7 +16,7 @@ import { RecordRequestDetailComponent } from "./record-request/record-request-de
   templateUrl: "static/app/templates/app.component.html",
   directives: [ROUTER_DIRECTIVES],
   providers: [AuthService],
-  styles: [" .main { margin-top:45px; }"]
+  styles: [" .main { padding-top:45px; }"]
 })
  @RouteConfig([
   { path: "/add-record/", name: "AddRecord", component: RecordDetailComponent },

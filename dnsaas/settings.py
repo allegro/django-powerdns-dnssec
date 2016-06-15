@@ -224,7 +224,8 @@ OWNER_NOTIFICATIONS = {
 }
 
 SITE_TITLE = 'Django powerdns'
-
+REPORT_BUG_URL = ''
+NEW_FEATURE_URL = ''
 
 if not TESTING:
     try:

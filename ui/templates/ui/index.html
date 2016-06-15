@@ -10,6 +10,25 @@
   <script src="/static/lib/systemjs/dist/system.src.js"></script>
   <script src="/static/systemjs.config.js"></script>
   <style>
+    html, body {
+        height: 100%;
+    }
+    #wrap {
+        min-height: 100%;
+    }
+    #main {
+        overflow:auto;
+        padding-bottom:60px; /* this needs to be bigger than footer height*/
+    }
+    .footer {
+        position: relative;
+        margin-top: -60px; /* negative value of footer height */
+        height: 60px;
+        clear:both;
+        padding-top:20px;
+        border-top:1px solid silver;
+        background-color:#f5f5f5;
+    }
     .glyphicon-spin {
         -webkit-animation: spin 1000ms infinite linear;
         animation: spin 1000ms infinite linear;
@@ -36,12 +55,31 @@
     }
   </style>
   <script>
+    var debug = {% if settings.TEMPLATE_DEBUG %}true{% else %}false{% endif %};
     System.import('/static/dist/main').then(null, console.error.bind(console));
   </script>
 </head>
 <base href="/">
 <body>
   <dnsaas-app>Loading...</dnsaas-app>
+  <footer class="footer">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-offset-7 col-md-3">
+          <a href="{{ settings.NEW_FEATURE_URL }}">
+            <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
+            Request new feature
+          </a>
+        </div>
+        <div class="col-md-2">
+          <a href="{{ settings.REPORT_BUG_URL }}">
+            <span class="glyphicon glyphicon-fire" aria-hidden="true"></span>
+            Report a bug
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
   <script src="/static/lib/bootstrap/dist/js/bootstrap.min.js"></script>
 </body>
 </html>

@@ -10,6 +10,12 @@ import { ConfigService } from "./config.service";
 import { HttpClient } from "./http-client";
 import { LocalStorage } from "./local-storage";
 
+// get java script debug variable from ui/templates/ui/index.html
+declare var debug: any;
+
+if (!debug) {
+  enableProdMode();
+}
 
 bootstrap(AppComponent, [
   ROUTER_PROVIDERS,
