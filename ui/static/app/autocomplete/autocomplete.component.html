@@ -12,6 +12,7 @@
     #autocomplete_search
     placeholder="{{ placeholder }}"
     class="form-control"
+    [(ngModel)]="currentTextValue"
     [style.display]="showInput ? 'block' : 'none'"
     (keyup)="onKey($event, autocomplete_search.value)"/>
   <ul class="dropdown-menu" [style.display]="showResults ? 'block' : 'none'">

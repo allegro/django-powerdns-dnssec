@@ -10,9 +10,9 @@ import { Directive, ElementRef, Input } from "@angular/core";
 })
 export class HighlightDirective {
 
-  private nativeElement: HTMLElement;
-
   @Input("highlight") highlightColor: string = "#d9edf7";
+
+  private nativeElement: HTMLElement;
 
   constructor(el: ElementRef) {
     this.nativeElement = el.nativeElement;

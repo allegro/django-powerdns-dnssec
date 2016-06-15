@@ -1,4 +1,4 @@
-import { Component, Input, AfterViewInit } from "@angular/core";
+import { AfterViewInit, Component, Input } from "@angular/core";
 import { AutocompleteServiceInterface } from "./autocomplete.service";
 
 
@@ -26,6 +26,7 @@ export class AutocompleteComponent implements AfterViewInit {
   @Input("afterRemoveAction") afterRemoveAction: Function;
 
   activeIndex: number = 0;
+  currentTextValue: string;
   selectValue: number;
   _value: string;
   showResults: boolean = false;
@@ -77,6 +78,7 @@ export class AutocompleteComponent implements AfterViewInit {
       event.keyCode > this.endChar &&
       event.keyCode !== 8
     ) {
+      // backspace
       event.preventDefault();
       return;
     }
@@ -117,7 +119,7 @@ export class AutocompleteComponent implements AfterViewInit {
     this.showInput = true;
     this.showLabel = false;
     this.ngModel[this.ngModelField] = null;
-
+    this.currentTextValue = "";
     if (this.afterRemoveAction) {
       this.afterRemoveAction();
     }
