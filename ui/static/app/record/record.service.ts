@@ -59,9 +59,8 @@ export class RecordService {
   }
 
   private handleError(response: any) {
-    if (response.status === 400) {
-      let body = JSON.parse(response._body);
-      return Observable.throw(body);
+    if (response.status === 400 || response.status === 412) {
+      return Observable.throw(JSON.parse(response._body));
     }
     let errMsg = response.message || "Server error";
     console.error(errMsg);

@@ -128,6 +128,8 @@ export class RecordDetailComponent implements OnInit {
           error => {
             if (typeof error === "string") {
               this.errorMessage = error;
+            } else if (error.hasOwnProperty("record_request_ids")) {
+              this.router.navigate(["RecordRequests"]);
             } else {
               this.setApiValidationErrors(error);
             }
