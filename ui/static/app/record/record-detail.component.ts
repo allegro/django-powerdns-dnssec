@@ -4,7 +4,6 @@ import {
   ControlGroup,
   FormBuilder,
   FORM_DIRECTIVES,
-  Location,
   Validators
 } from "@angular/common";
 import { CanActivate, Router, RouteParams } from "@angular/router-deprecated";
@@ -41,6 +40,7 @@ export class RecordDetailComponent implements OnInit {
     saved: boolean = false;
     domainDot: string = "";
     recordName: string = "";
+    backUrlParams: {[key: string]: string} = {};
     @ViewChild("inputContent") inputContent;
 
     constructor(
@@ -49,8 +49,7 @@ export class RecordDetailComponent implements OnInit {
       private recordService: RecordService,
       private domainService: DomainService,
       private authService: AuthService,
-      private formBuilder: FormBuilder,
-      private location: Location
+      private formBuilder: FormBuilder
     ) {
       this.recordForm = formBuilder.group({
         name: [],
@@ -63,6 +62,10 @@ export class RecordDetailComponent implements OnInit {
     }
 
     ngOnInit() {
+      let backUrl: string = this.routeParams.get("backUrl");
+      if (backUrl && backUrl.length > 0) {
+        this.backUrlParams = JSON.parse(backUrl);
+      }
       let recordId: any = this.routeParams.get("id");
       if (!recordId) {
         this.record = new Record();
@@ -122,7 +125,7 @@ export class RecordDetailComponent implements OnInit {
             if (record.owner !== this.authService.getUsername()) {
               this.router.navigate(["RecordRequests"]);
             } else {
-              this.router.navigate(["Records"]);
+              this.onBack();
             }
           },
           error => {
@@ -199,6 +202,10 @@ export class RecordDetailComponent implements OnInit {
     }
 
     onBack() {
-      this.location.back();
+      if (this.backUrlParams) {
+        this.router.navigate(["Records", this.backUrlParams]);
+      } else {
+        this.router.navigate(["Records"]);
+      }
     }
 }

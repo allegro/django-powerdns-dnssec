@@ -13,7 +13,7 @@ from powerdns.models import (
     SuperMaster,
 )
 from rest_framework import serializers
-from rest_framework.serializers import(
+from rest_framework.serializers import (
     PrimaryKeyRelatedField,
     ReadOnlyField,
     ModelSerializer,
