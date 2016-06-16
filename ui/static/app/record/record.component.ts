@@ -120,7 +120,9 @@ export class RecordComponent extends SearchComponent implements OnInit {
 
   onSelect(record: Record) {
     if (record.type !== "PTR") {
-      this.router.navigate(["RecordDetail", { id: record.id }]);
+      this.router.navigate(
+        ["RecordDetail", { id: record.id, backUrl: JSON.stringify(this.routeParams.params) }]
+      );
     }
   }
 

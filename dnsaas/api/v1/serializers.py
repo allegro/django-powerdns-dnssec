@@ -10,7 +10,7 @@ from powerdns.models import (
     RecordTemplate,
     SuperMaster,
 )
-from rest_framework.serializers import(
+from rest_framework.serializers import (
     HyperlinkedModelSerializer,
     HyperlinkedRelatedField,
     SlugRelatedField,

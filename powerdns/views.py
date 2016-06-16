@@ -2,7 +2,6 @@
 import logging
 
 from django.core.urlresolvers import reverse
-from django.db import transaction
 from django.shortcuts import redirect
 from django.views.generic.base import TemplateView
 from rest_framework.authtoken.models import Token
@@ -22,7 +21,6 @@ log = logging.getLogger(__name__)
 
 
 class ObtainAuthToken(ObtainAuthToken):
-    @transaction.atomic
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
