@@ -26,8 +26,6 @@ admin.autodiscover()
 
 urlpatterns = patterns(
     '',
-    url(r'^$', HomeView.as_view()),
-    url(r'^ui$', start_page),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^api/', include('dnsaas.api.urls', namespace='api')),
     url(r'^api-token-auth/', obtain_auth_token, name='get-api-token'),
@@ -49,3 +47,13 @@ urlpatterns = patterns(
         name='accept_delete'
     ),
 )
+
+if settings.NEW_UI_ENABLED:
+    urlpatterns += (
+        url(r'^$', start_page, name='home'),
+    )
+else:
+    urlpatterns += (
+        url(r'^$', HomeView.as_view()),
+        url(r'^ui$', start_page, name='home'),
+    )

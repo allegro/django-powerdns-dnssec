@@ -10,7 +10,7 @@ import { RecordRequest } from "./record-request";
 
 
 @Component({
-  templateUrl: "/static/app/templates/record-request-detail.component.html",
+  templateUrl: "/static/app/record-request/record-request-detail.component.html",
   providers: [DomainService, RecordService, RecordRequestService],
   styles: [`
     td span { cursor:pointer; }
@@ -34,11 +34,14 @@ export class RecordRequestDetailComponent implements OnInit {
   ) { }
 
   getValue(fieldName: string): string {
-    let recordValue: string = String(this.record[fieldName]);
     let recordRequestValue: string = String(
       this.recordRequest[`target_${fieldName}`]
     );
+    if (!this.record) {
+      return `<span>${recordRequestValue}`;
+    }
 
+    let recordValue: string = String(this.record[fieldName]);
     if (recordValue !== recordRequestValue) {
       return `
         <span class="old">${recordValue}</span> ->
@@ -57,11 +60,13 @@ export class RecordRequestDetailComponent implements OnInit {
   }
 
   getRecord() {
-    this.recordService.getRecordById(
-      String(this.recordRequest.record)
-    ).subscribe(
-      (record) => this.record = record
-    );
+    if(this.recordRequest.record) {
+      this.recordService.getRecordById(
+        String(this.recordRequest.record)
+      ).subscribe(
+        (record) => this.record = record
+      );
+    }
   }
 
   ngOnInit() {

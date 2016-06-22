@@ -8,7 +8,7 @@
     <div *ngIf="errorMessage" class="alert alert-success alert-danger">
       {{ errorMessage }}
     </div>
-    <table class="table table-striped table-hover" *ngIf="recordRequest && domain && record">
+    <table class="table table-striped table-hover" *ngIf="recordRequest && domain">
       <tbody>
         <tr>
           <td>Name</td>
@@ -38,7 +38,7 @@
           <td>Domain</td>
           <td>{{ domain.name }}</td>
         </tr>
-        <tr>
+        <tr *ngIf="record">
           <td>Record</td>
           <td>
             <span (click)="onSelectRecord(record)">{{ record.name }}</span>

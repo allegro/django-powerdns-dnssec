@@ -20,7 +20,7 @@ import "rxjs/add/observable/throw";
 
 
 @Component({
-  templateUrl: "/static/app/templates/record-detail.component.html",
+  templateUrl: "/static/app/record/record-detail.component.html",
   providers: [HTTP_PROVIDERS, RecordService, DomainService],
   directives: [FORM_DIRECTIVES, AutocompleteComponent, TooltipDirective],
   styles: [`

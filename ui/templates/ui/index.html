@@ -13,11 +13,17 @@
   <script src="{% static "lib/systemjs/dist/system.src.js" %}"></script>
   <script src="{% static "systemjs.config.js" %}"></script>
   <script>
-    var debug = {% if settings.TEMPLATE_DEBUG %}true{% else %}false{% endif %};
-    var ravenEnabled = false;
+    var globalConfig = {
+      debug: {% if settings.DEBUG %}true{% else %}false{% endif %},
+      ravenEnabled: false,
+      domainUrl: "{% url 'api:v2:domain-list' %}",
+      recordUrl: "{% url 'api:v2:record-list' %}",
+      recordRequestUrl: "{% url 'api:v2:recordrequest-list' %}",
+      homeUrl: "{% url 'home' %}"
+    };
     {% if settings.SENTRY_JS_DSN %}
        Raven.config("{{ settings.SENTRY_JS_DSN }}", {{ settings.SENTRY_JS_CONFIG|safe }}).install();
-       ravenEnabled = true;
+       globalConfig["ravenEnabled"] = true;
     {% endif %}
     System.import('{% static "dist/main" %}').then(null, console.error.bind(console));
   </script>

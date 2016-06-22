@@ -8,7 +8,7 @@ import { HighlightDirective } from "../directives/highlight.directive";
 
 
 @Component({
-  templateUrl: "/static/app/templates/record-request.component.html",
+  templateUrl: "/static/app/record-request/record-request.component.html",
   providers: [RecordRequestService],
   directives: [HighlightDirective],
   styles: [`

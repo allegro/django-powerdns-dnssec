@@ -11,7 +11,7 @@ import "rxjs/add/observable/throw";
 
 
 @Component({
-  templateUrl: "/static/app/templates/domain.component.html",
+  templateUrl: "/static/app/domain/domain.component.html",
   providers: [DomainService],
   directives: [PaginationComponent, HighlightDirective],
   styles: [`

@@ -11,7 +11,7 @@ import "rxjs/add/observable/throw";
 
 
 @Component({
-  templateUrl: "/static/app/templates/record.component.html",
+  templateUrl: "/static/app/record/record.component.html",
   providers: [HTTP_PROVIDERS, RecordService],
   directives: [PaginationComponent, HighlightDirective],
   styles: [`
@@ -46,6 +46,7 @@ export class RecordComponent extends SearchComponent implements OnInit {
     "search": null
   };
   showResults: boolean = false;
+  isAdmin: boolean = false;
 
   constructor(
     private router: Router,
@@ -58,6 +59,7 @@ export class RecordComponent extends SearchComponent implements OnInit {
 
   ngOnInit() {
     this.activeUser = this.authService.getUsername();
+    this.isAdmin = this.authService.isAdmin();
     this.showAllRecords = this.routeParams.get("showAll") === "true" ? true : false;
     this.additionalRouteParams["showAll"] = this.routeParams.get("showAll");
     let url_offset: string = this.routeParams.get("offset");
