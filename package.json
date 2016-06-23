@@ -22,7 +22,6 @@
     "bootstrap": "3.3.6",
     "del": "^2.2.1",
     "es6-shim": "^0.35.0",
-    "gulp": "3.9.1",
     "gulp-sourcemaps": "1.6.0",
     "gulp-typescript": "^2.8.0",
     "jquery": "2.2.4",
@@ -36,7 +35,7 @@
   },
   "devDependencies": {
     "concurrently": "^2.0.0",
-    "gulp": "^3.9.1",
+    "gulp": "3.9.1",
     "gulp-tslint": "5.0.0",
     "gulp-util": "^3.0.7",
     "jasmine-core": "2.4.1",
