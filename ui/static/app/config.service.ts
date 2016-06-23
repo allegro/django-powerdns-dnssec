@@ -1,10 +1,13 @@
 import { Injectable } from "@angular/core";
 
 
+declare var globalConfig: {[key: string]: any};
+
+
 @Injectable()
 export class ConfigService {
 
-  public apiDomain: string = "/api/v2/domains/";
-  public apiRecord: string = "/api/v2/records/";
-  public apiRecordRequest: string = "/api/v2/record-requests/";
+  static get(key: string): any {
+    return globalConfig[key];
+  }
 }

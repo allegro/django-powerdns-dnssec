@@ -5,6 +5,9 @@
         <h3 class="panel-title">DNSaaS</h3>
       </div>
       <div class="panel-body">
+        <div *ngIf="errorMessage" class="alert alert-success alert-danger">
+            {{ errorMessage }}
+        </div>
         <form (ngSubmit)="onSubmit()">
           <div class="form-group">
             <label for="name">Login</label>

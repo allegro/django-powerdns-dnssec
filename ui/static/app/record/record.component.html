@@ -77,11 +77,11 @@
             </td>
             <td class="action">
               <div *ngIf="record.type !== 'PTR'">
-                <div *ngIf="activeUser == record.owner">
+                <div *ngIf="activeUser == record.owner || isAdmin">
                   <a class="btn btn-primary btn-xs" (click)="onSelect(record)">Edit</a>
                   <a class="btn btn-danger btn-xs" (click)="deleteConfirm(record)">Delete</a>
                 </div>
-                <div *ngIf="activeUser != record.owner">
+                <div *ngIf="activeUser != record.owner && !isAdmin">
                   <a class="btn btn-primary btn-xs" (click)="onSelect(record)">Request Edit</a>
                   <a class="btn btn-danger btn-xs" (click)="deleteConfirm(record)">Request Delete</a>
                 </div>

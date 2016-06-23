@@ -2,6 +2,7 @@ import { Component, OnInit } from "@angular/core";
 import { ROUTER_DIRECTIVES, Route, Router, RouteConfig } from "@angular/router-deprecated";
 
 import { AuthService } from "./auth/auth.service";
+import { ConfigService } from "./config.service";
 import { DomainComponent } from "./domain/domain.component";
 import { LoginComponent } from "./auth/login.component";
 import { LogoutComponent } from "./auth/logout.component";
@@ -13,7 +14,7 @@ import { RecordRequestDetailComponent } from "./record-request/record-request-de
 
 @Component({
   selector: "dnsaas-app",
-  templateUrl: "static/app/templates/app.component.html",
+  templateUrl: "static/app/app.component.html",
   directives: [ROUTER_DIRECTIVES],
   providers: [AuthService],
   styles: [" .main { padding-top:45px; }"]
@@ -29,6 +30,8 @@ import { RecordRequestDetailComponent } from "./record-request/record-request-de
   { path: "/request-detail/:id", name: "RecordRequestDetail", component: RecordRequestDetailComponent },
 ])
 export class AppComponent implements OnInit {
+
+  homeUrl: string = ConfigService.get("homeUrl");
 
   constructor(
     public router: Router,

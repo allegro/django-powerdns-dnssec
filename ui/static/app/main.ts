@@ -11,10 +11,8 @@ import { HttpClient } from "./http-client";
 import { LocalStorage } from "./local-storage";
 import { CustomExceptionHandler } from "./exception-handler";
 
-// get java script debug variable from ui/templates/ui/index.html
-declare var debug: any;
 
-if (!debug) {
+if (!ConfigService.get("debug")) {
   enableProdMode();
 }
 

@@ -14,18 +14,17 @@ export class RecordRequestService {
 
   constructor(
     private http: HttpClient,
-    private authService: AuthService,
-    private configService: ConfigService
+    private authService: AuthService
   ) { }
 
   getRequests(search: URLSearchParams): Observable<Response> {
     search.set("owner", String(this.authService.getUserId()));
-    let url: string = this.configService.apiRecordRequest;
+    let url: string = ConfigService.get("recordRequestUrl");
     return this.http.get(url, search).catch(this.handleError);
   }
 
   getRequestById(id: string): Observable<RecordRequest> {
-    let url: string = `${this.configService.apiRecordRequest}${id}/`;
+    let url: string = `${ConfigService.get("recordRequestUrl")}${id}/`;
     return this.http.get(url).map(
         this.extractSingleData
     ).catch(this.handleError);

@@ -13,28 +13,27 @@ import "rxjs/add/operator/map";
 export class RecordService {
 
   constructor(
-    private http: HttpClient,
-    private configervice: ConfigService
+    private http: HttpClient
   ) { }
 
   getRecords(search: URLSearchParams): Observable<Response>  {
-    let url: string = this.configervice.apiRecord;
+    let url: string = ConfigService.get("recordUrl");
     return this.http.get(url, search).catch(this.handleError);
   }
 
   getRecordById(id: string): Observable<Record> {
-    let url: string = `${this.configervice.apiRecord}${id}/`;
+    let url: string = `${ConfigService.get("recordUrl")}${id}/`;
     return this.http.get(url).map(
         this.extractSingleData
     ).catch(this.handleError);
   }
 
   updateOrCreateRecord(record: Record): Observable<Record> {
-    let url: string = this.configervice.apiRecord;
+    let url: string = ConfigService.get("recordUrl")
     let body = JSON.stringify(record);
     let request: any;
     if (record.id) {
-      url = `${this.configervice.apiRecord}${record.id}/`;
+      url = `${ConfigService.get("recordUrl")}${record.id}/`;
       request = this.http.patch(url, body);
     } else {
       request = this.http.post(url, body);
@@ -46,7 +45,7 @@ export class RecordService {
   }
 
   deleteRecord(record: Record) {
-    let url: string = `${this.configervice.apiRecord}${record.id}/`;
+    let url: string = `${ConfigService.get("recordUrl")}${record.id}/`;
     return this.http.delete(url).catch(this.handleError);
   }
 

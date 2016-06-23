@@ -78,10 +78,9 @@
                 ngControl="name"
                 class="form-control"
                 [(ngModel)]="recordName"
-                #inputName
                 (keyup)="onKeyUpName(inputName.value)"
                 [disabled]="!domain"
-                />
+                #inputName />
             <div class="input-group-addon">
               <span *ngIf="domain">
                 {{ domainDot }}{{ domain.name }}

@@ -13,17 +13,16 @@ import "rxjs/add/operator/map";
 export class DomainService implements AutocompleteServiceInterface {
 
   constructor(
-    private http: HttpClient,
-    private configService: ConfigService
+    private http: HttpClient
   ) { }
 
   getDomains(search: URLSearchParams): Observable<Response> {
-    let url: string = this.configService.apiDomain;
+    let url: string = ConfigService.get("domainUrl");
     return this.http.get(url, search).catch(this.handleError);
   }
 
   getDomainById(id: number): Observable<Domain> {
-    let url: string = `${this.configService.apiDomain}${id}/`;
+    let url: string = `${ConfigService.get("domainUrl")}${id}/`;
     return this.http.get(url).map(
       response => {
         let json = response.json();
@@ -34,7 +33,7 @@ export class DomainService implements AutocompleteServiceInterface {
 
   getAutocompleteSearchResults(value: string): Observable<Domain[]> {
     let result: Array<{0: number, 1: string}> = [];
-    let url: string =  this.configService.apiDomain;
+    let url: string =  ConfigService.get("domainUrl");
     let params: URLSearchParams = new URLSearchParams();
     params.set("name", value);
     params.set("limit", "10");
@@ -42,7 +41,7 @@ export class DomainService implements AutocompleteServiceInterface {
   }
 
   getAutocompleteCurrentValue(id: number): Observable<string> {
-      let url: string = `${this.configService.apiDomain}${id}/`;
+      let url: string = `${ConfigService.get("domainUrl")}${id}/`;
       return this.http.get(url).map(
         response => {
           let json = response.json();

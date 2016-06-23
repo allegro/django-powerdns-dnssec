@@ -39,7 +39,14 @@ gulp.task("libs", function () {
         'raven-js/dist/**',
         'rxjs/**',
         'zone.js/dist/**',
-        '@angular/**',
+        '@angular/common/common.umd.js',
+        '@angular/compiler/compiler.umd.js',
+        '@angular/core/core.umd.js',
+        '@angular/http/http.umd.js',
+        '@angular/platform-browser/platform-browser.umd.js',
+        '@angular/platform-browser-dynamic/platform-browser-dynamic.umd.js',
+        '@angular/router-deprecated/router-deprecated.umd.js',
+        '@angular/upgrade/upgrade.umd.js',
         'bootstrap/dist/**',
         'jquery/dist/**'
     ], {cwd: "node_modules/**"}) /* Glob required here. */
