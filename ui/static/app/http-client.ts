@@ -12,14 +12,12 @@ export class HttpClient {
   constructor(
     private http: Http,
     private authService: AuthService
-  ) {
-    this.apiToken = this.authService.getToken();
-  }
+  ) { }
 
   getAuthorizationHeader(): Headers {
     let headers: Headers = new Headers();
     headers.append("Content-Type", "application/json");
-    headers.append("Authorization", `Token ${this.apiToken}`);
+    headers.append("Authorization", `Token ${this.authService.getToken()}`);
     headers.append("Accept", "application/json; version=v2");
     return headers;
   }

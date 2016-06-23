@@ -49,9 +49,7 @@ export class AuthService {
   }
 
   logout() {
-    this.localStorage.remove("auth_token");
-    this.localStorage.remove("auth_username");
-    this.localStorage.remove("is_admin");
+    this.localStorage.clear();
   }
 
   getUsername(): string {

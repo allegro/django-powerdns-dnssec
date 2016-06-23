@@ -29,7 +29,7 @@ export class RecordService {
   }
 
   updateOrCreateRecord(record: Record): Observable<Record> {
-    let url: string = ConfigService.get("recordUrl")
+    let url: string = ConfigService.get("recordUrl");
     let body = JSON.stringify(record);
     let request: any;
     if (record.id) {
