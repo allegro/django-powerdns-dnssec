@@ -60,7 +60,7 @@ export class RecordRequestDetailComponent implements OnInit {
   }
 
   getRecord() {
-    if(this.recordRequest.record) {
+    if (this.recordRequest.record) {
       this.recordService.getRecordById(
         String(this.recordRequest.record)
       ).subscribe(
