@@ -1,6 +1,6 @@
 import { Component, OnInit } from "@angular/core";
+import { Location } from "@angular/common";
 import { ROUTER_DIRECTIVES, Route, Router, RouteConfig } from "@angular/router-deprecated";
-
 import { AuthService } from "./auth/auth.service";
 import { ConfigService } from "./config.service";
 import { DomainComponent } from "./domain/domain.component";
@@ -35,14 +35,16 @@ export class AppComponent implements OnInit {
 
   constructor(
     public router: Router,
+    public location: Location,
     private authService: AuthService
   ) { }
 
   ngOnInit() {
     if (!this.authService.isLoggedIn()) {
       this.router.navigate(["Login"]);
+    } else if (this.location.path().length === 0) {
+      this.router.navigate(["Records"]);
     }
-    this.router.navigate(["Records"]);
   }
 
   get isLoggedIn(): Boolean {

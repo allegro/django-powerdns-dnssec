@@ -61,7 +61,7 @@ export class AuthService {
   }
 
   isAdmin(): boolean {
-    return (this.localStorage.get("is_admin") === "true") ? true : false;
+    return (this.localStorage.get("is_admin") === "true");
   }
 
   private handleError(response: any) {
