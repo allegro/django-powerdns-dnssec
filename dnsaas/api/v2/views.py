@@ -23,7 +23,6 @@ from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from rest_framework.permissions import DjangoObjectPermissions
 from rest_framework.response import Response
 
-from powerdns.models.requests import RequestStates
 from .serializers import (
     CryptoKeySerializer,
     DomainMetadataSerializer,
@@ -132,20 +131,17 @@ class RecordViewSet(OwnerViewSet):
         record_request.copy_records_data(serializer.validated_data.items())
         record_request.owner = request.user
         record_request.target_owner = serializer.validated_data['owner']
-        record_request.save()
 
         if serializer.validated_data['domain'].can_auto_accept(
             request.user
         ):
-            serializer.save()
-            record_request.record = serializer.instance
-            record_request.state = RequestStates.ACCEPTED
-            record_request.save()
+            serializer.instance = record_request.accept()
             data = serializer.data
             code = status.HTTP_201_CREATED
             headers = {}
         else:
             data = {}
+            record_request.save()
             code = status.HTTP_202_ACCEPTED
             headers = {
                 'Location': reverse(
@@ -191,18 +187,16 @@ class RecordViewSet(OwnerViewSet):
         record_request.owner = request.user
         record_request.target_owner = serializer.validated_data.get('owner')
         record_request.record = serializer.instance
-        record_request.save()
 
         if (
             serializer.instance.domain.can_auto_accept(request.user) and
             instance.can_auto_accept(request.user)
         ):
-            record_request.state = RequestStates.ACCEPTED
-            record_request.save()
-            serializer.save()
+            serializer.instance = record_request.accept()
             code = status.HTTP_200_OK
             headers = {}
         else:
+            record_request.save()
             code = status.HTTP_202_ACCEPTED
             headers = {
                 'Location': reverse(
@@ -232,7 +226,6 @@ class RecordViewSet(OwnerViewSet):
         delete_request = DeleteRequest(
             owner=request.user, target=instance,
         )
-        delete_request.save()
         if (
             instance.domain.can_auto_accept(request.user) and
             instance.can_auto_accept(request.user)
@@ -240,6 +233,7 @@ class RecordViewSet(OwnerViewSet):
             delete_request.accept()
             code = status.HTTP_204_NO_CONTENT
         else:
+            delete_request.save()
             code = status.HTTP_202_ACCEPTED
         return Response(status=code)
 

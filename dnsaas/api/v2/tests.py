@@ -295,7 +295,7 @@ class TestRecords(BaseApiTestCase):
             response.data['record_request_ids'][0], record_request.id
         )
 
-    def test_dont_reject_update_when_request_already_exists_but_superuser(
+    def test_allow_update_when_request_already_exists_but_superuser(
         self
     ):
         self.client.login(username='super_user', password='super_user')
@@ -374,6 +374,37 @@ class TestRecords(BaseApiTestCase):
         record_request = RecordRequest.objects.get(record__id=record.id)
         self.assertEqual(record_request.owner, self.super_user)
         self.assertEqual(record_request.target_owner, None)
+
+    def test_owner_keeps_value_when_no_owner_in_update(self):
+        """
+        1. Create record r1 with owner o1
+        2. Create record request (rr1) for r1 without owner
+        3. r1 gets update on owner to o2 while acceptation is pending
+        4. rr1 gets acceptation
+        5. r1.owner == o2
+        """
+        self.client.login(username='regular_user1', password='regular_user1')
+        record = RecordFactory(
+            auto_ptr=AutoPtrOptions.NEVER.id,
+            type='A',
+            name='blog.com',
+            remarks='initial remarks',
+            content='192.168.1.0',
+            owner=self.super_user,
+        )
+        response = self.client.patch(
+            reverse('api:v2:record-detail', kwargs={'pk': record.pk}),
+            data={'remarks': 'updated remarks'},
+            format='json',
+            **{'HTTP_ACCEPT': 'application/json; version=v2'}
+        )
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
+        record.owner = self.regular_user2
+        record.save()
+        RecordRequest.objects.get(record=record).accept()
+        record.refresh_from_db()
+        self.assertEqual(record.owner, self.regular_user2)
+        self.assertEqual(record.remarks, 'updated remarks')
 
     #
     # deletion
