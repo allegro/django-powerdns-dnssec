@@ -40,10 +40,10 @@ export class RecordComponent extends SearchComponent implements OnInit {
   totalCount: number;
   showAllRecords: boolean = false;
   activeUser: string;
-  searchValue: string;
+  searchValue: string = "";
   additionalRouteParams: {[key: string]: string} = {
     "showAll": "false",
-    "search": null
+    "search": ""
   };
   showResults: boolean = false;
   isAdmin: boolean = false;
@@ -64,19 +64,23 @@ export class RecordComponent extends SearchComponent implements OnInit {
     this.additionalRouteParams["showAll"] = this.routeParams.get("showAll");
     let url_offset: string = this.routeParams.get("offset");
     this.currentOffset = url_offset ? Number(url_offset) : 0;
-    this.searchValue = this.routeParams.get("search");
+    let search: string = this.routeParams.get("search");
+    this.searchValue = (search !== null) ? search : "";
     this.getRecords();
   }
 
   search(value: string) {
-    this.currentOffset = 0;
     if (value.length > 1) {
       this.searchValue = value;
-      this.getRecords();
     } else {
-      this.searchValue = null;
-      this.getRecords();
+      this.searchValue = "";
     }
+    this.searchUpdateUrls();
+  }
+
+  searchUpdateUrls() {
+    this.additionalRouteParams["search"] = this.searchValue;
+    this.router.navigate(["Records", this.additionalRouteParams]);
   }
 
   get isRecords(): boolean {
@@ -95,7 +99,6 @@ export class RecordComponent extends SearchComponent implements OnInit {
     if (!this.showAllRecords) {
       params.set("owner", String(this.authService.getUserId()));
     }
-
     this.additionalRouteParams["search"] = this.searchValue;
 
     if (this.searchValue) {
