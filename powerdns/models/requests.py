@@ -110,7 +110,9 @@ class ChangeCreateRequest(Request):
             # creation
             old_dict = object_.as_empty_history()
         new_dict = self.as_history_dump()
-        return flat_dict_diff(old_dict, new_dict)
+        result = flat_dict_diff(old_dict, new_dict)
+        result['_type'] = 'update' if object_.id else 'creation'
+        return result
 
     def _set_json_history(self, object_):
         self.last_change_json = self._get_json_history(object_)
