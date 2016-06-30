@@ -240,7 +240,8 @@ class TestRecords(BaseApiTestCase):
             'prio': {'new': '', 'old': ''},
             'remarks': {'new': '', 'old': ''},
             'ttl': {'new': 3600, 'old': ''},
-            'type': {'new': 'CNAME', 'old': ''}
+            'type': {'new': 'CNAME', 'old': ''},
+            '_type': 'creation',
         })
 
     def test_rejected_record_creation_dumps_history_correctly(self):
@@ -269,7 +270,8 @@ class TestRecords(BaseApiTestCase):
             'prio': {'new': '', 'old': ''},
             'remarks': {'new': '', 'old': ''},
             'ttl': {'new': 3600, 'old': ''},
-            'type': {'new': 'CNAME', 'old': ''}
+            'type': {'new': 'CNAME', 'old': ''},
+            '_type': 'creation',
         })
 
     #
@@ -530,7 +532,8 @@ class TestRecords(BaseApiTestCase):
             # set, so it can't be distinguish if eg. 3600 was from default of
             # from user
             'ttl': {'new': 3600, 'old': 3600},
-            'type': {'new': '', 'old': data['type']}
+            'type': {'new': '', 'old': data['type']},
+            '_type': 'update',
         })
 
     #
