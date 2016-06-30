@@ -122,9 +122,12 @@ export class RecordDetailComponent implements OnInit {
 
         this.recordService.updateOrCreateRecord(this.record).subscribe(
           record => {
-            if (record.owner !== this.authService.getUsername()) {
-              this.router.navigate(["RecordRequests"]);
-            } else {
+            if (record.record_request_id) {
+              this.router.navigate(
+                ["RecordRequestDetail", {id: record.record_request_id, showAutoAcceptanceMessage: "true"}]
+              );
+            }
+            else {
               this.onBack();
             }
           },

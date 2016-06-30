@@ -11,4 +11,5 @@ export class RecordRequest {
   target_remarks: string;
   domain: number;
   record: number;
+  last_change: JSON;
 }

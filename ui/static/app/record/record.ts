@@ -12,6 +12,7 @@ export class Record {
   public ttl: number = 3600;
   public owner: string;
   public modified: string;
+  public record_request_id: number;
 
   public static recordTypes: Array<{0: string, 1: string}> = [
     ["A", "IPv4 address: e.g. example.com -> 1.2.3.4"],
