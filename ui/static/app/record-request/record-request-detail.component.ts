@@ -9,6 +9,9 @@ import { RecordRequestService } from "./record-request.service";
 import { RecordRequest } from "./record-request";
 
 
+declare var $: any;
+
+
 @Component({
   templateUrl: "/static/app/record-request/record-request-detail.component.html",
   providers: [DomainService, RecordService, RecordRequestService],
@@ -24,6 +27,7 @@ export class RecordRequestDetailComponent implements OnInit {
   domain: Domain;
   record: Record;
   recordRequest: RecordRequest;
+  showAutoAcceptanceMessage: boolean = false;
 
   constructor(
     private routeParams: RouteParams,
@@ -34,21 +38,27 @@ export class RecordRequestDetailComponent implements OnInit {
   ) { }
 
   getValue(fieldName: string): string {
-    let recordRequestValue: string = String(
-      this.recordRequest[`target_${fieldName}`]
-    );
-    if (!this.record) {
-      return `<span>${recordRequestValue}`;
+    if ($.isEmptyObject(this.recordRequest.last_change)) {
+      let value: string = this.recordRequest[`target_${fieldName}`];
+      return `<span class="new">${value}</span>`;
     }
 
-    let recordValue: string = String(this.record[fieldName]);
-    if (recordValue !== recordRequestValue) {
-      return `
-        <span class="old">${recordValue}</span> ->
-        <span class="new">${recordRequestValue}</span>
-      `;
+    let newValue: string = String(
+      this.recordRequest.last_change[fieldName]["new"]
+    );
+    let oldValue: string = String(
+      this.recordRequest.last_change[fieldName]["old"]
+    );
+
+    if (oldValue === newValue) {
+      return `<span>${newValue}</span>`;
+    } else {
+      let result: string = "";
+      if (this.recordRequest.last_change["_request_type"] === "update") {
+        result += `<span class="old">${oldValue}</span> ->`;
+      }
+      return result + `<span class="new">${newValue}</span>`;
     }
-    return `<span>${recordRequestValue}</span>`;
   }
 
   getDomain() {
@@ -71,6 +81,7 @@ export class RecordRequestDetailComponent implements OnInit {
 
   ngOnInit() {
     let requestId: any = this.routeParams.get("id");
+    let showAutoAcceptanceMessage: string = this.routeParams.get("showAutoAcceptanceMessage");
     if (requestId) {
       this.recordRequestService.getRequestById(
         String(requestId)
@@ -79,6 +90,9 @@ export class RecordRequestDetailComponent implements OnInit {
           this.recordRequest = recordRequest;
           this.getDomain();
           this.getRecord();
+          if (showAutoAcceptanceMessage === "true") {
+            this.showAutoAcceptanceMessage = true;
+          }
         }
       );
     }

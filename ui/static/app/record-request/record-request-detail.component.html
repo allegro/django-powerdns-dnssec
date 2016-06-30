@@ -1,11 +1,14 @@
 <div class="page-header">
   <h1>Record Request</h1>
 </div>
+<div *ngIf="showAutoAcceptanceMessage" class="alert alert-warning">
+  Your change requires acceptance by owner of record or domain.
+</div>
 <div class="panel panel-default">
   <div class="panel-heading">
   </div>
   <div class="panel-body">
-    <div *ngIf="errorMessage" class="alert alert-success alert-danger">
+    <div *ngIf="errorMessage" class="alert alert-danger">
       {{ errorMessage }}
     </div>
     <table class="table table-striped table-hover" *ngIf="recordRequest && domain">
