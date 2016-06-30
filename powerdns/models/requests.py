@@ -75,7 +75,9 @@ class DeleteRequest(Request):
     def accept(self):
         old_dict = self.target.as_history_dump()
         new_dict = self.target.as_empty_history()
-        self.last_change_json = flat_dict_diff(old_dict, new_dict)
+        result = flat_dict_diff(old_dict, new_dict)
+        result['_request_type'] = 'delete'
+        self.last_change_json = result
 
         self.target.delete()
         self.state = RequestStates.ACCEPTED
@@ -111,7 +113,7 @@ class ChangeCreateRequest(Request):
             old_dict = object_.as_empty_history()
         new_dict = self.as_history_dump()
         result = flat_dict_diff(old_dict, new_dict)
-        result['_type'] = 'update' if object_.id else 'creation'
+        result['_request_type'] = 'update' if object_.id else 'create'
         return result
 
     def _set_json_history(self, object_):
