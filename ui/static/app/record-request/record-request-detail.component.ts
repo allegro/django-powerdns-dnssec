@@ -1,5 +1,5 @@
 import { Component, OnInit } from "@angular/core";
-import { CanActivate, RouteParams, Router } from "@angular/router-deprecated";
+import { ROUTER_DIRECTIVES, CanActivate, RouteParams, Router } from "@angular/router-deprecated";
 import { isLoggedin }  from "../auth/auth.service";
 import { Domain } from "../domain/domain";
 import { DomainService } from "../domain/domain.service";
@@ -15,6 +15,7 @@ declare var $: any;
 @Component({
   templateUrl: "/static/app/record-request/record-request-detail.component.html",
   providers: [DomainService, RecordService, RecordRequestService],
+  directives: [ROUTER_DIRECTIVES],
   styles: [`
     td span { cursor:pointer; }
     :host >>> .new { color: green; }

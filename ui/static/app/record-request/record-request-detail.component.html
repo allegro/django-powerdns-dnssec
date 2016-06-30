@@ -1,5 +1,9 @@
 <div class="page-header">
-  <h1>Record Request</h1>
+  <h1>Record Request
+    <small>
+      <a [routerLink]="['RecordRequests']" class="btn">Back to list</a>
+    </small>
+  </h1>
 </div>
 <div *ngIf="showAutoAcceptanceMessage" class="alert alert-warning">
   Your change requires acceptance by owner of record or domain.
