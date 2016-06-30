@@ -5,6 +5,7 @@ import logging
 from django.db import models
 from django.conf import settings
 from django.core.urlresolvers import reverse
+from django_extensions.db.fields.json import JSONField
 from dj.choices import Choices
 from dj.choices.fields import ChoiceField
 from django.contrib.contenttypes.fields import ContentType, GenericForeignKey
@@ -18,7 +19,7 @@ from powerdns.models import (
     Domain,
     Record
 )
-from powerdns.utils import AutoPtrOptions, RecordLike
+from powerdns.utils import AutoPtrOptions, RecordLike, flat_dict_diff
 
 
 log = logging.getLogger(__name__)
@@ -46,6 +47,7 @@ class Request(Owned):
         null=True,
         blank=True
     )
+    last_change_json = JSONField(null=True, blank=True)
 
     def reject(self):
         """Reject the request"""
@@ -71,9 +73,17 @@ class DeleteRequest(Request):
     view = 'accept_delete'
 
     def accept(self):
-        object_ = self.target
-        object_.delete()
+        old_dict = self.target.as_history_dump()
+        new_dict = self.target.as_empty_history()
+        self.last_change_json = flat_dict_diff(old_dict, new_dict)
+
+        self.target.delete()
         self.state = RequestStates.ACCEPTED
+        self.save()
+
+    def reject(self):
+        """Reject the request"""
+        self.state = RequestStates.REJECTED
         self.save()
 
     def __str__(self):
@@ -92,8 +102,22 @@ class ChangeCreateRequest(Request):
     class Meta:
         abstract = True
 
+    def _get_json_history(self, object_):
+        if object_.id:
+            # udpate
+            old_dict = object_.as_history_dump()
+        else:
+            # creation
+            old_dict = object_.as_empty_history()
+        new_dict = self.as_history_dump()
+        return flat_dict_diff(old_dict, new_dict)
+
+    def _set_json_history(self, object_):
+        self.last_change_json = self._get_json_history(object_)
+
     def accept(self):
         object_ = self.get_object()
+        self._set_json_history(object_)
         for field_name in type(self).copy_fields:
             if field_name in self.ignore_fields:
                 continue
@@ -109,6 +133,13 @@ class ChangeCreateRequest(Request):
         self.state = RequestStates.ACCEPTED
         self.save()
         return object_
+
+    def reject(self):
+        """Reject the request"""
+        object_ = self.get_object()
+        self._set_json_history(object_)
+        self.state = RequestStates.REJECTED
+        self.save()
 
     def copy_records_data(self, fields_to_copy):
         """Sets data from `fields_to_copy` on self
@@ -239,6 +270,10 @@ class DomainRequest(ChangeCreateRequest):
     def assign_object(self, obj):
         self.domain = obj
 
+    def as_history_dump(self):
+        """We don't care about domain history for now"""
+        return {}
+
 
 # rules.add_perm('powerdns', rules.is_authenticated)
 rules.add_perm('powerdns.add_domainrequest', rules.is_authenticated)
@@ -349,5 +384,17 @@ class RecordRequest(ChangeCreateRequest, RecordLike):
 
     def assign_object(self, obj):
         self.record = obj
+
+    def as_history_dump(self):
+        return {
+            'content': self.target_content or '',
+            'name': self.target_name or '',
+            'owner': getattr(self.target_owner, 'username', ''),
+            'prio': self.target_prio or '',
+            'remarks': self.target_remarks or '',
+            'ttl':  self.target_ttl or '',
+            'type':  self.target_type or '',
+        }
+
 
 rules.add_perm('powerdns.add_recordrequest', rules.is_authenticated)

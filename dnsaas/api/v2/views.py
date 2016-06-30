@@ -140,8 +140,10 @@ class RecordViewSet(OwnerViewSet):
             code = status.HTTP_201_CREATED
             headers = {}
         else:
-            data = {}
             record_request.save()
+            data = {
+                'record_request_id': record_request.id,
+            }
             code = status.HTTP_202_ACCEPTED
             headers = {
                 'Location': reverse(
@@ -193,10 +195,14 @@ class RecordViewSet(OwnerViewSet):
             instance.can_auto_accept(request.user)
         ):
             serializer.instance = record_request.accept()
+            data = serializer.data
             code = status.HTTP_200_OK
             headers = {}
         else:
             record_request.save()
+            data = {
+                'record_request_id': record_request.id,
+            }
             code = status.HTTP_202_ACCEPTED
             headers = {
                 'Location': reverse(
@@ -204,7 +210,7 @@ class RecordViewSet(OwnerViewSet):
                     kwargs={'pk': record_request.id},
                 )
             }
-        return Response(serializer.data, status=code, headers=headers)
+        return Response(data, status=code, headers=headers)
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()

@@ -294,6 +294,14 @@ class Domain(TimeTrackable, Owned, WithRequests):
             )
         )
 
+    def as_empty_history(self):
+        """We don't care about domain history for now"""
+        return {}
+
+    def as_history_dump(self):
+        """We don't care about domain history for now"""
+        return {}
+
 
 rules.add_perm('powerdns', rules.is_authenticated)
 rules.add_perm('powerdns.add_domain', rules.is_superuser)
@@ -612,6 +620,27 @@ class Record(TimeTrackable, Owned, RecordLike, WithRequests):
             )
         )
 
+    def as_empty_history(self):
+        return {
+            'content': '',
+            'name': '',
+            'owner': '',
+            'prio': '',
+            'remarks': '',
+            'ttl':  '',
+            'type':  '',
+        }
+
+    def as_history_dump(self):
+        return {
+            'content': self.content or '',
+            'name': self.name or '',
+            'owner': getattr(self.owner, 'username', ''),
+            'prio': self.prio or '',
+            'remarks': self.remarks or '',
+            'ttl':  self.ttl or '',
+            'type':  self.type or '',
+        }
 
 rules.add_perm('powerdns.add_record', rules.is_authenticated)
 rules.add_perm('powerdns.change_record', rules.is_authenticated)

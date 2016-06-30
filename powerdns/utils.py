@@ -327,3 +327,25 @@ class RecordLike(models.Model):
             self.set_field('name', self.get_field('name').lower())
         if self.get_field('type'):
             self.set_field('type', self.get_field('type').upper())
+
+
+def flat_dict_diff(old_dict, new_dict):
+    """
+    return: {
+        'name': {'old': 'old-value', 'new': 'new-value'},
+        'ttl': {'old': 'old-value', 'new': ''},
+        'prio': {'old': '', 'new': 'new-value'},
+        ..
+    }
+    """
+    def _fmt(old, new):
+        return {
+            'old': old,
+            'new': new,
+        }
+
+    diff_result = {}
+    keys = set(old_dict) & set(new_dict)
+    for key in keys:
+        diff_result[key] = _fmt(old_dict[key], new_dict[key])
+    return diff_result
