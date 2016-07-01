@@ -6,13 +6,13 @@
     <div class="row">
       <div class="col-md-6">
         <div class="input-group">
-          <input
+          <input #searchInput
             type="text"
             class="form-control"
             placeholder="Search by name, content, owner, domain name"
             value="{{ searchValue }}"
-            #searchInput
-            (keyup)="onKeyUpSearch($event, searchInput.value)"
+            #search
+            (keyup)="onKeyUpSearch($event, search.value)"
           />
           <div class="input-group-addon">
             <span class="glyphicon glyphicon-search"></span>

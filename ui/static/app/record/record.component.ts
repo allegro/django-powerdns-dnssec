@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { AfterViewInit, Component, OnInit, ViewChild } from "@angular/core";
 import { CanActivate, Router, RouteParams } from "@angular/router-deprecated";
 import { URLSearchParams, HTTP_PROVIDERS } from "@angular/http";
 import { AuthService, isLoggedin }  from "../auth/auth.service";
@@ -9,6 +9,7 @@ import { SearchComponent } from "../search.component";
 import { HighlightDirective } from "../directives/highlight.directive";
 import "rxjs/add/observable/throw";
 
+declare var $: any;
 
 @Component({
   templateUrl: "/static/app/record/record.component.html",
@@ -31,7 +32,7 @@ import "rxjs/add/observable/throw";
   `]
 })
 @CanActivate(() => isLoggedin())
-export class RecordComponent extends SearchComponent implements OnInit {
+export class RecordComponent extends SearchComponent implements AfterViewInit, OnInit {
 
   records: Record[];
   errorMessage: any;
@@ -47,6 +48,7 @@ export class RecordComponent extends SearchComponent implements OnInit {
   };
   showResults: boolean = false;
   isAdmin: boolean = false;
+  @ViewChild("searchInput") searchInput;
 
   constructor(
     private router: Router,
@@ -67,6 +69,10 @@ export class RecordComponent extends SearchComponent implements OnInit {
     let search: string = this.routeParams.get("search");
     this.searchValue = (search !== null) ? search : "";
     this.getRecords();
+  }
+
+  ngAfterViewInit() {
+    $(this.searchInput.nativeElement).focus();
   }
 
   search(value: string) {

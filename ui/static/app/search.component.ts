@@ -9,6 +9,6 @@ export abstract class SearchComponent {
     if (this.timer) {
       clearTimeout(this.timer);
     }
-    this.timer = setTimeout(() => this.search(value), 400);
+    this.timer = setTimeout(() => this.search(value), 500);
   }
 }
