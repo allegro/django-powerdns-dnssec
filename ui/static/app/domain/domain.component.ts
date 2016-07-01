@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { AfterViewInit, Component, OnInit, ViewChild } from "@angular/core";
 import { CanActivate, Router, RouteParams } from "@angular/router-deprecated";
 import { URLSearchParams } from "@angular/http";
 import { DomainService } from "./domain.service";
@@ -8,6 +8,8 @@ import { SearchComponent } from "../search.component";
 import { PaginationComponent } from "../pagination/pagination.component";
 import { HighlightDirective } from "../directives/highlight.directive";
 import "rxjs/add/observable/throw";
+
+declare var $: any;
 
 
 @Component({
@@ -28,10 +30,11 @@ export class DomainComponent extends SearchComponent implements OnInit {
   currentOffset: number = 0;
   perPage: number = 100;
   totalCount: number;
-  searchValue: string;
+  searchValue: string = "";
   additionalRouteParams: {[key: string]: string} = {
     "search": null
   };
+  @ViewChild("searchInput") searchInput;
 
   constructor(
     private domainService: DomainService,
@@ -44,8 +47,15 @@ export class DomainComponent extends SearchComponent implements OnInit {
   ngOnInit() {
     let url_offset: string = this.routeParams.get("offset");
     this.currentOffset = url_offset ? Number(url_offset) : 0;
-    this.searchValue = this.routeParams.get("search");
+    let search: string = this.routeParams.get("search");
+    this.searchValue = (search !== null) ? search : "";
     this.getDomains();
+  }
+
+  ngAfterViewInit() {
+    $(this.searchInput.nativeElement).focus().get(0).setSelectionRange(
+      this.searchValue.length, this.searchValue.length
+    );
   }
 
   getDomains() {

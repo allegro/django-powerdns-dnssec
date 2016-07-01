@@ -72,7 +72,9 @@ export class RecordComponent extends SearchComponent implements AfterViewInit, O
   }
 
   ngAfterViewInit() {
-    $(this.searchInput.nativeElement).focus();
+    $(this.searchInput.nativeElement).focus().get(0).setSelectionRange(
+      this.searchValue.length, this.searchValue.length
+    );
   }
 
   search(value: string) {
