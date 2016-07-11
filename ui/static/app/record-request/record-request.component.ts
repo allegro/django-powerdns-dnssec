@@ -5,7 +5,7 @@ import { AuthService, isLoggedin }  from "../auth/auth.service";
 import { RecordRequest } from "./record-request";
 import { RecordRequestService } from "./record-request.service";
 import { HighlightDirective } from "../directives/highlight.directive";
-
+import { ConfigService } from "../config.service";
 
 @Component({
   templateUrl: "/static/app/record-request/record-request.component.html",
@@ -24,6 +24,7 @@ export class RecordRequestComponent implements OnInit {
   recordRequests: RecordRequest;
   state: string = "pending";
   errorMessage: string;
+  jiraUrl: string = ConfigService.get("jiraUrl");
 
   constructor(
     private router: Router,

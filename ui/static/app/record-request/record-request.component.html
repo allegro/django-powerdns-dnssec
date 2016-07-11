@@ -21,10 +21,12 @@
             <th>Content</th>
             <th>TTL</th>
             <th>Owner</th>
+            <th>Ticket</th>
+            <th>Options</th>
          </tr>
       </thead>
        <tbody>
-        <tr *ngFor="let request of recordRequests" (click)="onSelect(request)" style="cursor:pointer;" [highlight]>
+        <tr *ngFor="let request of recordRequests" [highlight]>
           <td>
             <div class="wrap" title="{{ request.target_name }}">
               {{ request.target_name }}
@@ -43,6 +45,12 @@
           </td>
           <td>
             {{ request.target_owner }}
+          </td>
+          <td>
+            <a href="{{ jira_url }}" target="_blank"> {{ request.key }} </a>
+          </td>
+          <td>
+            <a class="btn btn-primary btn-xs" (click)="onSelect(request)" style="cursor:pointer;">Detail</a>
           </td>
         </tr>
       </tbody>

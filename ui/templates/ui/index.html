@@ -19,6 +19,7 @@
       domainUrl: "{% url 'api:v2:domain-list' %}",
       recordUrl: "{% url 'api:v2:record-list' %}",
       recordRequestUrl: "{% url 'api:v2:recordrequest-list' %}",
+      jiraUrl: "{{ settings.JIRA_URL }}",
       homeUrl: "{% url 'home' %}"
     };
     {% if settings.SENTRY_JS_DSN %}
