@@ -31,6 +31,7 @@
       <thead>
          <tr>
             <th>Name</th>
+            <th>Type</th>
             <th>Owner</th>
          </tr>
       </thead>
@@ -38,6 +39,9 @@
         <tr *ngFor="let domain of domains" [highlight]>
             <td>
               {{ domain.name }}
+            </td>
+            <td>
+              {{ domain.type }}
             </td>
             <td>
               {{ domain.owner }}

@@ -12,4 +12,5 @@ export class RecordRequest {
   domain: number;
   record: number;
   last_change: JSON;
+  key: string;
 }
