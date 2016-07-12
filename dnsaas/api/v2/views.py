@@ -4,7 +4,7 @@ import django_filters
 import logging
 
 from django.core.urlresolvers import reverse
-from django.db.models import Q
+from django.db.models import Prefetch, Q
 
 from powerdns.models import (
     CryptoKey,
@@ -36,6 +36,7 @@ from .serializers import (
 )
 from powerdns.utils import to_reverse
 from powerdns.models.tsigkeys import TsigKey
+from powerdns.models.requests import RequestStates
 
 
 log = logging.getLogger(__name__)
@@ -108,6 +109,15 @@ class RecordViewSet(OwnerViewSet):
 
     queryset = Record.objects.all().select_related(
         'owner', 'domain'
+    ).prefetch_related(
+        Prefetch(
+            "requests",
+            queryset=RecordRequest.objects.filter(state=RequestStates.OPEN)
+        ),
+        Prefetch(
+            "delete_request",
+            queryset=DeleteRequest.objects.filter(state=RequestStates.OPEN)
+        )
     ).order_by('-id')
     serializer_class = RecordSerializer
     filter_backends = (filters.DjangoFilterBackend, filters.SearchFilter)

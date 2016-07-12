@@ -52,7 +52,11 @@
          </tr>
       </thead>
        <tbody>
-        <tr *ngFor="let record of records" class="{{ showAllRecords && activeUser == record.owner ? 'success': '' }}{{ record.type == 'PTR' ? 'read-only': '' }}" [highlight]>
+        <tr *ngFor="let record of records" class="
+          {{ showAllRecords && activeUser == record.owner ? 'success': '' }}
+          {{ record.type == 'PTR' ? 'read-only': '' }}
+          {{ record.change_request || record.delete_request  ? 'danger' : '' }}
+        " [highlight]>
             <td>
               <div class="wrap" title="{{ record.name }}">
                 {{ record.name }}
@@ -76,7 +80,17 @@
               {{ record.modified }}
             </td>
             <td class="action">
-              <div *ngIf="record.type !== 'PTR'">
+              <span *ngIf="record.change_request || record.delete_request">
+                <a
+                  target="_blank"
+                  class="btn btn-default btn-xs"
+                  href="{{ jiraUrl }}/browse/{{ record.delete_request ? record.delete_request : record.change_request }}"
+                >
+                  {{ record.delete_request ? record.delete_request : record.change_request }}
+                  <span class="glyphicon glyphicon-info-sign" tooltip data-toggle="tooltip" data-placement="top" title="Record is locked for modifications. Will be unlocked once processing of another request has finished." aria-hidden="true"></span>
+                </a>
+              </span>
+              <div *ngIf="record.type !== 'PTR' && !record.change_request && !record.delete_request">
                 <div *ngIf="activeUser == record.owner || isAdmin">
                   <a class="btn btn-primary btn-xs" (click)="onSelect(record)">Edit</a>
                   <a class="btn btn-danger btn-xs" (click)="deleteConfirm(record)">Delete</a>

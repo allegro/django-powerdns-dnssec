@@ -73,6 +73,24 @@ class RecordSerializer(OwnerSerializer):
     modified = serializers.DateTimeField(
         format='%Y-%m-%d %H:%M:%S', read_only=True
     )
+    change_request = serializers.SerializerMethodField(
+        'get_change_record_request'
+    )
+    delete_request = serializers.SerializerMethodField(
+        'get_delete_record_request'
+    )
+
+    def get_change_record_request(self, record):
+        record_request = record.requests.all()
+        if record_request:
+            return record_request[0].key
+        return None
+
+    def get_delete_record_request(self, record):
+        delete_request = record.delete_request.all()
+        if delete_request:
+            return delete_request[0].key
+        return None
 
     def validate(self, attrs):
         domain, content, record_type = (
