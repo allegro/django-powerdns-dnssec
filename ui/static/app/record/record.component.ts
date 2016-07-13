@@ -2,11 +2,13 @@ import { AfterViewInit, Component, OnInit, ViewChild } from "@angular/core";
 import { CanActivate, Router, RouteParams } from "@angular/router-deprecated";
 import { URLSearchParams, HTTP_PROVIDERS } from "@angular/http";
 import { AuthService, isLoggedin }  from "../auth/auth.service";
+import { ConfigService } from "../config.service";
 import { Record } from "./record";
 import { RecordService } from "./record.service";
 import { PaginationComponent } from "../pagination/pagination.component";
 import { SearchComponent } from "../search.component";
 import { HighlightDirective } from "../directives/highlight.directive";
+import { TooltipDirective } from "../tooltip.directive";
 import "rxjs/add/observable/throw";
 
 declare var $: any;
@@ -14,7 +16,7 @@ declare var $: any;
 @Component({
   templateUrl: "/static/app/record/record.component.html",
   providers: [HTTP_PROVIDERS, RecordService],
-  directives: [PaginationComponent, HighlightDirective],
+  directives: [PaginationComponent, HighlightDirective, TooltipDirective],
   styles: [`
     .panel-heading {overflow:hidden;} td { font-size:13px; }
     .legend { float:left;padding-top:5px; }
@@ -48,6 +50,7 @@ export class RecordComponent extends SearchComponent implements AfterViewInit, O
   };
   showResults: boolean = false;
   isAdmin: boolean = false;
+  jiraUrl: string = ConfigService.get("jiraUrl");
   @ViewChild("searchInput") searchInput;
 
   constructor(

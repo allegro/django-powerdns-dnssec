@@ -6,6 +6,7 @@ import time
 import rules
 from dj.choices.fields import ChoiceField
 from django.conf import settings
+from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
@@ -399,6 +400,11 @@ class Record(TimeTrackable, Owned, RecordLike, WithRequests):
         _('Auto PTR record'),
         choices=AutoPtrOptions,
         default=AutoPtrOptions.ALWAYS,
+    )
+    delete_request = GenericRelation(
+        'DeleteRequest',
+        content_type_field='content_type',
+        object_id_field='target_id',
     )
 
     class Meta:
