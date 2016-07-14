@@ -128,6 +128,11 @@ export class RecordDetailComponent implements OnInit {
               );
             }
             else {
+              if (this.isCreate) {
+                this.backUrlParams["showAddRecordMessage"] = "true";
+              } else {
+                this.backUrlParams["showSaveRecordMessage"] = "true";
+              }
               this.onBack();
             }
           },
