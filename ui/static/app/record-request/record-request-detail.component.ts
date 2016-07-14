@@ -29,6 +29,7 @@ export class RecordRequestDetailComponent implements OnInit {
   record: Record;
   recordRequest: RecordRequest;
   showAutoAcceptanceMessage: boolean = false;
+  backUrlParams: {[key: string]: string} = {};
 
   constructor(
     private routeParams: RouteParams,
@@ -81,6 +82,11 @@ export class RecordRequestDetailComponent implements OnInit {
   }
 
   ngOnInit() {
+    let backUrl: string = this.routeParams.get("backUrl");
+    if (backUrl && backUrl.length > 0) {
+      this.backUrlParams = JSON.parse(backUrl);
+    }
+
     let requestId: any = this.routeParams.get("id");
     let showAutoAcceptanceMessage: string = this.routeParams.get("showAutoAcceptanceMessage");
     if (requestId) {
@@ -101,5 +107,9 @@ export class RecordRequestDetailComponent implements OnInit {
 
   onSelectRecord(record: Record) {
     this.router.navigate(["RecordDetail", { id: record.id }]);
+  }
+
+  onBack() {
+    this.router.navigate(["RecordRequests", this.backUrlParams]);
   }
 }

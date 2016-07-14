@@ -28,38 +28,43 @@ export class RecordRequestComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private recordRequestService: RecordRequestService
+    private recordRequestService: RecordRequestService,
+    private routeParams: RouteParams
   ) { }
 
   ngOnInit() {
-    let search: URLSearchParams = new URLSearchParams();
-    search.set("state", "1");
-    this.recordRequestService.getRequests(search).map(
-      (response) => response.json()
-    ).subscribe(
-      (json) => this.recordRequests = json.results
-    );
+    let state: string = this.routeParams.get("state");
+    this.state = (state) ? state : "pending";
+    this.getRecordRequest();
   }
 
   onSelect(request: RecordRequest) {
-    this.router.navigate(["RecordRequestDetail", { id: request.id }]);
+    this.router.navigate(
+      ["RecordRequestDetail", {
+        id: request.id,
+        backUrl: JSON.stringify(this.routeParams.params)
+      }]
+    );
   }
 
-  onSelectShowRequest(show: string) {
+  getRecordRequest() {
     let search: URLSearchParams = new URLSearchParams();
-    this.state = show;
-    if (show === "accepted") {
+    if (this.state === "accepted") {
       search.set("state", "2");
-    } else if (show === "rejected") {
+    } else if (this.state === "rejected") {
       search.set("state", "3");
     } else {
       search.set("state", "1");
     }
-
     this.recordRequestService.getRequests(search).map(
       (response) => response.json()
     ).subscribe(
       (json) => this.recordRequests = json.results
     );
+  }
+
+  onSelectShowRequest(show: string) {
+    this.state = show;
+    this.router.navigate(["RecordRequests", { state: this.state }]);
   }
 }

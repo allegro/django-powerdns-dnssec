@@ -77,11 +77,7 @@ export class AutocompleteComponent implements AfterViewInit {
       event.keyCode < this.startChar ||
       event.keyCode > this.endChar &&
       event.keyCode !== 8
-    ) {
-      // backspace
-      event.preventDefault();
-      return;
-    }
+    )
 
     this.activeIndex = 0;
     if (value.length >= 2) {
@@ -91,9 +87,15 @@ export class AutocompleteComponent implements AfterViewInit {
           for (let item in response) {
             this.results.push([response[item].id, response[item].name]);
           }
+          if (this.results.length > 0) {
+            this.showResults = true;
+          } else {
+            this.showResults = false;
+          }
         }
       );
-      this.showResults = true;
+    } else {
+      this.showResults = false;
     }
   }
 
