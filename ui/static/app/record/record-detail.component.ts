@@ -18,6 +18,8 @@ import { Record } from "./record";
 import { isLoggedin }  from "../auth/auth.service";
 import "rxjs/add/observable/throw";
 
+declare var $: any;
+
 
 @Component({
   templateUrl: "/static/app/record/record-detail.component.html",
@@ -42,6 +44,8 @@ export class RecordDetailComponent implements OnInit {
     recordName: string = "";
     backUrlParams: {[key: string]: string} = {};
     @ViewChild("inputContent") inputContent;
+    @ViewChild("inputName") inputName;
+
 
     constructor(
       private router: Router,
@@ -85,7 +89,7 @@ export class RecordDetailComponent implements OnInit {
       }
     }
 
-    getDomain() {
+    getDomain(callbackAfterLoad?: Function) {
       if (this.record.domain) {
         this.domainService.getDomainById(
           this.record.domain
@@ -93,6 +97,9 @@ export class RecordDetailComponent implements OnInit {
           (domain) => {
             this.domain = domain;
             this.setRecordName();
+            if (callbackAfterLoad) {
+              callbackAfterLoad();
+            }
           }
         );
       }
@@ -182,8 +189,13 @@ export class RecordDetailComponent implements OnInit {
       return () => {
         if (this.isCreate) {
           this.record.type = "A";
+          this.getDomain(() => {
+            this.inputContent.nativeElement.disabled = false;
+            $(this.inputContent.nativeElement).focus();
+          });
+        } else {
+          this.getDomain();
         }
-        this.getDomain();
       };
     }
 
@@ -197,14 +209,19 @@ export class RecordDetailComponent implements OnInit {
       if (this.isCreate) {
         if (this.record.type === "A" || this.record.type === "MX") {
           this.inputContent.nativeElement.placeholder = "1.2.3.4";
+          $(this.inputContent.nativeElement).focus();
         } else if (this.record.type === "CNAME") {
           this.inputContent.nativeElement.placeholder = "example.com";
+          $(this.inputName.nativeElement).focus();
         } else if (this.record.type === "TXT") {
           this.inputContent.nativeElement.placeholder = "description here";
+          $(this.inputContent.nativeElement).focus();
         } else if (this.record.type === "SRV") {
           this.inputContent.nativeElement.placeholder = "0 5222 jabber.example.com";
+          $(this.inputName.nativeElement).focus();
         } else {
           this.inputContent.nativeElement.placeholder = "";
+          $(this.inputName.nativeElement).focus();
         }
       }
     }
