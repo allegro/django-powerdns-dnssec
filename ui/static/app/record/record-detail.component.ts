@@ -190,8 +190,8 @@ export class RecordDetailComponent implements OnInit {
         if (this.isCreate) {
           this.record.type = "A";
           this.getDomain(() => {
-            this.inputContent.nativeElement.disabled = false;
-            $(this.inputContent.nativeElement).focus();
+            this.inputName.nativeElement.disabled = false;
+            $(this.inputName.nativeElement).focus();
           });
         } else {
           this.getDomain();
@@ -207,7 +207,10 @@ export class RecordDetailComponent implements OnInit {
 
     onChangeType() {
       if (this.isCreate) {
-        if (this.record.type === "A" || this.record.type === "MX") {
+        if (this.record.type === "A") {
+          this.inputContent.nativeElement.placeholder = "1.2.3.4";
+          $(this.inputName.nativeElement).focus();
+        } else if (this.record.type === "MX") {
           this.inputContent.nativeElement.placeholder = "1.2.3.4";
           $(this.inputContent.nativeElement).focus();
         } else if (this.record.type === "CNAME") {
@@ -215,7 +218,7 @@ export class RecordDetailComponent implements OnInit {
           $(this.inputName.nativeElement).focus();
         } else if (this.record.type === "TXT") {
           this.inputContent.nativeElement.placeholder = "description here";
-          $(this.inputContent.nativeElement).focus();
+          $(this.inputName.nativeElement).focus();
         } else if (this.record.type === "SRV") {
           this.inputContent.nativeElement.placeholder = "0 5222 jabber.example.com";
           $(this.inputName.nativeElement).focus();

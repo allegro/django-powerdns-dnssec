@@ -59,7 +59,7 @@ setup(
         'factory_boy>=2.5.2',
         # 3.3.3 includes bug, https://github.com/rtfd/readthedocs.org/issues/2101
         'djangorestframework==3.3.2',
-        'django-rest-swagger>=0.3.2',
+        'django-rest-swagger==0.3.8',
         'django-filter>=0.10.0',
         'django-threadlocals>=0.8',
         'docutils>=0.12',
