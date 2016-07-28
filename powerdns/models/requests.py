@@ -2,7 +2,7 @@
 
 import logging
 
-from django.db import models
+from django.db import models, transaction
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django_extensions.db.fields.json import JSONField
@@ -49,11 +49,6 @@ class Request(Owned):
     )
     last_change_json = JSONField(null=True, blank=True)
 
-    def reject(self):
-        """Reject the request"""
-        self.state = RequestStates.REJECTED
-        self.save()
-
     def extra_buttons(self):
         perm = 'change_' + self._meta.model_name.lower()
         if get_current_user().has_perm(perm, self):
@@ -64,6 +59,13 @@ class Request(Owned):
             self.owner = get_current_user()
         super().save(*args, **kwargs)
 
+    def _log_processed_request_message(self):
+        log.warning('{} (id:{}) already {}'.format(
+            self._meta.object_name,
+            self.id,
+            RequestStates.DescFromID(self.state).lower(),
+        ))
+
 
 class DeleteRequest(Request):
     """A request for object deletion"""
@@ -72,7 +74,12 @@ class DeleteRequest(Request):
     target = GenericForeignKey('content_type', 'target_id')
     view = 'accept_delete'
 
+    @transaction.atomic
     def accept(self):
+        if self.state != RequestStates.OPEN:
+            self._log_processed_request_message()
+            return
+
         old_dict = self.target.as_history_dump()
         new_dict = self.target.as_empty_history()
         result = flat_dict_diff(old_dict, new_dict)
@@ -83,8 +90,12 @@ class DeleteRequest(Request):
         self.state = RequestStates.ACCEPTED
         self.save()
 
+    @transaction.atomic
     def reject(self):
         """Reject the request"""
+        if self.state != RequestStates.OPEN:
+            self._log_processed_request_message()
+            return
         self.state = RequestStates.REJECTED
         self.save()
 
@@ -119,8 +130,13 @@ class ChangeCreateRequest(Request):
     def _set_json_history(self, object_):
         self.last_change_json = self._get_json_history(object_)
 
+    @transaction.atomic
     def accept(self):
         object_ = self.get_object()
+        if self.state != RequestStates.OPEN:
+            self._log_processed_request_message()
+            return object_
+
         self._set_json_history(object_)
         for field_name in type(self).copy_fields:
             if field_name in self.ignore_fields:
@@ -138,8 +154,12 @@ class ChangeCreateRequest(Request):
         self.save()
         return object_
 
+    @transaction.atomic
     def reject(self):
         """Reject the request"""
+        if self.state != RequestStates.OPEN:
+            self._log_processed_request_message()
+            return
         object_ = self.get_object()
         self._set_json_history(object_)
         self.state = RequestStates.REJECTED
