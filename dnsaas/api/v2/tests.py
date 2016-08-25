@@ -22,7 +22,6 @@ from powerdns.tests.utils import (
     RecordRequestFactory,
     UserFactory
 )
-from powerdns.utils import AutoPtrOptions
 from dnsaas.api.v2.views import RecordViewSet
 from dnsaas.api.v2.serializers import RecordRequestSerializer
 
@@ -43,27 +42,24 @@ class TestApi(TestCase):
 
         domain = DomainFactory(
             name='example.com', type=None, unrestricted=False,
-            record_auto_ptr=2,
+            auto_ptr=2,
             reverse_template=DomainTemplateFactory(name='reverse'),
         )
         for i in range(3):
             RecordFactory(
                 type='A', name='example{}.com'.format(i),
                 content='192.168.0.{}'.format(i),
-                auto_ptr=AutoPtrOptions.ALWAYS,
                 domain=domain,
 
             )
             RecordFactory(
                 type='CNAME', name='www.example{}.com'.format(i),
                 content='example{}.com'.format(i),
-                auto_ptr=AutoPtrOptions.NEVER,
                 domain=domain,
             )
             RecordFactory(
                 type='TXT', name='example{}.com'.format(i),
                 content='Some information{}'.format(i),
-                auto_ptr=AutoPtrOptions.NEVER,
                 domain=domain,
             )
 
@@ -280,7 +276,6 @@ class TestRecords(BaseApiTestCase):
     def test_update_record_when_recordrequest_doesnt_exist(self):
         self.client.login(username='super_user', password='super_user')
         record = RecordFactory(
-            auto_ptr=AutoPtrOptions.NEVER.id,
             type='A',
             name='blog.com',
             content='192.168.1.0',
@@ -303,7 +298,6 @@ class TestRecords(BaseApiTestCase):
         self.client.login(username='regular_user1', password='regular_user1')
         record_request = RecordRequestFactory(
             state=RequestStates.ACCEPTED.id,
-            record__auto_ptr=AutoPtrOptions.NEVER.id,
             record__type='A',
             record__name='blog.com',
             record__content='192.168.1.0',
@@ -332,7 +326,6 @@ class TestRecords(BaseApiTestCase):
         self.client.login(username='regular_user1', password='regular_user1')
         record_request = RecordRequestFactory(
             state=RequestStates.OPEN.id,
-            record__auto_ptr=AutoPtrOptions.NEVER.id,
             record__type='A',
             record__name='blog.com',
             record__content='192.168.1.0',
@@ -360,7 +353,6 @@ class TestRecords(BaseApiTestCase):
         self.client.login(username='super_user', password='super_user')
         record_request = RecordRequestFactory(
             state=RequestStates.OPEN.id,
-            record__auto_ptr=AutoPtrOptions.NEVER.id,
             record__type='A',
             record__name='blog.com',
             record__content='192.168.1.0',
@@ -388,7 +380,6 @@ class TestRecords(BaseApiTestCase):
     def test_user_is_set_correct_when_updating_record_with_owner(self):
         self.client.login(username='super_user', password='super_user')
         record = RecordFactory(
-            auto_ptr=AutoPtrOptions.NEVER.id,
             type='A',
             name='blog.com',
             content='192.168.1.0',
@@ -414,7 +405,6 @@ class TestRecords(BaseApiTestCase):
     def test_user_is_set_correct_when_updating_record_without_owner(self):
         self.client.login(username='super_user', password='super_user')
         record = RecordFactory(
-            auto_ptr=AutoPtrOptions.NEVER.id,
             type='A',
             name='blog.com',
             content='192.168.1.0',
@@ -444,7 +434,6 @@ class TestRecords(BaseApiTestCase):
         """
         self.client.login(username='regular_user1', password='regular_user1')
         record = RecordFactory(
-            auto_ptr=AutoPtrOptions.NEVER.id,
             type='A',
             name='blog.com',
             remarks='initial remarks',
@@ -468,7 +457,6 @@ class TestRecords(BaseApiTestCase):
     def test_record_update_dumps_history_data_correctly(self):
         self.client.login(username='super_user', password='super_user')
         record = RecordFactory(
-            auto_ptr=AutoPtrOptions.NEVER.id,
             type='A',
             name='blog.com',
             content='192.168.1.0',
@@ -544,7 +532,6 @@ class TestRecords(BaseApiTestCase):
         self.client.login(username='super_user', password='super_user')
         record_request = RecordRequestFactory(
             state=RequestStates.OPEN.id,
-            record__auto_ptr=AutoPtrOptions.NEVER.id,
             record__type='A',
             record__name='blog.com',
             record__content='192.168.1.0',
@@ -576,7 +563,6 @@ class TestRecords(BaseApiTestCase):
         self.client.login(username='regular_user1', password='regular_user1')
         record_request = RecordRequestFactory(
             state=RequestStates.ACCEPTED.id,
-            record__auto_ptr=AutoPtrOptions.NEVER.id,
             record__type='A',
             record__name='blog.com',
             record__content='192.168.1.0',
@@ -604,7 +590,6 @@ class TestRecords(BaseApiTestCase):
         self.client.login(username='regular_user1', password='regular_user1')
         record_request = RecordRequestFactory(
             state=RequestStates.OPEN.id,
-            record__auto_ptr=AutoPtrOptions.NEVER.id,
             record__type='A',
             record__name='blog.com',
             record__content='192.168.1.0',
@@ -632,7 +617,6 @@ class TestRecords(BaseApiTestCase):
         self.client.login(username='super_user', password='super_user')
         record_request = RecordRequestFactory(
             state=RequestStates.OPEN.id,
-            record__auto_ptr=AutoPtrOptions.NEVER.id,
             record__type='A',
             record__name='blog.com',
             record__content='192.168.1.0',

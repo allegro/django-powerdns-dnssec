@@ -39,15 +39,18 @@ class TestPermissions(TestCase):
         self.su_domain = DomainFactory(
             name='su.example.com',
             owner=self.superuser,
+            auto_ptr=AutoPtrOptions.NEVER,
         )
         self.unrestricted_domain = DomainFactory(
             name='unrestricted.example.com',
             owner=self.superuser,
             unrestricted=True,
+            auto_ptr=AutoPtrOptions.NEVER,
         )
         self.u_domain = DomainFactory(
             name='u.example.com',
             owner=self.user,
+            auto_ptr=AutoPtrOptions.NEVER,
         )
         self.su_record = RecordFactory(
             domain=self.su_domain,
@@ -55,7 +58,6 @@ class TestPermissions(TestCase):
             type='A',
             content='192.168.1.1',
             owner=self.superuser,
-            auto_ptr=AutoPtrOptions.NEVER,
         )
         self.u_record = RecordFactory(
             domain=self.u_domain,
@@ -63,7 +65,6 @@ class TestPermissions(TestCase):
             type='A',
             content='192.168.1.2',
             owner=self.user,
-            auto_ptr=AutoPtrOptions.NEVER,
         )
         self.su_client = user_client(self.superuser)
         self.u_client = user_client(self.user)
@@ -177,7 +178,6 @@ class TestPermissions(TestCase):
                 'content': '192.168.1.4',
                 'type': 'A',
                 'domain': get_domain_url(self.u_domain),
-                'auto_ptr': AutoPtrOptions.NEVER.id,
             },
         )
         self.assertEqual(request.status_code, 201)
@@ -191,7 +191,6 @@ class TestPermissions(TestCase):
                 'content': '192.168.1.4',
                 'type': 'A',
                 'domain': get_domain_url(self.u_domain),
-                'auto_ptr': AutoPtrOptions.NEVER.id,
             },
         )
         self.assertEqual(request.status_code, 201)
@@ -206,7 +205,6 @@ class TestPermissions(TestCase):
                 'content': '192.168.1.4',
                 'type': 'A',
                 'domain': get_domain_url(self.unrestricted_domain),
-                'auto_ptr': AutoPtrOptions.NEVER.id,
             },
         )
         self.assertEqual(request.status_code, 201)
@@ -220,7 +218,6 @@ class TestPermissions(TestCase):
                 'content': '192.168.1.4',
                 'type': 'A',
                 'domain': get_domain_url(self.su_domain),
-                'auto_ptr': AutoPtrOptions.NEVER.id,
             },
         )
         self.assertEqual(request.status_code, 400)

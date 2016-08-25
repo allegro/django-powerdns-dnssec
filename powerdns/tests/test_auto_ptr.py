@@ -1,5 +1,7 @@
 """Tests for auto_ptr feature"""
 
+from unittest import mock
+
 from django.contrib.auth.models import User
 from django.test import TestCase
 
@@ -42,11 +44,26 @@ class TestAutoPtr(TestCase):
             ),
             domain_template=self.alt_reverse_template,
         )
-        self.domain = DomainFactory(
+        self.ptr_domain = DomainFactory(
             name='example.com',
             template=None,
             reverse_template=self.reverse_template,
             type='NATIVE',
+            auto_ptr=AutoPtrOptions.ALWAYS,
+        )
+        self.ptr_if_domain = DomainFactory(
+            name='ptr-if-domain.com',
+            template=None,
+            reverse_template=self.reverse_template,
+            type='NATIVE',
+            auto_ptr=AutoPtrOptions.ONLY_IF_DOMAIN,
+        )
+        self.no_ptr_domain = DomainFactory(
+            name='no-ptr--domain.com',
+            template=None,
+            reverse_template=self.reverse_template,
+            type='NATIVE',
+            auto_ptr=AutoPtrOptions.NEVER,
         )
 
     def tearDown(self):
@@ -56,11 +73,10 @@ class TestAutoPtr(TestCase):
     def test_default_ptr_created(self):
         """A PTR record is created for an A record with default template"""
         RecordFactory(
-            domain=self.domain,
+            domain=self.ptr_domain,
             type='A',
             name='site.example.com',
             content='192.168.1.1',
-            auto_ptr=AutoPtrOptions.ALWAYS,
             owner=self.user,
         )
         domain = Domain.objects.get(name='1.168.192.in-addr.arpa')
@@ -76,11 +92,10 @@ class TestAutoPtr(TestCase):
     def test_auto_ptr_edit(self):
         """PTR changes when A changes"""
         record = RecordFactory(
-            domain=self.domain,
+            domain=self.ptr_domain,
             type='A',
             name='site.example.com',
             content='192.168.1.1',
-            auto_ptr=AutoPtrOptions.ALWAYS,
         )
         record.content = '192.168.1.9'
         record.save()
@@ -98,11 +113,10 @@ class TestAutoPtr(TestCase):
 
     def test_auto_ptr_fields_get_update_when_record_is_changed(self):
         record = RecordFactory(
-            domain=self.domain,
+            domain=self.ptr_domain,
             type='A',
             name='site.example.com',
             content='192.168.1.1',
-            auto_ptr=AutoPtrOptions.ALWAYS,
             ttl=3600,
         )
 
@@ -121,16 +135,19 @@ class TestAutoPtr(TestCase):
 
     def test_auto_ptr_off(self):
         """PTR is removed when setting auto_ptr to NEVER"""
-        record = RecordFactory(
-            domain=self.domain,
+        RecordFactory(
+            domain=self.ptr_domain,
             type='A',
             name='site.example.com',
             content='192.168.1.1',
-            auto_ptr=AutoPtrOptions.ALWAYS,
         )
-        domain = Domain.objects.get(name='1.168.192.in-addr.arpa')
-        record.auto_ptr = AutoPtrOptions.NEVER
-        record.save()
+        domain = Domain.objects.get(
+            name='1.168.192.in-addr.arpa'
+        )
+
+        self.ptr_domain.auto_ptr = AutoPtrOptions.NEVER
+        self.ptr_domain.save()
+
         assert_not_exists(
             Record,
             domain=domain,
@@ -141,11 +158,10 @@ class TestAutoPtr(TestCase):
         """A PTR record is not created if auto_ptr set to NEVER"""
         domain = DomainFactory(name='1.168.192.in-addr.arpa')
         RecordFactory(
-            domain=self.domain,
+            domain=self.no_ptr_domain,
             type='A',
             name='site.example.com',
             content='192.168.1.1',
-            auto_ptr=AutoPtrOptions.NEVER,
         )
         assert_not_exists(
             Record,
@@ -157,11 +173,10 @@ class TestAutoPtr(TestCase):
         """A PTR record with 'only-if-domain' is created if domain exists"""
         domain = DomainFactory(name='1.168.192.in-addr.arpa')
         RecordFactory(
-            domain=self.domain,
+            domain=self.ptr_if_domain,
             type='A',
             name='site.example.com',
             content='192.168.1.1',
-            auto_ptr=AutoPtrOptions.ONLY_IF_DOMAIN,
         )
         assert_does_exist(
             Record,
@@ -172,11 +187,10 @@ class TestAutoPtr(TestCase):
     def test_ptr_domain_not_exists(self):
         """A PTR record with 'only-if-domain' is created if domain exists"""
         RecordFactory(
-            domain=self.domain,
+            domain=self.ptr_if_domain,
             type='A',
             name='site.example.com',
             content='192.168.1.1',
-            auto_ptr=AutoPtrOptions.ONLY_IF_DOMAIN,
         )
         assert_not_exists(
             Record,
@@ -185,13 +199,12 @@ class TestAutoPtr(TestCase):
 
     def test_alt_ptr_created(self):
         """A PTR record is created for an A record with alternative"""
-        self.domain.reverse_template = self.alt_reverse_template
+        self.ptr_domain.reverse_template = self.alt_reverse_template
         RecordFactory(
-            domain=self.domain,
+            domain=self.ptr_domain,
             type='A',
             name='site.example.com',
             content='192.168.1.1',
-            auto_ptr=AutoPtrOptions.ALWAYS,
         )
         domain = Domain.objects.get(name='1.168.192.in-addr.arpa')
         self.assertTrue(domain.get_soa().content.endswith('1200'))
@@ -199,12 +212,44 @@ class TestAutoPtr(TestCase):
     def test_ptr_autoremove(self):
         """A PTR record is automatically removed with its A record"""
         a = RecordFactory(
-            domain=self.domain,
+            domain=self.ptr_domain,
             type='A',
             name='site.example.com',
             content='192.168.1.1',
-            auto_ptr=AutoPtrOptions.ALWAYS,
         )
         assert_does_exist(Record, name='1.1.168.192.in-addr.arpa', type='PTR')
         a.delete()
         assert_not_exists(Record, name='1.1.168.192.in-addr.arpa', type='PTR')
+
+    @mock.patch('powerdns.models.powerdns._update_records_ptrs')
+    def test_update_ptr_signal_is_fired_when_auto_ptr_is_changed(
+        self, update_records
+    ):
+        RecordFactory(
+            domain=self.no_ptr_domain,
+            type='A',
+            name='site.example.com',
+            content='192.168.1.1',
+        )
+        self.no_ptr_domain.auto_ptr = AutoPtrOptions.ALWAYS
+        saves_counter = update_records.call_count
+
+        self.no_ptr_domain.save()
+
+        self.assertEqual(update_records.call_count, saves_counter + 1)
+
+    @mock.patch('powerdns.models.powerdns._update_records_ptrs')
+    def test_update_ptr_signal_is_skipped_when_auto_ptr_is_changed(
+        self, update_records
+    ):
+        RecordFactory(
+            domain=self.no_ptr_domain,
+            type='A',
+            name='site.example.com',
+            content='192.168.1.1',
+        )
+        saves_counter = update_records.call_count
+
+        self.no_ptr_domain.save()
+
+        self.assertEqual(update_records.call_count, saves_counter)

@@ -179,7 +179,7 @@ class Domain(TimeTrackable, Owned, WithRequests):
         ('NATIVE', 'NATIVE'),
         ('SLAVE', 'SLAVE'),
     )
-    copy_fields = ['record_auto_ptr']
+    copy_fields = ['auto_ptr']
     name = models.CharField(
         _("name"),
         unique=True,
@@ -218,7 +218,7 @@ class Domain(TimeTrackable, Owned, WithRequests):
             'template.'
         )
     )
-    record_auto_ptr = ChoiceField(
+    auto_ptr = ChoiceField(
         choices=AutoPtrOptions,
         default=AutoPtrOptions.ALWAYS,
         help_text=_(
@@ -240,6 +240,12 @@ class Domain(TimeTrackable, Owned, WithRequests):
         db_table = u'domains'
         verbose_name = _("domain")
         verbose_name_plural = _("domains")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._original_values = {}
+        for field in self._meta.fields:
+            self._original_values[field.name] = getattr(self, field.name)
 
     def __str__(self):
         return self.name
@@ -395,11 +401,6 @@ class Record(TimeTrackable, Owned, RecordLike, WithRequests):
             'should be automatically updated/deleted. Used for PTR records'
             'that depend on A records.'
         )
-    )
-    auto_ptr = ChoiceField(
-        _('Auto PTR record'),
-        choices=AutoPtrOptions,
-        default=AutoPtrOptions.ALWAYS,
     )
     delete_request = GenericRelation(
         'DeleteRequest',
@@ -586,7 +587,7 @@ class Record(TimeTrackable, Owned, RecordLike, WithRequests):
         if self.type != 'A':
             raise ValueError(_('Creating PTR only for A records'))
         domain_name, number = to_reverse(self.content)
-        if self.auto_ptr == AutoPtrOptions.ALWAYS:
+        if self.domain.auto_ptr == AutoPtrOptions.ALWAYS:
             domain, created = Domain.objects.get_or_create(
                 name=domain_name,
                 defaults={
@@ -597,7 +598,7 @@ class Record(TimeTrackable, Owned, RecordLike, WithRequests):
                     'type': self.domain.type,
                 }
             )
-        elif self.auto_ptr == AutoPtrOptions.ONLY_IF_DOMAIN:
+        elif self.domain.auto_ptr == AutoPtrOptions.ONLY_IF_DOMAIN:
             try:
                 domain = Domain.objects.get(name=domain_name)
             except Domain.DoesNotExist:
@@ -648,6 +649,7 @@ class Record(TimeTrackable, Owned, RecordLike, WithRequests):
             'type':  self.type or '',
         }
 
+
 rules.add_perm('powerdns.add_record', rules.is_authenticated)
 rules.add_perm('powerdns.change_record', rules.is_authenticated)
 rules.add_perm('powerdns.delete_record', rules.is_authenticated)
@@ -662,12 +664,32 @@ def update_serial(sender, instance, **kwargs):
         soa.save()
 
 
+def _update_records_ptrs(domain):
+    records = Record.objects.filter(domain=domain, type='A')
+    for record in records:
+        _create_ptr(record)
+
+
+@receiver(post_save, sender=Domain, dispatch_uid='domain_update_ptr')
+def update_ptr(sender, instance, **kwargs):
+    if instance._original_values['auto_ptr'] == instance.auto_ptr:
+        return
+    _update_records_ptrs(instance)
+
+
+def _create_ptr(record):
+    if (
+        record.domain.auto_ptr == AutoPtrOptions.NEVER or
+        record.type != 'A'
+    ):
+        record.delete_ptr()
+        return
+    record.create_ptr()
+
+
 @receiver(post_save, sender=Record, dispatch_uid='record_create_ptr')
 def create_ptr(sender, instance, **kwargs):
-    if instance.auto_ptr == AutoPtrOptions.NEVER or instance.type != 'A':
-        instance.delete_ptr()
-        return
-    instance.create_ptr()
+    _create_ptr(instance)
 
 
 class SuperMaster(TimeTrackable):

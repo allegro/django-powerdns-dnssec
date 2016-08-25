@@ -23,7 +23,10 @@ class TestTemplates(TestCase):
 
     def setUp(self):
         self.reverse_template = DomainTemplateFactory(name='reverse')
-        self.domain_template1 = DomainTemplateFactory(name='template1')
+        self.domain_template1 = DomainTemplateFactory(
+            name='template1',
+            auto_ptr=AutoPtrOptions.ALWAYS,
+        )
         self.t1_soa_record = RecordTemplateFactory(
             type='SOA',
             name='{domain-name}',
@@ -48,7 +51,6 @@ class TestTemplates(TestCase):
                 '192.168.1.3'
             ),
             domain_template=self.domain_template1,
-            auto_ptr=AutoPtrOptions.ALWAYS,
         )
         self.domain_template2 = DomainTemplateFactory(name='template2')
         RecordTemplateFactory(

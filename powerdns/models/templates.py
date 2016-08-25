@@ -19,7 +19,7 @@ class DomainTemplateManager(models.Manager):
 class DomainTemplate(models.Model):
     """A predefined template containing several record templates"""
 
-    copy_fields = ['record_auto_ptr', 'type']
+    copy_fields = ['auto_ptr', 'type']
 
     name = models.CharField(
         _('Template identifier'),
@@ -42,7 +42,7 @@ class DomainTemplate(models.Model):
     )
     is_public_domain = models.BooleanField(default=True)
 
-    record_auto_ptr = ChoiceField(
+    auto_ptr = ChoiceField(
         choices=AutoPtrOptions,
         default=AutoPtrOptions.ALWAYS,
     )
@@ -110,11 +110,6 @@ class RecordTemplate(models.Model):
         default=True,
     )
     remarks = models.TextField(_('Additional remarks'), blank=True)
-    auto_ptr = ChoiceField(
-        _('Auto PTR field'),
-        choices=AutoPtrOptions,
-        default=AutoPtrOptions.ALWAYS,
-    )
 
     def natural_key(self):
         return (self.domain_template.name, self.type, self.name, self.content)
@@ -131,7 +126,7 @@ class RecordTemplate(models.Model):
         template_kwargs = {
             'domain-name': domain.name,
         }
-        for argname in ['type', 'ttl', 'prio', 'auth', 'auto_ptr']:
+        for argname in ['type', 'ttl', 'prio', 'auth']:
             kwargs[argname] = getattr(self, argname)
         for argname in ['name', 'content']:
             kwargs[argname] = getattr(self, argname).format(**template_kwargs)

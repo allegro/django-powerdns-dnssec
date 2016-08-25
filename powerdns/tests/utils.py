@@ -12,6 +12,7 @@ from rest_framework.test import APIClient
 from powerdns.models.powerdns import Record, Domain
 from powerdns.models.requests import RecordRequest
 from powerdns.models.templates import RecordTemplate, DomainTemplate
+from powerdns.utils import AutoPtrOptions
 
 
 class UserFactory(factory.django.DjangoModelFactory):
@@ -46,6 +47,7 @@ class DomainFactory(DjangoModelFactory):
         model = Domain
 
     name = factory.Sequence(lambda n: 'name%d.com' % n)
+    auto_ptr = AutoPtrOptions.NEVER
 
 
 class RecordFactory(DjangoModelFactory):
@@ -73,6 +75,7 @@ class RecordTestCase(TestCase):
             name='example.com',
             template=None,
             reverse_template=DomainTemplateFactory(name='reverse'),
+            auto_ptr=AutoPtrOptions.NEVER,
         )
 
     def validate(self, **values):
