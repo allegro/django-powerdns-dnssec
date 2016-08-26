@@ -92,6 +92,14 @@ class RecordSerializer(OwnerSerializer):
             return delete_request[0].key
         return None
 
+    def _clean_txt_content(self, record_type, attrs):
+        """
+        Remove backslashes form `content` (from `attrs`) inplace when
+        `type`=TXT
+        """
+        if record_type == 'TXT':
+            attrs['content'] = attrs['content'].replace('\\', '')
+
     def validate(self, attrs):
         domain, content, record_type = (
             attrs.get('domain'), attrs.get('content'), attrs.get('type')
@@ -107,6 +115,8 @@ class RecordSerializer(OwnerSerializer):
                     {'content':
                      ['Content should be IP valid address when type="A".']}
                 )
+
+        self._clean_txt_content(record_type, attrs)
 
         if (
             domain and domain.template and

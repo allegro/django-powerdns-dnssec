@@ -270,6 +270,21 @@ class TestRecords(BaseApiTestCase):
             '_request_type': 'create',
         })
 
+    def test_create_txt_record_removes_backslashes_from_content(self):
+        domain = DomainFactory(name='example.com', owner=self.super_user)
+        self.client.login(username='super_user', password='super_user')
+        data = {
+            'type': 'TXT',
+            'domain': domain.id,
+            'name': 'www.example.com',
+            'content': '\\a\\a\\',
+        }
+        response = self.client.post(
+            reverse('api:v2:record-list'), data, format='json',
+            **{'HTTP_ACCEPT': 'application/json; version=v2'}
+        )
+        self.assertEqual(response.data['content'], 'aa')
+
     #
     # updates
     #
