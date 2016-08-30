@@ -788,6 +788,53 @@ class TestRecordRequestSerializer(TestCase):
         )
 
 
+class TestDomainSelecting(BaseApiTestCase):
+    def setUp(self):
+        super().setUp()
+        self.data = {
+            'type': 'CNAME',
+            'name': 'www.example.com',
+            'content': 'example.com',
+        }
+        self.client.login(username='super_user', password='super_user')
+
+    def test_domain_is_used_when_is_send_in_request(self):
+        domain = DomainFactory(name='example.com', owner=self.super_user)
+        self.data['domain'] = domain.id
+
+        response = self.client.post(
+            reverse('api:v2:record-list'), self.data, format='json',
+            **{'HTTP_ACCEPT': 'application/json; version=v2'}
+        )
+
+        self.assertEqual(
+            Record.objects.get(pk=response.data['id']).domain.id,
+            domain.id,
+        )
+
+    def test_domain_is_taken_from_record_when_is_absent_in_request(self):
+        domain = DomainFactory(name='example.com', owner=self.super_user)
+        response = self.client.post(
+            reverse('api:v2:record-list'), self.data, format='json',
+            **{'HTTP_ACCEPT': 'application/json; version=v2'}
+        )
+        self.assertEqual(
+            Record.objects.get(pk=response.data['id']).domain.id,
+            domain.id,
+        )
+
+    def test_raise_error_when_domain_cant_be_found(self):
+        self.data['name'] = 'unknown-domain.com'
+        response = self.client.post(
+            reverse('api:v2:record-list'), self.data, format='json',
+            **{'HTTP_ACCEPT': 'application/json; version=v2'}
+        )
+        self.assertEqual(
+            response.data,
+            {'domain': ['No domain found for name unknown-domain.com']}
+        )
+
+
 class TestTrimmingSpaces(TestCase):
 
     def test_trim_works_ok(self):

@@ -61,6 +61,27 @@ class RecordRequestSerializer(OwnerSerializer):
             return obj.last_change_json
 
 
+def hostname2domain(hostname):
+    """
+    Find longest existing domain within `hostname` or None
+
+    Example:
+        hostname = sub-domain.on.existing-domain.com
+        and only existing-domain.com exists
+    Then it returns `existing-domain.com` as db object.
+    """
+    domain = None
+    parts = hostname.split('.')
+    while parts:
+        try:
+            domain = Domain.objects.get(name='.'.join(parts))
+            break
+        except Domain.DoesNotExist:
+            pass
+        parts = parts[1:]
+    return domain
+
+
 def _trim_whitespace(data_dict, trim_fields):
     for field_name in trim_fields:
         if field_name not in data_dict:
@@ -77,6 +98,8 @@ class RecordSerializer(OwnerSerializer):
 
     domain = PrimaryKeyRelatedField(
         queryset=Domain.objects.all(),
+        required=False,
+        allow_null=True,
     )
     modified = serializers.DateTimeField(
         format='%Y-%m-%d %H:%M:%S', read_only=True
@@ -138,6 +161,20 @@ class RecordSerializer(OwnerSerializer):
                 raise serializers.ValidationError(
                     {'content': ['IP address cannot be private.']}
                 )
+
+        if not self.instance:
+            # get domain from name only for creation
+            if not domain:
+                domain = hostname2domain(attrs['name'])
+                if not domain:
+                    raise serializers.ValidationError({
+                        'domain': [
+                            'No domain found for name {}'.format(
+                                attrs['name']
+                            )
+                        ]
+                    })
+                attrs['domain'] = domain
 
         return attrs
 
