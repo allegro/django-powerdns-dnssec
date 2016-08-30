@@ -61,6 +61,14 @@ class RecordRequestSerializer(OwnerSerializer):
             return obj.last_change_json
 
 
+def _trim_whitespace(data_dict, trim_fields):
+    for field_name in trim_fields:
+        if field_name not in data_dict:
+            continue
+        data_dict[field_name] = data_dict[field_name].strip()
+    return data_dict
+
+
 class RecordSerializer(OwnerSerializer):
 
     class Meta:
@@ -92,7 +100,17 @@ class RecordSerializer(OwnerSerializer):
             return delete_request[0].key
         return None
 
+    def _clean_txt_content(self, record_type, attrs):
+        """
+        Remove backslashes form `content` (from `attrs`) inplace when
+        `type`=TXT
+        """
+        # DNS servers don't accept backslashes (\) in content so we neither
+        if record_type == 'TXT':
+            attrs['content'] = attrs['content'].replace('\\', '')
+
     def validate(self, attrs):
+        _trim_whitespace(attrs, ['name', 'content'])
         domain, content, record_type = (
             attrs.get('domain'), attrs.get('content'), attrs.get('type')
         )
@@ -107,6 +125,8 @@ class RecordSerializer(OwnerSerializer):
                     {'content':
                      ['Content should be IP valid address when type="A".']}
                 )
+
+        self._clean_txt_content(record_type, attrs)
 
         if (
             domain and domain.template and
