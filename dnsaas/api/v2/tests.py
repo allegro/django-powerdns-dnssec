@@ -23,7 +23,9 @@ from powerdns.tests.utils import (
     UserFactory
 )
 from dnsaas.api.v2.views import RecordViewSet
-from dnsaas.api.v2.serializers import RecordRequestSerializer
+from dnsaas.api.v2.serializers import (
+    RecordRequestSerializer, _trim_whitespace,
+)
 
 
 class TestApi(TestCase):
@@ -784,3 +786,16 @@ class TestRecordRequestSerializer(TestCase):
             serializer.data['last_change']['remarks']['new'],
             serializer.instance.target_remarks
         )
+
+
+class TestTrimmingSpaces(TestCase):
+
+    def test_trim_works_ok(self):
+        data = {'field': ' a '}
+        _trim_whitespace(data, ('field', ))
+        self.assertEqual(data['field'], 'a')
+
+    def test_skips_not_specified_field(self):
+        data = {'field': ' a '}
+        _trim_whitespace(data, ('some-other-field', ))
+        self.assertEqual(data['field'], ' a ')
