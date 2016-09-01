@@ -2,6 +2,7 @@
 import ipaddress
 
 from django.contrib.auth.models import User
+from powerdns.utils import hostname2domain
 from powerdns.models import (
     CryptoKey,
     Domain,
@@ -59,27 +60,6 @@ class RecordRequestSerializer(OwnerSerializer):
             return obj._get_json_history(obj.get_object())
         else:
             return obj.last_change_json
-
-
-def hostname2domain(hostname):
-    """
-    Find longest existing domain within `hostname` or None
-
-    Example:
-        hostname = sub-domain.on.existing-domain.com
-        and only existing-domain.com exists
-    Then it returns `existing-domain.com` as db object.
-    """
-    domain = None
-    parts = hostname.split('.')
-    while parts:
-        try:
-            domain = Domain.objects.get(name='.'.join(parts))
-            break
-        except Domain.DoesNotExist:
-            pass
-        parts = parts[1:]
-    return domain
 
 
 def _trim_whitespace(data_dict, trim_fields):

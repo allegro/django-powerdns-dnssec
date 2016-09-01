@@ -1,11 +1,13 @@
 
 """Views and viewsets for DNSaaS API"""
 import django_filters
+import ipaddress
 import logging
 
 from django.core.urlresolvers import reverse
 from django.db.models import Prefetch, Q
 
+from powerdns.utils import hostname2domain
 from powerdns.models import (
     CryptoKey,
     DeleteRequest,
@@ -17,11 +19,11 @@ from powerdns.models import (
     RecordRequest,
     SuperMaster,
 )
-from rest_framework import status
-from rest_framework import filters
-from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
-from rest_framework.permissions import DjangoObjectPermissions
+from rest_framework import filters, status
+from rest_framework.permissions import DjangoObjectPermissions, IsAdminUser
 from rest_framework.response import Response
+from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
+from rest_framework.views import APIView
 
 from .serializers import (
     CryptoKeySerializer,
@@ -313,3 +315,45 @@ class TsigKeysViewSet(FiltersMixin, ModelViewSet):
     queryset = TsigKey.objects.all()
     serializer_class = TsigKeysTemplateSerializer
     filter_fields = ('name', 'secret')
+
+
+class IPRecordView(APIView):
+    """Dedicated view for add/update/delete"""
+    permission_classes = (IsAdminUser,)
+
+    def _get_record(self, ip):
+        ip = int(ipaddress.ip_address(ip))
+        try:
+            record = Record.objects.get(number=ip)
+        except:
+            record = None
+        return record
+
+    def _add_or_update_record(self, ip, data):
+        hostname = data.get('hostname')
+        address = data.get('address')
+        Record.objects.update_or_create(
+            type='A',
+            number=int(ipaddress.ip_address(ip)),
+            defaults={
+                'name': hostname,
+                'domain': hostname2domain(hostname),
+                'content': address
+            }
+        )
+
+    def _delete_record(self, ip):
+        record = self._get_record(ip)
+        if record:
+            record.delete()
+
+    def post(self, request):
+        data = request.data
+        assert all([data['ip'], data['action']])
+        action = data.pop('action')
+        ip = data.pop('ip')
+        if action == 'add' or action == 'update':
+            self._add_or_update_record(ip, data)
+        elif action == 'delete':
+            self._delete_record(ip)
+        return Response(data={})
