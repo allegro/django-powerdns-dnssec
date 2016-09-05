@@ -321,39 +321,42 @@ class IPRecordView(APIView):
     """Dedicated view for add/update/delete"""
     permission_classes = (IsAdminUser,)
 
-    def _get_record(self, ip):
+    def _get_record(self, ip, hostname):
         ip = int(ipaddress.ip_address(ip))
         try:
-            record = Record.objects.get(number=ip)
+            record = Record.objects.get(number=ip, name=hostname)
         except:
             record = None
         return record
 
-    def _add_or_update_record(self, ip, data):
-        hostname = data.get('hostname')
-        address = data.get('address')
+    def _add_or_update_record(self, data):
+        new = data['new']
+        old = data['old']
         Record.objects.update_or_create(
             type='A',
-            number=int(ipaddress.ip_address(ip)),
+            number=int(ipaddress.ip_address(old['address'])),
+            name=old['hostname'],
+            domain=hostname2domain(old['hostname']),
             defaults={
-                'name': hostname,
-                'domain': hostname2domain(hostname),
-                'content': address
+                'name': new['hostname'],
+                'domain': hostname2domain(new['hostname']),
+                'content': new['address']
             }
         )
 
-    def _delete_record(self, ip):
-        record = self._get_record(ip)
+    def _delete_record(self, ip, hostname):
+        record = self._get_record(ip, hostname)
         if record:
             record.delete()
 
     def post(self, request):
         data = request.data
-        assert all([data['ip'], data['action']])
+        assert 'action' in data
         action = data.pop('action')
-        ip = data.pop('ip')
-        if action == 'add' or action == 'update':
-            self._add_or_update_record(ip, data)
-        elif action == 'delete':
-            self._delete_record(ip)
+        if action == 'delete':
+            assert 'address' in data
+            assert 'hostname' in data
+            self._delete_record(data['address'], data['hostname'])
+        else:
+            self._add_or_update_record(data)
         return Response(data={})

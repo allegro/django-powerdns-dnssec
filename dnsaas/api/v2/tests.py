@@ -846,3 +846,79 @@ class TestTrimmingSpaces(TestCase):
         data = {'field': ' a '}
         _trim_whitespace(data, ('some-other-field', ))
         self.assertEqual(data['field'], ' a ')
+
+
+class TestIPRecordTest(BaseApiTestCase):
+    def setUp(self):
+        super().setUp()
+        self.client.login(username='super_user', password='super_user')
+        self.domain = DomainFactory(name='example.com', owner=self.super_user)
+        self.data = {
+            'new': {},
+            'old': {},
+            'action': 'add'
+        }
+
+    def _send_post_data_to_endpoint(self):
+        return self.client.post(
+            reverse('api:v2:ip-record'), self.data, format='json',
+            **{'HTTP_ACCEPT': 'application/json; version=v2'}
+        )
+
+    def test_add_record(self):
+        self.data.update({
+            'old': {
+                'address': '127.0.0.1',
+                'hostname': 'test123.example.com'
+            },
+            'new': {
+                'address': '127.0.0.1',
+                'hostname': 'test123.example.com'
+            }
+        })
+        response = self._send_post_data_to_endpoint()
+        self.assertEqual(response.status_code, 200)
+
+    def test_update_record(self):
+        target_content = '192.168.1.8'
+        target_name = 'test_update_2.{}'.format(self.domain.name)
+        record = RecordFactory(
+            type='A',
+            content='127.0.0.9',
+            name='update_test_1.{}'.format(self.domain.name),
+            domain=self.domain
+        )
+        self.data.update({
+            'old': {
+                'address': record.content,
+                'hostname': record.name
+            },
+            'new': {
+                'address': target_content,
+                'hostname': target_name
+            },
+            'action': 'update',
+        })
+        response = self._send_post_data_to_endpoint()
+        self.assertEqual(response.status_code, 200)
+        record.refresh_from_db()
+        self.assertEqual(record.content, target_content)
+        self.assertEqual(record.name, target_name)
+
+    def test_delete_record(self):
+        target_content = '192.168.1.8'
+        target_name = 'test_update_2.{}'.format(self.domain.name)
+        record_kwargs = {
+            'type': 'A',
+            'content': target_content,
+            'name': target_name,
+            'domain': self.domain
+        }
+        RecordFactory(**record_kwargs)
+        self.data = {
+            'address': target_content,
+            'hostname': target_name,
+            'action': 'delete'
+        }
+        self._send_post_data_to_endpoint()
+        self.assertFalse(Record.objects.filter(**record_kwargs).exists())

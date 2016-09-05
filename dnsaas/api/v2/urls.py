@@ -28,5 +28,5 @@ router.register(r'tsigkeys', TsigKeysViewSet)
 urlpatterns = router.urls
 urlpatterns += patterns(
     '',
-    url(r'^ip_record/', IPRecordView.as_view(), name='ip_record'),
+    url(r'^ip_record/', IPRecordView.as_view(), name='ip-record'),
 )
