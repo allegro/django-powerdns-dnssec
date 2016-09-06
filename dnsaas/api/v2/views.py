@@ -332,7 +332,7 @@ class IPRecordView(APIView):
     def _add_or_update_record(self, data):
         new = data['new']
         old = data['old']
-        Record.objects.update_or_create(
+        _, created = Record.objects.update_or_create(
             type='A',
             number=int(ipaddress.ip_address(old['address'])),
             name=old['hostname'],
@@ -343,20 +343,27 @@ class IPRecordView(APIView):
                 'content': new['address']
             }
         )
+        return 'created' if created else 'updated'
 
     def _delete_record(self, ip, hostname):
         record = self._get_record(ip, hostname)
         if record:
             record.delete()
+            return 'deleted'
+        return 'noop'
 
     def post(self, request):
         data = request.data
         assert 'action' in data
         action = data.pop('action')
+        status = ''
         if action == 'delete':
             assert 'address' in data
             assert 'hostname' in data
-            self._delete_record(data['address'], data['hostname'])
+            status = self._delete_record(data['address'], data['hostname'])
         else:
-            self._add_or_update_record(data)
-        return Response(data={})
+            status = self._add_or_update_record(data)
+        return Response(
+            data={'status': status},
+            status=status.HTTP_200_OK if status else status.HTTP_404_NOT_FOUND
+        )
