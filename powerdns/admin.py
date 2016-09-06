@@ -115,6 +115,8 @@ class CopyingAdmin(admin.ModelAdmin):
 class RequestAdmin(CopyingAdmin):
     """Admin for domain/record requests"""
 
+    search_fields = ['target_name', 'key', 'target_content']
+
     def get_form(self, *args, **kwargs):
         form = super().get_form(*args, **kwargs)
         form.base_fields['target_owner'].initial =\
