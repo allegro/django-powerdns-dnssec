@@ -356,14 +356,19 @@ class IPRecordView(APIView):
         data = request.data
         assert 'action' in data
         action = data.pop('action')
-        status = ''
+        status_text = ''
         if action == 'delete':
             assert 'address' in data
             assert 'hostname' in data
-            status = self._delete_record(data['address'], data['hostname'])
+            status_text = self._delete_record(
+                data['address'], data['hostname']
+            )
         else:
-            status = self._add_or_update_record(data)
+            status_text = self._add_or_update_record(data)
         return Response(
-            data={'status': status},
-            status=status.HTTP_200_OK if status else status.HTTP_404_NOT_FOUND
+            data={'status': status_text},
+            status=(
+                status.HTTP_200_OK
+                if status_text else status.HTTP_404_NOT_FOUND
+            )
         )
