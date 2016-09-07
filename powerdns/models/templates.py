@@ -56,7 +56,7 @@ class DomainTemplate(models.Model):
     def add_domain_url(self):
         """Return URL for 'Add domain' action"""
         return (
-            reverse('admin:powerdns_domain_add') +
+            reverse('admin-deprecated:powerdns_domain_add') +
             '?template={}'.format(self.pk)
         )
 

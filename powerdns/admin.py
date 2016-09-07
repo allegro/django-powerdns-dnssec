@@ -1,6 +1,8 @@
 import autocomplete_light
 import rules
+from django.contrib.admin.sites import AdminSite
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group, User
 from django.contrib import admin
 from django.contrib.admin.widgets import AdminRadioSelect
 from django.contrib.contenttypes.models import ContentType
@@ -22,6 +24,7 @@ from powerdns.models.powerdns import (
     SuperMaster,
 )
 from powerdns.models.authorisations import Authorisation
+from rest_framework.authtoken.models import Token
 from rules.contrib.admin import ObjectPermissionsModelAdmin
 from threadlocals.threadlocals import get_current_user
 
@@ -38,6 +41,9 @@ from powerdns.models.requests import (
 )
 from powerdns.utils import Owned, DomainForRecordValidator, is_owner
 from powerdns.models.tsigkeys import TsigKey
+
+
+admin_site = AdminSite('admin-deprecated')
 
 
 class NullBooleanRadioSelect(NullBooleanSelect, AdminRadioSelect):
@@ -390,15 +396,18 @@ class RecordRequestAdmin(RequestAdmin):
             form.base_fields['domain'].initial = self.from_object.domain
         return form
 
-admin.site.register(Domain, DomainAdmin)
-admin.site.register(Record, RecordAdmin)
-admin.site.register(SuperMaster, SuperMasterAdmin)
-admin.site.register(DomainMetadata, DomainMetadataAdmin)
-admin.site.register(CryptoKey, CryptoKeyAdmin)
-admin.site.register(DomainTemplate, DomainTemplateAdmin)
-admin.site.register(RecordTemplate, RecordTemplateAdmin)
-admin.site.register(Authorisation, AuthorisationAdmin)
-admin.site.register(DomainRequest, DomainRequestAdmin)
-admin.site.register(RecordRequest, RecordRequestAdmin)
-admin.site.register(DeleteRequest, DeleteRequestAdmin)
-admin.site.register(TsigKey)
+admin_site.register(Domain, DomainAdmin)
+admin_site.register(Record, RecordAdmin)
+admin_site.register(SuperMaster, SuperMasterAdmin)
+admin_site.register(DomainMetadata, DomainMetadataAdmin)
+admin_site.register(CryptoKey, CryptoKeyAdmin)
+admin_site.register(DomainTemplate, DomainTemplateAdmin)
+admin_site.register(RecordTemplate, RecordTemplateAdmin)
+admin_site.register(Authorisation, AuthorisationAdmin)
+admin_site.register(DomainRequest, DomainRequestAdmin)
+admin_site.register(RecordRequest, RecordRequestAdmin)
+admin_site.register(DeleteRequest, DeleteRequestAdmin)
+admin_site.register(TsigKey)
+admin_site.register(Token)
+admin_site.register(User)
+admin_site.register(Group)

@@ -1,9 +1,9 @@
-
 import autocomplete_light.shortcuts as al
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
 from django.conf import settings
 
+import powerdns
 from powerdns.utils import VERSION
 from powerdns.views import (
     accept_domain_request,
@@ -13,6 +13,7 @@ from powerdns.views import (
     HomeView,
 )
 from ui.views import start_page
+
 
 title = settings.SITE_TITLE
 title_v = ' '.join([title, VERSION])
@@ -27,6 +28,7 @@ admin.autodiscover()
 urlpatterns = patterns(
     '',
     url(r'^admin/', include(admin.site.urls)),
+    url(r'^admin-deprecated/', include(powerdns.admin.admin_site.urls)),
     url(r'^api/', include('dnsaas.api.urls', namespace='api')),
     url(r'^api-token-auth/', obtain_auth_token, name='get-api-token'),
     url(r'^api-docs/', include('rest_framework_swagger.urls')),
@@ -47,6 +49,7 @@ urlpatterns = patterns(
         name='accept_delete'
     ),
 )
+
 
 if settings.NEW_UI_ENABLED:
     urlpatterns += (

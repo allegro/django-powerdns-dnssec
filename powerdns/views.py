@@ -59,12 +59,12 @@ def accept_request_factory(request_model, model_name=None):
         if model_name:
             return redirect(
                 reverse(
-                    'admin:powerdns_{}_change'.format(model_name),
+                    'admin-deprecated:powerdns_{}_change'.format(model_name),
                     args=(domain.pk,)
                 )
             )
         else:
-            return redirect(reverse('admin:index'))
+            return redirect(reverse('admin-deprecated:index'))
     return result
 
 accept_domain_request = accept_request_factory(DomainRequest, 'domain')
