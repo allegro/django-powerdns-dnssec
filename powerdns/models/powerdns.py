@@ -18,6 +18,7 @@ from django.core.urlresolvers import reverse
 from IPy import IP
 from threadlocals.threadlocals import get_current_user
 
+from powerdns.models.ownership import OwnershipByService
 from powerdns.utils import (
     AutoPtrOptions,
     is_authorised,
@@ -170,7 +171,9 @@ class WithRequests(models.Model):
     request_deletion = request_factory('delete')
 
 
-class Domain(TimeTrackable, Owned, WithRequests):
+class Domain(
+    OwnershipByService, TimeTrackable, Owned, WithRequests
+):
     '''
     PowerDNS domains
     '''
@@ -318,7 +321,9 @@ rules.add_perm('powerdns.change_domain', can_edit)
 rules.add_perm('powerdns.delete_domain', can_delete)
 
 
-class Record(TimeTrackable, Owned, RecordLike, WithRequests):
+class Record(
+    OwnershipByService, TimeTrackable, Owned, RecordLike, WithRequests
+):
     '''
     PowerDNS DNS records
     '''

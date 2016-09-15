@@ -18,6 +18,7 @@ from powerdns.models.powerdns import (
     Record,
     SuperMaster,
 )
+from powerdns.models.ownership import Service, ServiceOwner
 from powerdns.models.templates import (
     DomainTemplate,
     RecordTemplate,
@@ -195,6 +196,22 @@ class DomainRequestAdmin(ReadonlyAdminMixin, admin.ModelAdmin):
 class RecordRequestAdmin(ReadonlyAdminMixin, admin.ModelAdmin):
     model = RecordRequest
     list_display = ['target_' + field for field in RECORD_LIST_FIELDS]
+
+
+class OwnerInline(admin.TabularInline):
+    model = Service.owners.through
+    extra = 3
+    raw_id_fields = ('user',)
+
+
+@admin.register(Service)
+class ServiceAdmin(admin.ModelAdmin):
+    inlines = (OwnerInline,)
+
+
+@admin.register(ServiceOwner)
+class ServiceOwnerAdmin(admin.ModelAdmin):
+    raw_id_fields = ("service", 'user')
 
 
 admin.site.register(Domain, DomainAdmin)

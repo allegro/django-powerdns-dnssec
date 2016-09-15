@@ -126,8 +126,12 @@ class TimeTrackable(models.Model):
 
 
 class Owned(models.Model):
-    """Model that has an owner. This owner is set as default to the creator
-    of this model, but can be overridden."""
+    """
+    DEPRECATED in favour of `powerdns.models.ownership` module.
+
+    Model that has an owner. This owner is set as default to the creator
+    of this model, but can be overridden.
+    """
 
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True)
     authorisations = GenericRelation(
