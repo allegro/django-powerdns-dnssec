@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('powerdns', '0025_auto_20160822_0137'),
+        ('powerdns', '0027_auto_20160915_0349'),
     ]
 
     operations = [
