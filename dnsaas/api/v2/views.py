@@ -6,6 +6,7 @@ import logging
 
 from django.core.exceptions import MultipleObjectsReturned
 from django.core.urlresolvers import reverse
+from django.db import IntegrityError
 from django.db.models import Prefetch, Q
 
 from powerdns.utils import hostname2domain
@@ -322,50 +323,9 @@ class IPRecordView(APIView):
     """Dedicated view for add/update/delete"""
     permission_classes = (IsAdminUser,)
 
-    def _get_record(self, ip, hostname):
-        ip = int(ipaddress.ip_address(ip))
-        try:
-            record = Record.objects.get(number=ip, name=hostname)
-        except (Record.DoesNotExist, MultipleObjectsReturned):
-            record = None
-        return record
-
-    def _add_or_update_record(self, data, action):
-        new = data['new']
-        old = data['old']
-        created = False
-        if action == 'add':
-            # TODO: try .. except
-            Record.objects.create(
-                type='A',
-                name=old['hostname'],
-                number=int(ipaddress.ip_address(old['address'])),
-            )
-        if action == 'update':
-            # TODO
-            pass
-        # _, created = Record.objects.update_or_create(
-        #     type='A',
-        #     domain=hostname2domain(old['hostname']),
-        #     defaults={
-        #         'name': new['hostname'],
-        #         'domain': hostname2domain(new['hostname']),
-        #         'content': new['address']
-        #     }
-        # )
-        return 'created' if created else 'updated'
-
-    def _delete_record(self, ip, hostname):
-        record = self._get_record(ip, hostname)
-        if record:
-            record.delete()
-            return 'deleted'
-        return 'noop'
-
-    def _validate_data(self, data):
-        if not data['action']:
-            return False
-        if data['action'] != 'delete' and not data['old']['hostname']:
+    @staticmethod
+    def _validate_data(data):
+        if 'action' not in data:
             return False
         if (
             data['action'] == 'delete' and
@@ -375,25 +335,73 @@ class IPRecordView(APIView):
             return False
         if data['action'] == 'add' and data['new'] != data['old']:
             return False
-        # if data['action'] == 'update' and
+        if data['action'] == 'add' and not data['old']['hostname']:
+            return False
         return True
+
+    def _get_record(self, ip, hostname):
+        ip = int(ipaddress.ip_address(ip))
+        try:
+            record = Record.objects.get(type='A', number=ip, name=hostname)
+        except (Record.DoesNotExist, MultipleObjectsReturned):
+            record = None
+        return record
+
+    def _add_record(self, data):
+        new = data['new']
+        old = data['old']
+        try:
+            Record.objects.create(
+                type='A',
+                name=old['hostname'],
+                domain=hostname2domain(new['hostname']),
+                number=int(ipaddress.ip_address(old['address'])),
+                content=new['address']
+            )
+        except IntegrityError as e:
+            return status.HTTP_409_CONFLICT, str(e)
+        else:
+            return status.HTTP_200_OK, 'created'
+
+    def _update_record(self, data):
+        new = data['new']
+        old = data['old']
+        record = self._get_record(old['address'], old['hostname'])
+        if new['hostname'] is None and record:
+            return self._delete_record(dict(
+                address=old['address'], hostname=old['hostname']
+            ))
+        if record:
+            record.name = new['hostname']
+            record.domain = hostname2domain(new['hostname'])
+            record.content = new['address']
+            record.save()
+        return status.HTTP_200_OK, 'updated'
+
+    def _delete_record(self, data):
+        ip, hostname = data['address'], data['hostname']
+        record = self._get_record(ip, hostname)
+        if record:
+            record.delete()
+            return status.HTTP_200_OK, 'deleted'
+        return status.HTTP_200_OK, 'noop'
 
     def post(self, request):
         data = request.data
-        if not self._validate_data(data):
+        action = data.get('action', None)
+        action_mapper = {
+            'add': self._add_record,
+            'update': self._update_record,
+            'delete': self._delete_record,
+        }
+        if not self._validate_data(data) or action not in action_mapper:
             return Response(
-                data={'status': 'Invalid data'},
+                data={'status': 'Invalid request data'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        action = data.pop('action')
-        status_text = ''
-        if action == 'delete':
-            status_text = self._delete_record(
-                data['address'], data['hostname']
-            )
-        else:
-            status_text = self._add_or_update_record(data=data, action=action)
+        action_func = action_mapper[action]
+        status_code, status_text = action_func(data=data)
         return Response(
             data={'status': status_text},
-            status=status.HTTP_200_OK
+            status=status_code
         )

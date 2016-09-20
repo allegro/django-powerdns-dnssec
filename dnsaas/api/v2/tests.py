@@ -22,7 +22,7 @@ from powerdns.tests.utils import (
     RecordRequestFactory,
     UserFactory
 )
-from dnsaas.api.v2.views import RecordViewSet
+from dnsaas.api.v2.views import RecordViewSet, IPRecordView
 from dnsaas.api.v2.serializers import (
     RecordRequestSerializer, _trim_whitespace,
 )
@@ -865,6 +865,48 @@ class TestIPRecordTest(BaseApiTestCase):
             **{'HTTP_ACCEPT': 'application/json; version=v2'}
         )
 
+    def test_validate_add_data(self):
+        self.data = {
+            'action': 'add',
+            'old': {
+                'address': '127.0.0.1',
+                'hostname': 'localhost'
+            },
+            'new': {
+                'address': '127.0.0.1',
+                'hostname': 'localhost'
+            }
+        }
+        self.assertTrue(IPRecordView._validate_data(self.data))
+
+    def test_validate_incorrect_add_data(self):
+        self.data = {
+            'action': 'add',
+            'old': {
+                'address': '127.0.0.2',
+                'hostname': 'localhost'
+            },
+            'new': {
+                'address': '127.0.0.1',
+                'hostname': 'localhost'
+            }
+        }
+        self.assertFalse(IPRecordView._validate_data(self.data))
+
+    def test_validate_incorrect_add_data_without_hostname(self):
+        self.data = {
+            'action': 'add',
+            'old': {
+                'address': '127.0.0.1',
+                'hostname': None
+            },
+            'new': {
+                'address': '127.0.0.1',
+                'hostname': None
+            }
+        }
+        self.assertFalse(IPRecordView._validate_data(self.data))
+
     def test_add_record(self):
         self.data.update({
             'old': {
@@ -878,6 +920,22 @@ class TestIPRecordTest(BaseApiTestCase):
         })
         response = self._send_post_data_to_endpoint()
         self.assertEqual(response.status_code, 200)
+
+    def test_create_duplicate_record(self):
+        self.data.update({
+            'old': {
+                'address': '127.0.0.1',
+                'hostname': 'test123.example.com'
+            },
+            'new': {
+                'address': '127.0.0.1',
+                'hostname': 'test123.example.com'
+            }
+        })
+        response = self._send_post_data_to_endpoint()
+        self.assertEqual(response.status_code, 200)
+        response = self._send_post_data_to_endpoint()
+        self.assertEqual(response.status_code, 409)
 
     def test_update_record(self):
         target_content = '192.168.1.8'
@@ -905,6 +963,28 @@ class TestIPRecordTest(BaseApiTestCase):
         self.assertEqual(record.content, target_content)
         self.assertEqual(record.name, target_name)
 
+    def test_when_hostname_is_empty_in_new_then_delete_record(self):
+        record = RecordFactory(
+            type='A',
+            content='127.0.0.9',
+            name='update_test_1.{}'.format(self.domain.name),
+            domain=self.domain
+        )
+        self.data.update({
+            'old': {
+                'address': record.content,
+                'hostname': record.name
+            },
+            'new': {
+                'address': record.content,
+                'hostname': None
+            },
+            'action': 'update',
+        })
+        response = self._send_post_data_to_endpoint()
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Record.objects.filter(id=record.id).exists())
+
     def test_delete_record(self):
         target_content = '192.168.1.8'
         target_name = 'test_update_2.{}'.format(self.domain.name)
@@ -922,3 +1002,11 @@ class TestIPRecordTest(BaseApiTestCase):
         }
         self._send_post_data_to_endpoint()
         self.assertFalse(Record.objects.filter(**record_kwargs).exists())
+
+    def test_delete_nonexistent_record(self):
+        self.data = {
+            'address': '192.168.1.0',
+            'hostname': '404.dc',
+            'action': 'delete'
+        }
+        self._send_post_data_to_endpoint()
