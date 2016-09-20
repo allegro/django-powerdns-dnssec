@@ -352,9 +352,9 @@ class Record(
         help_text=_("The 'right hand side' of a DNS record. For an A"
                     " record, this is the IP address"),
     )
-    number = models.PositiveIntegerField(
+    number = models.DecimalField(
         _("IP number"), null=True, blank=True, default=None, editable=False,
-        db_index=True
+        db_index=True, max_digits=39, decimal_places=0
     )
     ttl = models.PositiveIntegerField(
         _("TTL"), blank=True, null=True, default=3600,

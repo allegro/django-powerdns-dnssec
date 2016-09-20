@@ -1,3 +1,5 @@
+from django.conf.urls import url, patterns
+
 from rest_framework.routers import DefaultRouter
 
 from .views import (
@@ -10,6 +12,7 @@ from .views import (
     RecordTemplateViewSet,
     RecordRequestsViewSet,
     TsigKeysViewSet,
+    IPRecordView,
 )
 
 router = DefaultRouter()
@@ -23,3 +26,7 @@ router.register(r'record-templates', RecordTemplateViewSet)
 router.register(r'record-requests', RecordRequestsViewSet)
 router.register(r'tsigkeys', TsigKeysViewSet)
 urlpatterns = router.urls
+urlpatterns += patterns(
+    '',
+    url(r'^ip_record/', IPRecordView.as_view(), name='ip-record'),
+)

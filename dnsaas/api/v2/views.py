@@ -1,11 +1,15 @@
 
 """Views and viewsets for DNSaaS API"""
 import django_filters
+import ipaddress
 import logging
 
+from django.core.exceptions import MultipleObjectsReturned
 from django.core.urlresolvers import reverse
+from django.db import IntegrityError
 from django.db.models import Prefetch, Q
 
+from powerdns.utils import hostname2domain
 from powerdns.models import (
     CryptoKey,
     DeleteRequest,
@@ -17,11 +21,11 @@ from powerdns.models import (
     RecordRequest,
     SuperMaster,
 )
-from rest_framework import status
-from rest_framework import filters
-from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
-from rest_framework.permissions import DjangoObjectPermissions
+from rest_framework import filters, status
+from rest_framework.permissions import DjangoObjectPermissions, IsAdminUser
 from rest_framework.response import Response
+from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
+from rest_framework.views import APIView
 
 from .serializers import (
     CryptoKeySerializer,
@@ -313,3 +317,91 @@ class TsigKeysViewSet(FiltersMixin, ModelViewSet):
     queryset = TsigKey.objects.all()
     serializer_class = TsigKeysTemplateSerializer
     filter_fields = ('name', 'secret')
+
+
+class IPRecordView(APIView):
+    """Dedicated view for add/update/delete"""
+    permission_classes = (IsAdminUser,)
+
+    @staticmethod
+    def _validate_data(data):
+        if 'action' not in data:
+            return False
+        if (
+            data['action'] == 'delete' and
+            'address' not in data and
+            'hostname' not in data
+        ):
+            return False
+        if data['action'] == 'add' and data['new'] != data['old']:
+            return False
+        if data['action'] == 'add' and not data['old']['hostname']:
+            return False
+        return True
+
+    def _get_record(self, ip, hostname):
+        ip = int(ipaddress.ip_address(ip))
+        try:
+            record = Record.objects.get(type='A', number=ip, name=hostname)
+        except (Record.DoesNotExist, MultipleObjectsReturned):
+            record = None
+        return record
+
+    def _add_record(self, data):
+        new = data['new']
+        old = data['old']
+        try:
+            Record.objects.create(
+                type='A',
+                name=old['hostname'],
+                domain=hostname2domain(new['hostname']),
+                number=int(ipaddress.ip_address(old['address'])),
+                content=new['address']
+            )
+        except IntegrityError as e:
+            return status.HTTP_409_CONFLICT, str(e)
+        else:
+            return status.HTTP_200_OK, 'created'
+
+    def _update_record(self, data):
+        new = data['new']
+        old = data['old']
+        record = self._get_record(old['address'], old['hostname'])
+        if new['hostname'] is None and record:
+            return self._delete_record(dict(
+                address=old['address'], hostname=old['hostname']
+            ))
+        if record:
+            record.name = new['hostname']
+            record.domain = hostname2domain(new['hostname'])
+            record.content = new['address']
+            record.save()
+        return status.HTTP_200_OK, 'updated'
+
+    def _delete_record(self, data):
+        ip, hostname = data['address'], data['hostname']
+        record = self._get_record(ip, hostname)
+        if record:
+            record.delete()
+            return status.HTTP_200_OK, 'deleted'
+        return status.HTTP_200_OK, 'noop'
+
+    def post(self, request):
+        data = request.data
+        action = data.get('action', None)
+        action_mapper = {
+            'add': self._add_record,
+            'update': self._update_record,
+            'delete': self._delete_record,
+        }
+        if not self._validate_data(data) or action not in action_mapper:
+            return Response(
+                data={'status': 'Invalid request data'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        action_func = action_mapper[action]
+        status_code, status_text = action_func(data=data)
+        return Response(
+            data={'status': status_text},
+            status=status_code
+        )

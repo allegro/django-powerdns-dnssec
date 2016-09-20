@@ -353,3 +353,26 @@ def flat_dict_diff(old_dict, new_dict):
     for key in keys:
         diff_result[key] = _fmt(old_dict[key], new_dict[key])
     return diff_result
+
+
+def hostname2domain(hostname):
+    """
+    Find longest existing domain within `hostname` or None
+
+    Example:
+        hostname = sub-domain.on.existing-domain.com
+        and only existing-domain.com exists
+    Then it returns `existing-domain.com` as db object.
+    """
+    from powerdns.models import Domain
+
+    domain = None
+    parts = hostname.split('.')
+    while parts:
+        try:
+            domain = Domain.objects.get(name='.'.join(parts))
+            break
+        except Domain.DoesNotExist:
+            pass
+        parts = parts[1:]
+    return domain
