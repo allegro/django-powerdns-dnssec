@@ -17,14 +17,6 @@ from django.utils.translation import ugettext_lazy as _
 from powerdns.utils import TimeTrackable
 
 
-class ServiceStatus(Enum):
-    ACTIVE = 'Active'
-    OBSOLETE = 'Obsolete'
-    PENDING_OBSOLESCENCE = 'Pending Obsolescence'
-    PLANNING = 'Planning'
-    PENDING = 'Pending'
-
-
 class OwnershipType(Enum):
     BO = 'Business Owner'
     TO = 'Technical Owner'
@@ -33,10 +25,7 @@ class OwnershipType(Enum):
 class Service(TimeTrackable):
     name = models.CharField(_("name"), max_length=255)
     uid = models.CharField(max_length=100, unique=True, db_index=True)
-    status = models.CharField(
-        max_length=100, db_index=True,
-        choices=[(status.name, status.value) for status in ServiceStatus]
-    )
+    is_active = models.BooleanField(null=False, default=True)
     owners = models.ManyToManyField(
         settings.AUTH_USER_MODEL, through='ServiceOwner'
     )
