@@ -207,25 +207,24 @@ export class RecordDetailComponent implements OnInit {
 
     onChangeType() {
       if (this.isCreate) {
+        var focusElem = this.inputName.nativeElement;
         if (this.record.type === "A") {
           this.inputContent.nativeElement.placeholder = "1.2.3.4";
-          $(this.inputName.nativeElement).focus();
+        } else if (this.record.type === "AAAA") {
+          this.inputContent.nativeElement.placeholder = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
         } else if (this.record.type === "MX") {
           this.inputContent.nativeElement.placeholder = "1.2.3.4";
-          $(this.inputContent.nativeElement).focus();
+          focusElem = this.inputContent.nativeElement;
         } else if (this.record.type === "CNAME") {
           this.inputContent.nativeElement.placeholder = "example.com";
-          $(this.inputName.nativeElement).focus();
         } else if (this.record.type === "TXT") {
           this.inputContent.nativeElement.placeholder = "description here";
-          $(this.inputName.nativeElement).focus();
         } else if (this.record.type === "SRV") {
           this.inputContent.nativeElement.placeholder = "0 5222 jabber.example.com";
-          $(this.inputName.nativeElement).focus();
         } else {
           this.inputContent.nativeElement.placeholder = "";
-          $(this.inputName.nativeElement).focus();
         }
+        $(focusElem).focus();
       }
     }
 
