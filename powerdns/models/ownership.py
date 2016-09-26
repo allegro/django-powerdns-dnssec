@@ -31,7 +31,7 @@ class Service(TimeTrackable):
     )
 
     def __str__(self):
-        return '{} {} ({})'.format(self.name, self.status, self.uid)
+        return '{} {} ({})'.format(self.name, self.is_active, self.uid)
 
 
 class ServiceOwner(TimeTrackable):

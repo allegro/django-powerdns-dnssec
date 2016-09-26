@@ -12,7 +12,7 @@ from rest_framework.test import APIClient
 
 from powerdns.models.powerdns import Record, Domain
 from powerdns.models.requests import DeleteRequest, RecordRequest
-from powerdns.models.ownership import ServiceOwner, ServiceStatus, Service
+from powerdns.models.ownership import ServiceOwner, Service
 from powerdns.models.templates import RecordTemplate, DomainTemplate
 from powerdns.utils import AutoPtrOptions
 
@@ -49,7 +49,6 @@ class ServiceFactory(DjangoModelFactory):
         model = Service
     name = factory.Sequence(lambda n: 'service%d' % n)
     uid = factory.Sequence(lambda n: 'uid%d' % n)
-    status = ServiceStatus.ACTIVE
 
 
 class ServiceOwnerFactory(DjangoModelFactory):
