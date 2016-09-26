@@ -303,7 +303,7 @@ class Domain(
             user == self.owner or
             user.id in self.authorisations.values_list(
                 'authorised', flat=True
-            )
+            ) or self._has_access_by_service(user)
         )
 
     def as_empty_history(self):
@@ -631,7 +631,7 @@ class Record(
             user == self.owner or
             user.id in self.authorisations.values_list(
                 'authorised', flat=True
-            )
+            ) or self._has_access_by_service(user)
         )
 
     def as_empty_history(self):

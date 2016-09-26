@@ -37,6 +37,7 @@ class DomainSerializer(OwnerSerializer):
     class Meta:
         model = Domain
         read_only_fields = ('notified_serial',)
+        exclude = ('service',)
 
 
 class RecordRequestSerializer(OwnerSerializer):
@@ -60,6 +61,7 @@ class RecordSerializer(OwnerSerializer):
     class Meta:
         model = Record
         read_only_fields = ('change_date', 'ordername',)
+        exclude = ('service',)
 
     domain = HyperlinkedRelatedField(
         queryset=Domain.objects.all(),

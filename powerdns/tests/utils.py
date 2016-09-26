@@ -4,13 +4,15 @@ import functools as ft
 
 import factory
 from django.contrib.auth.models import User
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from factory.django import DjangoModelFactory
 from rest_framework.test import APIClient
 
 from powerdns.models.powerdns import Record, Domain
-from powerdns.models.requests import RecordRequest
+from powerdns.models.requests import DeleteRequest, RecordRequest
+from powerdns.models.ownership import ServiceOwner, ServiceStatus, Service
 from powerdns.models.templates import RecordTemplate, DomainTemplate
 from powerdns.utils import AutoPtrOptions
 
@@ -42,11 +44,27 @@ class RecordTemplateFactory(DjangoModelFactory):
         model = RecordTemplate
 
 
+class ServiceFactory(DjangoModelFactory):
+    class Meta:
+        model = Service
+    name = factory.Sequence(lambda n: 'service%d' % n)
+    uid = factory.Sequence(lambda n: 'uid%d' % n)
+    status = ServiceStatus.ACTIVE
+
+
+class ServiceOwnerFactory(DjangoModelFactory):
+    class Meta:
+        model = ServiceOwner
+    service = factory.SubFactory(UserFactory)
+    user = factory.SubFactory(UserFactory)
+
+
 class DomainFactory(DjangoModelFactory):
     class Meta:
         model = Domain
 
     name = factory.Sequence(lambda n: 'name%d.com' % n)
+    service = factory.SubFactory(ServiceFactory)
     auto_ptr = AutoPtrOptions.NEVER
 
 
@@ -56,6 +74,7 @@ class RecordFactory(DjangoModelFactory):
 
     domain = factory.SubFactory(DomainFactory)
     owner = factory.SubFactory(UserFactory)
+    service = factory.SubFactory(ServiceFactory)
 
 
 class RecordRequestFactory(DjangoModelFactory):
@@ -65,6 +84,14 @@ class RecordRequestFactory(DjangoModelFactory):
     record = factory.SubFactory(RecordFactory)
     domain = factory.SubFactory(DomainFactory)
     owner = factory.SubFactory(UserFactory)
+
+
+class RecordDeleteRequestFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = DeleteRequest
+
+    content_type = ContentType.objects.get_for_model(Record)
+    target = factory.SubFactory(RecordFactory)
 
 
 class RecordTestCase(TestCase):

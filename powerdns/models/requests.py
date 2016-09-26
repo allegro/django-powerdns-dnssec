@@ -25,6 +25,42 @@ from powerdns.utils import AutoPtrOptions, RecordLike, flat_dict_diff
 log = logging.getLogger(__name__)
 
 
+def can_auto_accept_record_request(user_request, user, action):
+    """
+    Return True if `user_request` (RecordRequest or Record DeleteRequest) being
+    done by `user` can be auto accepted for `action`.
+
+    Skipping corner cases (included in code below) this checks:
+        - if user has access to Record AND
+        - if user has access to Domain (which Record belongs to)
+    """
+    def _validate_domain(domain):
+        if not domain:
+            raise Exception(
+                "Can't check auto acceptance without domain set"
+            )
+
+    can_auto_accept = False
+    domain = (
+        user_request.domain
+        if action != 'delete' else user_request.target.domain
+    )
+    _validate_domain(domain)
+    if action == 'create':
+        can_auto_accept = user_request.domain.can_auto_accept(user)
+    elif action == 'update':
+        can_auto_accept = (
+            user_request.domain.can_auto_accept(user) and
+            user_request.record.can_auto_accept(user)
+        )
+    elif action == 'delete':
+        can_auto_accept = (
+            user_request.target.domain.can_auto_accept(user) and
+            user_request.target.can_auto_accept(user)
+        )
+    return can_auto_accept
+
+
 class RequestStates(Choices):
     _ = Choices.Choice
     OPEN = _('Open')

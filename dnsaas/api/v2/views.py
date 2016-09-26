@@ -40,7 +40,10 @@ from .serializers import (
 )
 from powerdns.utils import to_reverse
 from powerdns.models.tsigkeys import TsigKey
-from powerdns.models.requests import RequestStates
+from powerdns.models.requests import (
+    RequestStates,
+    can_auto_accept_record_request,
+)
 
 
 log = logging.getLogger(__name__)
@@ -146,8 +149,8 @@ class RecordViewSet(OwnerViewSet):
         record_request.owner = request.user
         record_request.target_owner = serializer.validated_data['owner']
 
-        if serializer.validated_data['domain'].can_auto_accept(
-            request.user
+        if can_auto_accept_record_request(
+            record_request, request.user, 'create',
         ):
             serializer.instance = record_request.accept()
             data = serializer.data
@@ -204,9 +207,8 @@ class RecordViewSet(OwnerViewSet):
         record_request.target_owner = serializer.validated_data.get('owner')
         record_request.record = serializer.instance
 
-        if (
-            serializer.instance.domain.can_auto_accept(request.user) and
-            instance.can_auto_accept(request.user)
+        if can_auto_accept_record_request(
+            record_request, request.user, 'update',
         ):
             serializer.instance = record_request.accept()
             data = serializer.data
@@ -246,9 +248,8 @@ class RecordViewSet(OwnerViewSet):
         delete_request = DeleteRequest(
             owner=request.user, target=instance,
         )
-        if (
-            instance.domain.can_auto_accept(request.user) and
-            instance.can_auto_accept(request.user)
+        if can_auto_accept_record_request(
+            delete_request, request.user, 'delete',
         ):
             delete_request.accept()
             code = status.HTTP_204_NO_CONTENT
