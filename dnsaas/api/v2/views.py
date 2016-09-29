@@ -350,13 +350,12 @@ class IPRecordView(APIView):
 
     def _add_record(self, data):
         new = data['new']
-        old = data['old']
         try:
             Record.objects.create(
                 type='A',
-                name=old['hostname'],
+                name=new['hostname'],
                 domain=hostname2domain(new['hostname']),
-                number=int(ipaddress.ip_address(old['address'])),
+                number=int(ipaddress.ip_address(new['address'])),
                 content=new['address']
             )
         except IntegrityError as e:
@@ -368,6 +367,9 @@ class IPRecordView(APIView):
         new = data['new']
         old = data['old']
         record = self._get_record(old['address'], old['hostname'])
+        if not record:
+            return self._add_record(data)
+
         if new['hostname'] is None and record:
             return self._delete_record(dict(
                 address=old['address'], hostname=old['hostname']
