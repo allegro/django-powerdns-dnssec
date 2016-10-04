@@ -1,7 +1,0 @@
-{% extends "admin/change_form.html" %}
-{% block object-tools-items %}
-{{ block.super }}
-{% for btn in original.extra_buttons %} 
-<li><a href="{{ btn.0 }}">{{ btn.1 }}</a></li>
-{% endfor %}
-{% endblock %}

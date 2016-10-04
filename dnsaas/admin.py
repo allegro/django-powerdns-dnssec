@@ -170,7 +170,7 @@ class RecordTemplateInline(admin.StackedInline):
 
 class DomainTemplateAdmin(ForeignKeyAutocompleteAdmin):
     inlines = [RecordTemplateInline]
-    list_display = ['name', 'add_domain_link', 'is_public_domain']
+    list_display = ['name', 'is_public_domain']
 
 
 class ReadonlyAdminMixin(object):

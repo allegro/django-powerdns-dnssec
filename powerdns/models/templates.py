@@ -1,6 +1,5 @@
 """Models and signal subscriptions for templating system"""
 
-from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -52,20 +51,6 @@ class DomainTemplate(models.Model):
 
     def natural_key(self):
         return (self.name,)
-
-    def add_domain_url(self):
-        """Return URL for 'Add domain' action"""
-        return (
-            reverse('admin-deprecated:powerdns_domain_add') +
-            '?template={}'.format(self.pk)
-        )
-
-    def add_domain_link(self):
-        return '<a href="{}">Create domain</a>'.format(self.add_domain_url())
-    add_domain_link.allow_tags = True
-
-    def extra_buttons(self):
-        yield (self.add_domain_url(), 'Create domain')
 
 
 class RecordTemplateManager(models.Manager):

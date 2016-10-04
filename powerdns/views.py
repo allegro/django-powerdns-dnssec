@@ -1,20 +1,9 @@
 """Views and viewsets for DNSaaS API"""
 import logging
 
-from django.core.urlresolvers import reverse
-from django.shortcuts import redirect
-from django.views.generic.base import TemplateView
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
-
-from powerdns.models import (
-    DeleteRequest,
-    DomainRequest,
-    RecordRequest,
-)
-
-from powerdns.utils import VERSION
 
 
 log = logging.getLogger(__name__)
@@ -33,40 +22,3 @@ class ObtainAuthToken(ObtainAuthToken):
             'is_admin': user.is_superuser
         })
 obtain_auth_token = ObtainAuthToken.as_view()
-
-
-class HomeView(TemplateView):
-
-    """
-    Homepage. This page should point user to API or admin site. This package
-    will provide some minimal homepage template. The administrators of
-    DNSaaS solutions are encouraged however to create their own ones.
-    """
-
-    template_name = "admin/powerdns/home.html"
-
-    def get_context_data(self, **kwargs):
-
-        return {
-            'version': VERSION,
-        }
-
-
-def accept_request_factory(request_model, model_name=None):
-    def result(request, pk):
-        request = request_model.objects.get(pk=pk)
-        domain = request.accept()
-        if model_name:
-            return redirect(
-                reverse(
-                    'admin-deprecated:powerdns_{}_change'.format(model_name),
-                    args=(domain.pk,)
-                )
-            )
-        else:
-            return redirect(reverse('admin-deprecated:index'))
-    return result
-
-accept_domain_request = accept_request_factory(DomainRequest, 'domain')
-accept_record_request = accept_request_factory(RecordRequest, 'record')
-accept_delete_request = accept_request_factory(DeleteRequest)

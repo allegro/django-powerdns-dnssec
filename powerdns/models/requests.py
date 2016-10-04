@@ -4,7 +4,6 @@ import logging
 
 from django.db import models, transaction
 from django.conf import settings
-from django.core.urlresolvers import reverse
 from django_extensions.db.fields.json import JSONField
 from dj.choices import Choices
 from dj.choices.fields import ChoiceField
@@ -85,11 +84,6 @@ class Request(Owned):
     )
     last_change_json = JSONField(null=True, blank=True)
 
-    def extra_buttons(self):
-        perm = 'change_' + self._meta.model_name.lower()
-        if get_current_user().has_perm(perm, self):
-            yield (reverse(self.view, kwargs={'pk': self.pk}), 'Accept')
-
     def save(self, *args, **kwargs):
         if self.owner is None:
             self.owner = get_current_user()
@@ -108,7 +102,6 @@ class DeleteRequest(Request):
     content_type = models.ForeignKey(ContentType)
     target_id = models.PositiveIntegerField()
     target = GenericForeignKey('content_type', 'target_id')
-    view = 'accept_delete'
 
     @transaction.atomic
     def accept(self):
@@ -316,8 +309,6 @@ class DomainRequest(ChangeCreateRequest):
 
     )
 
-    view = 'accept_domain'
-
     def __str__(self):
         return self.target_name
 
@@ -423,7 +414,6 @@ class RecordRequest(ChangeCreateRequest, RecordLike):
         blank=False,
         related_name='+',
     )
-    view = 'accept_record'
 
     def get_record_pk(self):
         if self.record:

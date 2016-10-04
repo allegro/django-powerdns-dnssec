@@ -232,8 +232,6 @@ SENTRY_JS_DSN = ''
 SENTRY_JS_CONFIG = {}
 JIRA_URL = ''
 
-NEW_UI_ENABLED = False
-
 if not TESTING:
     try:
         from settings_local import *  # noqa
