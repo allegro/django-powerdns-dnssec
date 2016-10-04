@@ -7,23 +7,15 @@ from django.conf import settings
 from django.contrib.contenttypes.fields import GenericRelation
 from django.core.mail import send_mail
 from django.core.exceptions import ValidationError
-from django.core.validators import validate_ipv4_address, RegexValidator
+from django.core.validators import (
+    validate_ipv4_address,
+    validate_ipv6_address,
+    RegexValidator
+)
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from threadlocals.threadlocals import get_current_user
 from dj.choices import Choices
-from IPy import IP
-
-
-def validate_ipv6_address(value):
-    try:
-        ip = IP(value)
-    except ValueError:
-        ip = None
-    if not ip or ip.version() == 4:
-        raise ValidationError(
-            _(u'Enter a valid IPv6 address.'), code='invalid',
-        )
 
 
 VERSION = working_set.find(Requirement.parse('django-powerdns-dnssec')).version
