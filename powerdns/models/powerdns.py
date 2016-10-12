@@ -26,6 +26,7 @@ from powerdns.utils import (
     RecordLike,
     TimeTrackable,
     to_reverse,
+    reverse_pointer,
     validate_domain_name,
 )
 
@@ -52,6 +53,31 @@ DEFAULT_REVERSE_DOMAIN_TEMPLATE = None
 
 can_edit = rules.is_superuser | no_object | is_owner | is_authorised
 can_delete = rules.is_superuser | is_owner | is_authorised
+
+
+class PreviousStateMixin(models.Model):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        fields = [f.name for f in self._meta.get_fields()]
+        self._original_values = {
+            k: v for k, v in self.__dict__.items() if k in fields
+        }
+
+    class Meta:
+        abstract = True
+
+
+def get_ptr_obj(ip, content):
+    """Return PTR object for `ip` and `content` or None"""
+    ptr = None
+    rev_ptr = reverse_pointer(ip)
+    try:
+        ptr = Record.objects.get(
+            type='PTR', name=rev_ptr, content=content,
+        )
+    except Record.DoesNotExist:
+        pass
+    return ptr
 
 
 def get_default_reverse_domain():
@@ -118,7 +144,7 @@ class SubDomainValidator():
         return type(self) == type(other)
 
 
-class Domain(OwnershipByService, TimeTrackable, Owned):
+class Domain(PreviousStateMixin, OwnershipByService, TimeTrackable, Owned):
     '''
     PowerDNS domains
     '''
@@ -189,14 +215,6 @@ class Domain(OwnershipByService, TimeTrackable, Owned):
         verbose_name = _("domain")
         verbose_name_plural = _("domains")
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._original_values = {}
-        fields = [f.name for f in self.__class__._meta.get_fields()]
-        self._original_values = {
-            k: v for k, v in self.__dict__.items() if k in fields
-        }
-
     def __str__(self):
         return self.name
 
@@ -241,7 +259,9 @@ rules.add_perm('powerdns.change_domain', can_edit)
 rules.add_perm('powerdns.delete_domain', can_delete)
 
 
-class Record(OwnershipByService, TimeTrackable, Owned, RecordLike):
+class Record(
+    PreviousStateMixin, OwnershipByService, TimeTrackable, Owned, RecordLike
+):
     '''
     PowerDNS DNS records
     '''
@@ -457,8 +477,48 @@ class Record(OwnershipByService, TimeTrackable, Owned, RecordLike):
             self.number = IP(self.content).int()
         super(Record, self).save(*args, **kwargs)
 
+    def get_ptr(self):
+        """Get PTR for `self` record if record is A or AAAA type."""
+        if self.type in {'A', 'AAAA'}:
+            return get_ptr_obj(self.content, self.name)
+
+    def _delete_old_ptr(self):
+        """
+        Delete PTR for A/AAAA record when `name` or `content` was updated.
+
+        This fn. works for case where `record.name` or `record.content` has
+        changed and record A (or AAAA) is already matched with PTR.
+        In such case looking for PTR depending on current record `name` or
+        `content` fails (PTR was created for values which are updated now).
+        To fix that PTR should be query by values before the update.
+        """
+        if (
+            # delete old PTR, when content or name has changed
+            self._original_values['content'] != self.content or
+            self._original_values['name'] != self.name and
+            (
+                self._original_values['content'] and
+                self._original_values['name']
+            )
+        ):
+            old_ptr = get_ptr_obj(
+                self._original_values['content'],
+                self._original_values['name']
+            )
+            if old_ptr:
+                old_ptr.delete()
+
     def delete_ptr(self):
-        Record.objects.filter(depends_on=self).delete()
+        """
+        Delete ptr for `self` if exists
+        """
+        if self.type not in {'A', 'AAAA'}:
+            return
+
+        self._delete_old_ptr()
+        current_ptr = self.get_ptr()
+        if current_ptr:
+            current_ptr.delete()
 
     def create_ptr(self):
         """Creates a PTR record for A record creating a domain if necessary."""
@@ -558,7 +618,7 @@ def update_ptr(sender, instance, **kwargs):
 def _create_ptr(record):
     if (
         record.domain.auto_ptr == AutoPtrOptions.NEVER or
-        record.type != 'A'
+        record.type not in {'A', 'AAAA'}
     ):
         record.delete_ptr()
         return

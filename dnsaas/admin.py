@@ -105,7 +105,9 @@ class RecordAdmin(ForeignKeyAutocompleteAdmin, admin.ModelAdmin):
     list_per_page = 250
     save_on_top = True
     search_fields = ('name', 'content',)
-    readonly_fields = ('change_date', 'ordername', 'created', 'modified')
+    readonly_fields = (
+        'change_date', 'ordername', 'created', 'modified', 'depends_on',
+    )
     related_search_fields = {
         'domain': ('name',),
     }

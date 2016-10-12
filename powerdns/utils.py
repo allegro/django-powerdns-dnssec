@@ -1,5 +1,6 @@
 """Utilities for powerdns models"""
 
+import ipaddress
 from pkg_resources import working_set, Requirement
 
 import rules
@@ -208,6 +209,26 @@ def to_reverse(ip):
     *domain_parts, number = ip.split('.')
     domain = '{}.in-addr.arpa'.format('.'.join(reversed(domain_parts)))
     return (domain, number)
+
+
+def reverse_pointer(ip):
+    """
+    Reverse `ip` to ptr.
+
+    Example:
+    >>> reverse_ip_to_ptr('192.168.1.1')
+    '1.1.168.192.in-addr.arpa'
+    >>> reverse_pointer('2001:db8::')
+    '0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa'
+    """
+    ip_obj = ipaddress.ip_address(ip)
+    if isinstance(ip_obj, ipaddress.IPv6Address):
+        reverse_chars = ip_obj.exploded[::-1].replace(':', '')
+        rev_ptr = '.'.join(reverse_chars) + '.ip6.arpa'
+    else:
+        reverse_octets = str(ip_obj).split('.')[::-1]
+        rev_ptr = '.'.join(reverse_octets) + '.in-addr.arpa'
+    return rev_ptr
 
 
 class AutoPtrOptions(Choices):
