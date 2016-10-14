@@ -493,9 +493,11 @@ class Record(
         To fix that PTR should be query by values before the update.
         """
         if (
-            # delete old PTR, when content or name has changed
-            self._original_values['content'] != self.content or
-            self._original_values['name'] != self.name and
+            (
+                # delete old PTR, when content or name has changed
+                self._original_values['content'] != self.content or
+                self._original_values['name'] != self.name
+            ) and
             (
                 self._original_values['content'] and
                 self._original_values['name']
