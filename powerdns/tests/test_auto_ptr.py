@@ -240,6 +240,20 @@ class TestAutoPtr(TestCase):
         a.delete()
         assert_not_exists(Record, name='1.1.168.192.in-addr.arpa', type='PTR')
 
+    def test_delete_auto_ptr_works_when_blank_name_and_content(self):
+        a = RecordFactory(
+            domain=self.ptr_domain,
+            type='A',
+            name='site.example.com',
+            content='192.168.1.1',
+        )
+        a._original_values['content'] = None
+        a._original_values['name'] = ''
+        a.save()
+        assert_does_exist(Record, name='1.1.168.192.in-addr.arpa', type='PTR')
+        a.delete()
+        assert_not_exists(Record, name='1.1.168.192.in-addr.arpa', type='PTR')
+
     @mock.patch('powerdns.models.powerdns._update_records_ptrs')
     def test_update_ptr_signal_is_fired_when_auto_ptr_is_changed(
         self, update_records
