@@ -492,7 +492,6 @@ class Record(
         `content` fails (PTR was created for values which are updated now).
         To fix that PTR should be query by values before the update.
         """
-        print('xxxx', self._original_values['content'], self._original_values['name'])
         if (
             (
                 # delete old PTR, when content or name has changed
