@@ -1,6 +1,6 @@
 """Tests for record/domain ownership"""
 
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.core import mail
 from django.test import TestCase
 
@@ -25,17 +25,17 @@ class TestOwnershipBase(TestCase):
     """Base test class creating some users."""
 
     def setUp(self):
-        self.user1 = User.objects.create_superuser(
+        self.user1 = get_user_model().objects.create_superuser(
             'user1', 'user1@example.com', 'password'
         )
-        self.user2 = User.objects.create_superuser(
+        self.user2 = get_user_model().objects.create_superuser(
             'user2', 'user2@example.com', 'password'
         )
         self.client = user_client(self.user1)
         mail.outbox = []
 
     def tearDown(self):
-        for Model in [Domain, Record, User]:
+        for Model in [Domain, Record, get_user_model()]:
             Model.objects.all().delete()
 
     def assertOwner(self, request, username, mailed):

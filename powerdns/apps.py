@@ -1,4 +1,6 @@
 from django.apps import AppConfig
+from django.conf import settings
+from django.contrib.auth import get_user_model
 
 
 class Powerdns(AppConfig):
@@ -9,7 +11,6 @@ class Powerdns(AppConfig):
     def ready(self):
         import autocomplete_light.shortcuts as al
         from powerdns.models.powerdns import Domain, Record
-        from django.contrib.auth.models import User
 
         class AutocompleteAuthItems(al.AutocompleteGenericBase):
             choices = (
@@ -22,12 +23,13 @@ class Powerdns(AppConfig):
             )
 
         al.register(AutocompleteAuthItems)
-        # We register the default django User class. If someone wants to use
-        # an alternative user model, she needs to register it herself. We can't
-        # do it, as we don't know what fields are used there.
+        # This requires the user model to have username, first_name, and
+        # last_name fields
+        search_fields = getattr(settings, 'POWERDNS_USER_SEARCH_FIELDS',
+                                ['username', 'first_name', 'last_name'])
         al.register(
-            User,
-            search_fields=['username', 'first_name', 'last_name']
+            get_user_model(),
+            search_fields=search_fields
         )
         al.register(Domain, search_fields=['name'])
         al.register(Record, search_fields=['name', 'content'])

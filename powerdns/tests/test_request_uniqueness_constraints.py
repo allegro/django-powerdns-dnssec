@@ -2,7 +2,7 @@
 
 # This file is essentially a 1:1 copy of test_uniqueness_constraints
 # The record requests should be validated like records
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 
 from powerdns.models.powerdns import Domain, Record
 from powerdns.tests.utils import RecordFactory, RecordTestCase
@@ -25,12 +25,12 @@ class TestRequestUniquenessConstraints(RecordTestCase):
             name='blog.example.com',
             content='www.example.com',
         )
-        self.user = User.objects.create_user(
+        self.user = get_user_model().objects.create_user(
             'user1', 'user1@example.com', 'password'
         )
 
     def tearDown(self):
-        for Model in [Domain, Record, User]:
+        for Model in [Domain, Record, get_user_model()]:
             Model.objects.all().delete()
 
     def validate(self, **values):

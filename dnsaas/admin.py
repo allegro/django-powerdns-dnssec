@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
 from django.contrib.admin.widgets import AdminRadioSelect
 from django.contrib.auth.admin import UserAdmin
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.db import models
 from django.forms import NullBooleanSelect
 from powerdns.models.requests import (
@@ -256,8 +256,8 @@ class ServiceOwnerAdmin(admin.ModelAdmin):
 # walkaround long load of user change_view until autocomplete-light3 gets
 # integrated
 UserAdmin.filter_horizontal = ()
-admin.site.unregister(User)
-admin.site.register(User, UserAdmin)
+admin.site.unregister(get_user_model())
+admin.site.register(get_user_model(), UserAdmin)
 
 
 admin.site.register(Domain, DomainAdmin)
