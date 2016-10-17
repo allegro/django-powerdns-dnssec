@@ -4,6 +4,9 @@
 /dist
 /tmp
 
+# cache files
+__pycache__
+
 # dependencies
 /node_modules
 /bower_components
