@@ -171,7 +171,7 @@ class PermissionValidator():
         super().__init__(*args, **kwargs)
 
     def __call__(self, object_):
-        from powerdns.models.powerdns import can_edit
+        from powerdns.models import can_edit
         if not can_edit(get_current_user(), object_):
             raise ValidationError("You don't have permission to use this")
         return object_

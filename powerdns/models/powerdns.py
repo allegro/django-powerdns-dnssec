@@ -82,6 +82,7 @@ def get_ptr_obj(ip, content):
 
 def get_default_reverse_domain():
     """Returns a default reverse domain."""
+    # Avoid circular import (.templates imports this file)
     from powerdns.models.templates import DomainTemplate
     global DEFAULT_REVERSE_DOMAIN_TEMPLATE
     if not DEFAULT_REVERSE_DOMAIN_TEMPLATE:

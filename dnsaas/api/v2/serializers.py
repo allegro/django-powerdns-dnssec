@@ -11,7 +11,9 @@ from powerdns.models import (
     Record,
     RecordRequest,
     RecordTemplate,
+    RequestStates,
     SuperMaster,
+    TsigKey,
 )
 from rest_framework import serializers
 from rest_framework.serializers import (
@@ -20,8 +22,6 @@ from rest_framework.serializers import (
     ModelSerializer,
     SlugRelatedField,
 )
-from powerdns.models.requests import RequestStates
-from powerdns.models.tsigkeys import TsigKey
 
 
 class OwnerSerializer(ModelSerializer):

@@ -4,9 +4,8 @@
 # The record requests should be validated like records
 from django.contrib.auth import get_user_model
 
-from powerdns.models.powerdns import Domain, Record
+from powerdns.models import Domain, Record, RecordRequest
 from powerdns.tests.utils import RecordFactory, RecordTestCase
-from powerdns.models.requests import RecordRequest
 
 
 class TestRequestUniquenessConstraints(RecordTestCase):

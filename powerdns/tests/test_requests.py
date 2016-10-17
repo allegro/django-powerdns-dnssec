@@ -3,8 +3,12 @@ from django.test import TestCase
 from threadlocals.threadlocals import set_current_user
 from django.contrib.auth import get_user_model
 
-from powerdns.models.powerdns import Domain, Record
-from powerdns.models.requests import DomainRequest, RecordRequest
+from powerdns.models import (
+    Domain,
+    DomainRequest,
+    Record,
+    RecordRequest,
+)
 from powerdns.tests.utils import assert_does_exist, assert_not_exists
 
 

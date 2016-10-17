@@ -3,6 +3,8 @@
 from django.db.models import Q
 
 from powerdns.models import (
+    can_delete,
+    can_edit,
     CryptoKey,
     Domain,
     DomainMetadata,
@@ -10,8 +12,8 @@ from powerdns.models import (
     Record,
     RecordTemplate,
     SuperMaster,
+    TsigKey,
 )
-from powerdns.models.powerdns import can_delete, can_edit
 from rest_framework import exceptions
 from rest_framework.filters import DjangoFilterBackend
 from rest_framework.viewsets import ModelViewSet
@@ -28,7 +30,6 @@ from .serializers import (
     TsigKeysTemplateSerializer,
 )
 from powerdns.utils import to_reverse
-from powerdns.models.tsigkeys import TsigKey
 
 
 class DomainPermission(DjangoObjectPermissions):

@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 
-from powerdns.models.authorisations import Authorisation
+from powerdns.models import Authorisation
 from powerdns.utils import AutoPtrOptions
 
 from powerdns.tests.utils import (

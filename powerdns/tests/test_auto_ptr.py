@@ -5,7 +5,7 @@ from unittest import mock
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
-from powerdns.models.powerdns import Domain, Record
+from powerdns.models import Domain, Record
 from powerdns.tests.utils import (
     DomainFactory,
     DomainTemplateFactory,
