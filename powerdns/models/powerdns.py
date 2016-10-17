@@ -1,5 +1,6 @@
 import base64
 import hashlib
+import ipaddress
 import sys
 import time
 
@@ -13,7 +14,6 @@ from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
 from django.utils.deconstruct import deconstructible
-from IPy import IP
 from threadlocals.threadlocals import get_current_user
 
 from powerdns.models.ownership import OwnershipByService
@@ -474,7 +474,7 @@ class Record(
         self.change_date = int(time.time())
         self.ordername = self._generate_ordername()
         if self.type == 'A':
-            self.number = IP(self.content).int()
+            self.number = int(ipaddress.ip_address(self.content))
         super(Record, self).save(*args, **kwargs)
 
     def get_ptr(self):
