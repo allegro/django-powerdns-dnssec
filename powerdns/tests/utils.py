@@ -3,7 +3,7 @@
 import functools as ft
 
 import factory
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.test import TestCase
@@ -19,7 +19,7 @@ from powerdns.utils import AutoPtrOptions
 
 class UserFactory(factory.django.DjangoModelFactory):
     class Meta:
-        model = User
+        model = get_user_model()
         django_get_or_create = ('username',)
 
     username = factory.Sequence(lambda n: "user_%d" % n)

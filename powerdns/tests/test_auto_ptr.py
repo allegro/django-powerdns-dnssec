@@ -2,7 +2,7 @@
 
 from unittest import mock
 
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 
 from powerdns.models.powerdns import Domain, Record
@@ -21,7 +21,7 @@ class TestAutoPtr(TestCase):
     """Tests for auto_ptr feature"""
 
     def setUp(self):
-        self.user = User.objects.create_superuser(
+        self.user = get_user_model().objects.create_superuser(
             'user', 'user1@example.com', 'password'
         )
         self.reverse_template = DomainTemplateFactory(name='reverse')
@@ -67,7 +67,7 @@ class TestAutoPtr(TestCase):
         )
 
     def tearDown(self):
-        for Model in [Domain, Record, User]:
+        for Model in [Domain, Record, get_user_model()]:
             Model.objects.all().delete()
 
     def test_default_ptr_created(self):

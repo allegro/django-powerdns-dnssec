@@ -2,7 +2,7 @@
 
 import functools as ft
 
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 
@@ -30,10 +30,10 @@ class TestPermissions(TestCase):
     """Test class for permission tests"""
 
     def setUp(self):
-        self.superuser = User.objects.create_superuser(
+        self.superuser = get_user_model().objects.create_superuser(
             'superuser', 'superuser@example.com', 'password'
         )
-        self.user = User.objects.create_user(
+        self.user = get_user_model().objects.create_user(
             'user', 'superuser@example.com', 'password'
         )
         self.su_domain = DomainFactory(

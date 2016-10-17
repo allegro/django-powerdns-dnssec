@@ -1,7 +1,7 @@
 from django.test import TestCase
 
 from threadlocals.threadlocals import set_current_user
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 
 from powerdns.models.powerdns import Domain, Record
 from powerdns.models.requests import DomainRequest, RecordRequest
@@ -12,10 +12,10 @@ class TestRequests(TestCase):
     """Tests for domain/record requests"""
 
     def setUp(self):
-        self.user1 = User.objects.create_user(
+        self.user1 = get_user_model().objects.create_user(
             'user1', 'user1@example.com', 'password'
         )
-        self.user2 = User.objects.create_user(
+        self.user2 = get_user_model().objects.create_user(
             'user2', 'user2@example.com', 'password'
         )
         self.domain = Domain.objects.create(
