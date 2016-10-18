@@ -172,7 +172,7 @@ class PermissionValidator():
         super().__init__(*args, **kwargs)
 
     def __call__(self, object_):
-        from powerdns.models import can_edit
+        from .models import can_edit
         if not can_edit(get_current_user(), object_):
             raise ValidationError("You don't have permission to use this")
         return object_
@@ -332,7 +332,7 @@ class RecordLike(models.Model):
 
     def validate_for_conflicts(self):
         """Ensure this record doesn't conflict with other records."""
-        from powerdns.models.requests import Record
+        from .models import Record
 
         def check_unique(comment, **kwargs):
             conflicting = Record.objects.filter(**kwargs)
@@ -396,7 +396,7 @@ def hostname2domain(hostname):
         and only existing-domain.com exists
     Then it returns `existing-domain.com` as db object.
     """
-    from powerdns.models import Domain
+    from .models import Domain
 
     domain = None
     parts = hostname.split('.')

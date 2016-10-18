@@ -1,6 +1,6 @@
 """Validation tests"""
 
-from powerdns.tests.utils import RecordTestCase
+from .utils import RecordTestCase
 
 
 class TestRecordValidators(RecordTestCase):

@@ -8,14 +8,14 @@ from __future__ import unicode_literals
 from django.test import TestCase
 
 from powerdns.models import Domain, Record
-from powerdns.tests.utils import (
+from powerdns.utils import AutoPtrOptions
+from .utils import (
     DomainTemplateFactory,
     RecordFactory,
     RecordTemplateFactory,
     assert_does_exist,
     assert_not_exists,
 )
-from powerdns.utils import AutoPtrOptions
 
 
 class TestTemplates(TestCase):

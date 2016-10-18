@@ -11,15 +11,15 @@ from powerdns.models import (
     RecordRequest,
     RequestStates,
 )
-from powerdns.tests.utils import (
+from powerdns.utils import AutoPtrOptions
+from .utils import (
+    user_client,
     DomainFactory,
     RecordDeleteRequestFactory,
     RecordFactory,
     ServiceOwnerFactory,
     UserFactory,
-    user_client,
 )
-from powerdns.utils import AutoPtrOptions
 
 
 class TestOwnershipBase(TestCase):

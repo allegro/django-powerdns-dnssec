@@ -2,7 +2,7 @@
 
 
 from powerdns.models import Record
-from powerdns.tests.utils import RecordTestCase, RecordFactory
+from .utils import RecordTestCase, RecordFactory
 
 
 class TestSOASerialUpdate(RecordTestCase):
