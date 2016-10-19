@@ -54,7 +54,7 @@ class ServiceFactory(DjangoModelFactory):
 class ServiceOwnerFactory(DjangoModelFactory):
     class Meta:
         model = ServiceOwner
-    service = factory.SubFactory(UserFactory)
+    service = factory.SubFactory(ServiceFactory)
     user = factory.SubFactory(UserFactory)
 
 
