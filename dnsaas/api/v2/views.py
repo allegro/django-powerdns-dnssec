@@ -11,6 +11,7 @@ from django.db.models import Prefetch, Q
 
 from powerdns.utils import hostname2domain
 from powerdns.models import (
+    can_auto_accept_record_request,
     CryptoKey,
     DeleteRequest,
     Domain,
@@ -19,7 +20,9 @@ from powerdns.models import (
     Record,
     RecordTemplate,
     RecordRequest,
+    RequestStates,
     SuperMaster,
+    TsigKey,
 )
 from rest_framework import filters, status
 from rest_framework.permissions import DjangoObjectPermissions, IsAdminUser
@@ -39,11 +42,6 @@ from .serializers import (
     TsigKeysTemplateSerializer,
 )
 from powerdns.utils import to_reverse
-from powerdns.models.tsigkeys import TsigKey
-from powerdns.models.requests import (
-    RequestStates,
-    can_auto_accept_record_request,
-)
 
 
 log = logging.getLogger(__name__)

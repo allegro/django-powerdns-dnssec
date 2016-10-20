@@ -4,11 +4,12 @@ from django.contrib.auth import get_user_model
 from django.core import mail
 from django.test import TestCase
 
-from powerdns.models.powerdns import Domain, Record
-from powerdns.models.requests import (
+from powerdns.models import (
+    can_auto_accept_record_request,
+    Domain,
+    Record,
     RecordRequest,
     RequestStates,
-    can_auto_accept_record_request,
 )
 from powerdns.tests.utils import (
     DomainFactory,

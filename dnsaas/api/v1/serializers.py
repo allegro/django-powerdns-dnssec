@@ -9,6 +9,7 @@ from powerdns.models import (
     RecordRequest,
     RecordTemplate,
     SuperMaster,
+    TsigKey,
 )
 from rest_framework.serializers import (
     HyperlinkedModelSerializer,
@@ -17,7 +18,6 @@ from rest_framework.serializers import (
     ReadOnlyField,
 )
 from powerdns.utils import DomainForRecordValidator
-from powerdns.models.tsigkeys import TsigKey
 
 
 class OwnerSerializer(HyperlinkedModelSerializer):

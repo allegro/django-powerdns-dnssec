@@ -5,27 +5,23 @@ from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.forms import NullBooleanSelect
-from powerdns.models.requests import (
+from powerdns.models import (
+    CryptoKey,
     DeleteRequest,
+    Domain,
+    DomainMetadata,
     DomainRequest,
+    DomainTemplate,
+    Record,
     RecordRequest,
+    RecordTemplate,
+    Service,
+    ServiceOwner,
+    SuperMaster,
+    TsigKey,
 )
 from django.utils.translation import ugettext_lazy as _
 from django_extensions.admin import ForeignKeyAutocompleteAdmin
-
-from powerdns.models.powerdns import (
-    CryptoKey,
-    Domain,
-    DomainMetadata,
-    Record,
-    SuperMaster,
-)
-from powerdns.models.ownership import Service, ServiceOwner
-from powerdns.models.templates import (
-    DomainTemplate,
-    RecordTemplate,
-)
-from powerdns.models.tsigkeys import TsigKey
 
 
 RECORD_LIST_FIELDS = (

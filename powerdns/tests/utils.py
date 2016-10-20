@@ -10,10 +10,16 @@ from django.test import TestCase
 from factory.django import DjangoModelFactory
 from rest_framework.test import APIClient
 
-from powerdns.models.powerdns import Record, Domain
-from powerdns.models.requests import DeleteRequest, RecordRequest
-from powerdns.models.ownership import ServiceOwner, Service
-from powerdns.models.templates import RecordTemplate, DomainTemplate
+from powerdns.models import (
+    DeleteRequest,
+    Domain,
+    DomainTemplate,
+    Record,
+    RecordRequest,
+    RecordTemplate,
+    Service,
+    ServiceOwner,
+)
 from powerdns.utils import AutoPtrOptions
 
 
