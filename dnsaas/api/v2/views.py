@@ -377,13 +377,28 @@ class IPRecordView(APIView):
             record.domain = hostname2domain(new['hostname'])
             record.content = new['address']
             record.save()
+            # If change hostname update name records txt.
+            log.info('Update TXT records from: {} hostname to: {}'.format(
+                old['hostname'], new['hostname']
+            ))
+            Record.objects.filter(
+                name=old['hostname'],
+                type='TXT'
+            ).update(
+                name=new['hostname'],
+                domain=record.domain
+            )
+
         return status.HTTP_200_OK, 'updated'
 
     def _delete_record(self, data):
         ip, hostname = data['address'], data['hostname']
         record = self._get_record(ip, hostname)
         if record:
+            log.warning('Delete record: {}'.format(record))
             record.delete()
+            log.warning('Delete TXT records for {} hostname'.format(hostname))
+            Record.objects.filter(name=hostname, type='TXT').delete()
             return status.HTTP_200_OK, 'deleted'
         return status.HTTP_200_OK, 'noop'
 
