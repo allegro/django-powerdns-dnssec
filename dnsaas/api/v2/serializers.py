@@ -90,6 +90,9 @@ class RecordSerializer(OwnerSerializer):
     delete_request = serializers.SerializerMethodField(
         'get_delete_record_request'
     )
+    unrestricted_domain = serializers.BooleanField(
+        source='domain.unrestricted', read_only=True
+    )
 
     def get_change_record_request(self, record):
         record_request = record.requests.all()

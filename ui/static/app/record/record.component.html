@@ -92,11 +92,11 @@
                 </a>
               </span>
               <div *ngIf="record.type !== 'PTR' && !record.change_request && !record.delete_request">
-                <div *ngIf="activeUser == record.owner || isAdmin">
+                <div *ngIf="activeUser == record.owner || isAdmin || record.unrestricted_domain">
                   <a class="btn btn-primary btn-xs" (click)="onSelect(record)">Edit</a>
                   <a class="btn btn-danger btn-xs" (click)="deleteConfirm(record)">Delete</a>
                 </div>
-                <div *ngIf="activeUser != record.owner && !isAdmin">
+                <div *ngIf="!(activeUser == record.owner || isAdmin || record.unrestricted_domain)">
                   <a class="btn btn-primary btn-xs" (click)="onSelect(record)">Request Edit</a>
                   <a class="btn btn-danger btn-xs" (click)="deleteConfirm(record)">Request Delete</a>
                 </div>
