@@ -165,10 +165,11 @@
         </div>
       </fieldset>
       <div class="row">
-        <div class="col-md-10">
+        <div class="col-md-1"></div>
+        <div class="col-md-6">
           <button type="button" class="btn btn-default" (click)="onBack()">Back</button>
         </div>
-        <div class="col-md-2">
+        <div class="col-md-1">
          <button type= "submit" class="btn btn-success" [disabled]="!recordForm.valid && !domain">
             <span *ngIf="isCreate">
               <span *ngIf="saved" class="glyphicon glyphicon-refresh glyphicon-spin" aria-hidden="true"></span>
