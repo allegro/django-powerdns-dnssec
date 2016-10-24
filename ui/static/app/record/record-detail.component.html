@@ -166,21 +166,25 @@
       </fieldset>
       <div class="row">
         <div class="col-md-2">
-          <button type="button" class="btn btn-default" (click)="onBack()">Back</button>
+          <div class="pull-right">
+            <button type="button" class="btn btn-default" (click)="onBack()">Back</button>
+          </div>
         </div>
-        <div class="col-md-2 col-md-offset-5">
-         <button type= "submit" class="btn btn-success" [disabled]="!recordForm.valid && !domain">
-            <span *ngIf="isCreate">
-              <span *ngIf="saved" class="glyphicon glyphicon-refresh glyphicon-spin" aria-hidden="true"></span>
-              <span *ngIf="!saved" class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-              Add record
-            </span>
-            <span *ngIf="!isCreate">
-              <span *ngIf="saved" class="glyphicon glyphicon-refresh glyphicon-spin" aria-hidden="true"></span>
-              <span *ngIf="!saved" class="glyphicon glyphicon-floppy-saved" aria-hidden="true"></span>
-              Save
-            </span>
-          </button>
+        <div class="col-md-3 col-md-offset-3">
+          <div class="pull-right">
+            <button type= "submit" class="btn btn-success" [disabled]="!recordForm.valid && !domain">
+              <span *ngIf="isCreate">
+                <span *ngIf="saved" class="glyphicon glyphicon-refresh glyphicon-spin" aria-hidden="true"></span>
+                <span *ngIf="!saved" class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                Add record
+              </span>
+              <span *ngIf="!isCreate">
+                <span *ngIf="saved" class="glyphicon glyphicon-refresh glyphicon-spin" aria-hidden="true"></span>
+                <span *ngIf="!saved" class="glyphicon glyphicon-floppy-saved" aria-hidden="true"></span>
+                Save
+              </span>
+            </button>
+           </div>
         </div>
       </div>
     </form>
