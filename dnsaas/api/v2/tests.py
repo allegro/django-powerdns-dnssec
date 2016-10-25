@@ -853,6 +853,7 @@ class TestIPRecordTest(BaseApiTestCase):
         super().setUp()
         self.client.login(username='super_user', password='super_user')
         self.domain = DomainFactory(name='example.com', owner=self.super_user)
+        self.domain_2 = DomainFactory(name='google.com', owner=self.super_user)
         self.data = {
             'new': {},
             'old': {},
@@ -962,6 +963,94 @@ class TestIPRecordTest(BaseApiTestCase):
         record.refresh_from_db()
         self.assertEqual(record.content, target_content)
         self.assertEqual(record.name, target_name)
+
+    def test_update_txt_records_when_record_name_change(self):
+        target_name = 'update_test_1.{}'.format(self.domain.name)
+        record = RecordFactory(
+            type='A',
+            content='127.0.0.9',
+            name='update_test_1.{}'.format(self.domain.name),
+            domain=self.domain
+        )
+        record_txt = RecordFactory(
+            type='TXT',
+            content='Rack 1',
+            name='update_test_1.{}'.format(self.domain.name),
+            domain=self.domain
+        )
+        self.data.update({
+            'old': {
+                'address': record.content,
+                'hostname': record.name
+            },
+            'new': {
+                'address': record.content,
+                'hostname': target_name
+            },
+            'action': 'update',
+        })
+        response = self._send_post_data_to_endpoint()
+        self.assertEqual(response.status_code, 200)
+        record.refresh_from_db()
+        record_txt.refresh_from_db()
+        self.assertEqual(record.name, target_name)
+        self.assertEqual(record_txt.name, target_name)
+
+    def test_update_txt_records_when_record_name_and_domain_change(self):
+        target_name = 'update_test_1.{}'.format(self.domain_2.name)
+        record = RecordFactory(
+            type='A',
+            content='127.0.0.9',
+            name='update_test_1.{}'.format(self.domain.name),
+            domain=self.domain
+        )
+        record_txt = RecordFactory(
+            type='TXT',
+            content='Rack 2',
+            name='update_test_1.{}'.format(self.domain.name),
+            domain=self.domain
+        )
+        self.data.update({
+            'old': {
+                'address': record.content,
+                'hostname': record.name
+            },
+            'new': {
+                'address': record.content,
+                'hostname': target_name
+            },
+            'action': 'update',
+        })
+        response = self._send_post_data_to_endpoint()
+        self.assertEqual(response.status_code, 200)
+        record.refresh_from_db()
+        record_txt.refresh_from_db()
+        self.assertEqual(record.name, target_name)
+        self.assertEqual(record.domain_id, self.domain_2.id)
+        self.assertEqual(record_txt.name, target_name)
+
+    def test_delete_txt_records_when_record_delete(self):
+        record = RecordFactory(
+            type='A',
+            content='127.0.0.9',
+            name='update_test_1.{}'.format(self.domain.name),
+            domain=self.domain
+        )
+        record_txt = RecordFactory(
+            type='TXT',
+            content='Rack 1',
+            name='update_test_1.{}'.format(self.domain.name),
+            domain=self.domain
+        )
+        self.data = {
+            'address': record.content,
+            'hostname': record.name,
+            'action': 'delete'
+        }
+        response = self._send_post_data_to_endpoint()
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Record.objects.filter(id=record.id).exists())
+        self.assertFalse(Record.objects.filter(id=record_txt.id).exists())
 
     def test_when_hostname_is_empty_in_new_then_delete_record(self):
         record = RecordFactory(
