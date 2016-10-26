@@ -125,7 +125,7 @@ class TestCreateRecordAccessByServiceOwnership(TestCase):
     def _set_owner(self, domain_ownership):
         self.example_domain.service.owners.clear()
         self.service = ServiceOwnerFactory(
-            service=self.example_domain.service, user=domain_ownership,
+            service=self.example_domain.service, owner=domain_ownership,
         )
         self.service.save()
 
@@ -192,7 +192,7 @@ class TestUpdateRecordAccessByServiceOwnership(TestCase):
         self.example_record.owner = record_owner
         self.example_record.service.owners.clear()
         self.service = ServiceOwnerFactory(
-            service=self.example_record.service, user=record_ownership,
+            service=self.example_record.service, owner=record_ownership,
         )
         self.example_record.save()
         self.service.save()
@@ -252,7 +252,7 @@ class TestDeleteRecordAccessByServiceOwnership(TestCase):
         self.example_record.owner = record_owner
         self.example_record.service.owners.clear()
         self.service = ServiceOwnerFactory(
-            service=self.example_record.service, user=record_ownership,
+            service=self.example_record.service, owner=record_ownership,
         )
         self.example_record.save()
         self.service.save()

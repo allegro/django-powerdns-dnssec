@@ -16,7 +16,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.deconstruct import deconstructible
 from threadlocals.threadlocals import get_current_user
 
-from powerdns.models.ownership import OwnershipByService
+from powerdns.models import OwnershipByService, OwnershipType
 from powerdns.utils import (
     AutoPtrOptions,
     is_authorised,
@@ -210,6 +210,10 @@ class Domain(PreviousStateMixin, OwnershipByService, TimeTrackable, Owned):
             "to it without owner's permission?"
         )
     )
+    direct_owners = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, through='DomainOwner',
+        related_name='domain_owners'
+    )
 
     class Meta:
         db_table = u'domains'
@@ -252,6 +256,20 @@ class Domain(PreviousStateMixin, OwnershipByService, TimeTrackable, Owned):
     def as_history_dump(self):
         """We don't care about domain history for now"""
         return {}
+
+    @property
+    def owners(self):
+        """Return queryset of all owners (direct and by service)"""
+        return (self.direct_owners.all() | self.service.owners.all())
+
+
+class DomainOwner(models.Model):
+    domain = models.ForeignKey(Domain)
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL)
+    ownership_type = models.CharField(
+        max_length=10, db_index=True,
+        choices=[(type_.name, type_.value) for type_ in OwnershipType],
+    )
 
 
 rules.add_perm('powerdns', rules.is_authenticated)

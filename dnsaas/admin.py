@@ -236,7 +236,7 @@ class RecordRequestAdmin(ReadonlyAdminMixin, admin.ModelAdmin):
 class OwnerInline(admin.TabularInline):
     model = Service.owners.through
     extra = 3
-    raw_id_fields = ('user',)
+    raw_id_fields = ('owner',)
 
 
 @admin.register(Service)
@@ -246,7 +246,7 @@ class ServiceAdmin(admin.ModelAdmin):
 
 @admin.register(ServiceOwner)
 class ServiceOwnerAdmin(admin.ModelAdmin):
-    raw_id_fields = ("service", 'user')
+    raw_id_fields = ("service", 'owner')
 
 
 # walkaround long load of user change_view until autocomplete-light3 gets

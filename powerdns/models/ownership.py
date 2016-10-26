@@ -27,7 +27,8 @@ class Service(TimeTrackable):
     uid = models.CharField(max_length=100, unique=True, db_index=True)
     is_active = models.BooleanField(null=False, default=True)
     owners = models.ManyToManyField(
-        settings.AUTH_USER_MODEL, through='ServiceOwner'
+        settings.AUTH_USER_MODEL, through='ServiceOwner',
+        related_name='service_owners',
     )
 
     def __str__(self):
@@ -36,7 +37,7 @@ class Service(TimeTrackable):
 
 class ServiceOwner(TimeTrackable):
     service = models.ForeignKey(Service)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL)
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL)
     ownership_type = models.CharField(
         max_length=10, db_index=True,
         choices=[(type_.name, type_.value) for type_ in OwnershipType],
@@ -44,7 +45,7 @@ class ServiceOwner(TimeTrackable):
 
     def __str__(self):
         return '{} - {} ({})'.format(
-            self.user, self.service, self.ownership_type,
+            self.owner, self.service, self.ownership_type,
         )
 
 

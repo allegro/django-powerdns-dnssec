@@ -13,6 +13,7 @@ from rest_framework.test import APIClient
 from powerdns.models import (
     DeleteRequest,
     Domain,
+    DomainOwner,
     DomainTemplate,
     Record,
     RecordRequest,
@@ -61,7 +62,7 @@ class ServiceOwnerFactory(DjangoModelFactory):
     class Meta:
         model = ServiceOwner
     service = factory.SubFactory(ServiceFactory)
-    user = factory.SubFactory(UserFactory)
+    owner = factory.SubFactory(UserFactory)
 
 
 class DomainFactory(DjangoModelFactory):
@@ -71,6 +72,13 @@ class DomainFactory(DjangoModelFactory):
     name = factory.Sequence(lambda n: 'name%d.com' % n)
     service = factory.SubFactory(ServiceFactory)
     auto_ptr = AutoPtrOptions.NEVER
+
+
+class DomainOwnerFactory(DjangoModelFactory):
+    class Meta:
+        model = DomainOwner
+    domain = factory.SubFactory(DomainFactory)
+    owner = factory.SubFactory(UserFactory)
 
 
 class RecordFactory(DjangoModelFactory):
