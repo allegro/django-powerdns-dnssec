@@ -3,26 +3,26 @@ import { URLSearchParams, Response } from "@angular/http";
 import { Observable } from "rxjs/Observable";
 import { HttpClient } from "../http-client";
 import { AutocompleteServiceInterface } from "../autocomplete/autocomplete.service";
-import { Domain } from "./domain";
+import { Service } from "./service";
 import { ConfigService } from "../config.service";
 import "rxjs/add/operator/catch";
 import "rxjs/add/operator/map";
 
 
 @Injectable()
-export class DomainService implements AutocompleteServiceInterface {
+export class ServiceService implements AutocompleteServiceInterface {
 
   constructor(
     private http: HttpClient
   ) { }
 
-  getDomains(search: URLSearchParams): Observable<Response> {
-    let url: string = ConfigService.get("domainUrl");
+  getServices(search: URLSearchParams): Observable<Response> {
+    let url: string = ConfigService.get("serviceUrl");
     return this.http.get(url, search).catch(this.handleError);
   }
 
-  getDomainById(id: number): Observable<Domain> {
-    let url: string = `${ConfigService.get("domainUrl")}${id}/`;
+  getServiceById(id: number): Observable<Service> {
+    let url: string = `${ConfigService.get("serviceUrl")}${id}/`;
     return this.http.get(url).map(
       response => {
         let json = response.json();
@@ -31,8 +31,8 @@ export class DomainService implements AutocompleteServiceInterface {
     ).catch(this.handleError);
   }
 
-  getAutocompleteSearchResults(value: string): Observable<Domain[]> {
-    let url: string =  ConfigService.get("domainUrl");
+  getAutocompleteSearchResults(value: string): Observable<Service[]> {
+    let url: string =  ConfigService.get("serviceUrl");
     let params: URLSearchParams = new URLSearchParams();
     params.set("name", value);
     params.set("limit", "10");
@@ -40,7 +40,7 @@ export class DomainService implements AutocompleteServiceInterface {
   }
 
   getAutocompleteCurrentValue(id: number): Observable<string> {
-      let url: string = `${ConfigService.get("domainUrl")}${id}/`;
+      let url: string = `${ConfigService.get("serviceUrl")}${id}/`;
       return this.http.get(url).map(
         response => {
           let json = response.json();

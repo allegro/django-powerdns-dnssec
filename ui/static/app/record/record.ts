@@ -4,6 +4,7 @@ import { Domain } from "../domain/domain";
 export class Record {
   public id: number;
   public domain: number;
+  public service: number;
   public name: string;
   public content: string;
   public type: string;

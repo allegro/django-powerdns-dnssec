@@ -48,6 +48,7 @@
             <th>Content</th>
             <th>TTL</th>
             <th>Owner</th>
+            <th>Service</th>
             <th>Mod. date</th>
             <th>Action</th>
          </tr>
@@ -76,6 +77,9 @@
             </td>
             <td>
               {{ record.owner }}
+            </td>
+            <td>
+              {{ record.service_name || '-' }}
             </td>
             <td>
               {{ record.modified }}

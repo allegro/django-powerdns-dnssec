@@ -9,7 +9,11 @@ from powerdns.models import (
     Record,
     RecordRequest,
 )
-from powerdns.tests.utils import assert_does_exist, assert_not_exists
+from powerdns.tests.utils import (
+    ServiceFactory,
+    assert_does_exist,
+    assert_not_exists,
+)
 
 
 class TestRequests(TestCase):
@@ -41,6 +45,7 @@ class TestRequests(TestCase):
             parent_domain=self.domain,
             target_name='subdomain.example.com',
             target_owner=self.user1,
+            target_service=ServiceFactory(),
         )
         request.accept()
         assert_does_exist(
@@ -54,6 +59,7 @@ class TestRequests(TestCase):
             target_type='MASTER',
             owner=self.user2,
             target_owner=self.user1,
+            target_service=ServiceFactory(),
         )
         request.accept()
         assert_does_exist(

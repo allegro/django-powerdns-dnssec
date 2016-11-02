@@ -11,18 +11,19 @@ from django.db.models import Prefetch, Q
 
 from powerdns.utils import hostname2domain
 from powerdns.models import (
-    can_auto_accept_record_request,
     CryptoKey,
     DeleteRequest,
     Domain,
     DomainMetadata,
     DomainTemplate,
     Record,
-    RecordTemplate,
     RecordRequest,
+    RecordTemplate,
     RequestStates,
+    Service,
     SuperMaster,
     TsigKey,
+    can_auto_accept_record_request,
 )
 from rest_framework import filters, status
 from rest_framework.permissions import DjangoObjectPermissions, IsAdminUser
@@ -38,6 +39,7 @@ from .serializers import (
     RecordRequestSerializer,
     RecordSerializer,
     RecordTemplateSerializer,
+    ServiceSerializer,
     SuperMasterSerializer,
     TsigKeysTemplateSerializer,
 )
@@ -87,6 +89,14 @@ class DomainViewSet(OwnerViewSet):
     filter_backends = (filters.DjangoFilterBackend, filters.SearchFilter)
     filter_class = DomainFilter
     search_fields = ['name', 'owner__username']
+
+
+class ServiceViewSet(FiltersMixin, ModelViewSet):
+
+    queryset = Service.objects.all()
+    serializer_class = ServiceSerializer
+    filter_backends = (filters.DjangoFilterBackend, filters.SearchFilter)
+    search_fields = ['name', 'uid', 'is_active']
 
 
 class RecordRequestsViewSet(FiltersMixin, ReadOnlyModelViewSet):

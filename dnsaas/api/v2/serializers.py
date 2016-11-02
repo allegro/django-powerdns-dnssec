@@ -12,6 +12,7 @@ from powerdns.models import (
     RecordRequest,
     RecordTemplate,
     RequestStates,
+    Service,
     SuperMaster,
     TsigKey,
 )
@@ -41,6 +42,12 @@ class DomainSerializer(OwnerSerializer):
     class Meta:
         model = Domain
         read_only_fields = ('notified_serial',)
+
+
+class ServiceSerializer(ModelSerializer):
+
+    class Meta:
+        model = Service
 
 
 class RecordRequestSerializer(OwnerSerializer):
@@ -81,6 +88,11 @@ class RecordSerializer(OwnerSerializer):
         required=False,
         allow_null=True,
     )
+    service = PrimaryKeyRelatedField(
+        queryset=Service.objects.all(),
+        required=True,
+    )
+    service_name = serializers.SerializerMethodField()
     modified = serializers.DateTimeField(
         format='%Y-%m-%d %H:%M:%S', read_only=True
     )
@@ -93,6 +105,9 @@ class RecordSerializer(OwnerSerializer):
     unrestricted_domain = serializers.BooleanField(
         source='domain.unrestricted', read_only=True
     )
+
+    def get_service_name(self, obj):
+        return obj.service.name if obj.service else ''
 
     def get_change_record_request(self, record):
         record_request = record.requests.all()
@@ -158,7 +173,6 @@ class RecordSerializer(OwnerSerializer):
                         ]
                     })
                 attrs['domain'] = domain
-
         return attrs
 
 
