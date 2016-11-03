@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='record',
             name='auto_ptr',
-            field=models.BooleanField(verbose_name='Auto PTR field', default=True),
+            field=models.IntegerField(verbose_name='Auto PTR field', default=2),
             preserve_default=True,
         ),
         migrations.AddField(
