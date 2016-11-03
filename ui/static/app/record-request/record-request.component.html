@@ -21,6 +21,7 @@
             <th>Content</th>
             <th>TTL</th>
             <th>Owner</th>
+            <th>Created</th>
             <th>Ticket</th>
             <th>Options</th>
          </tr>
@@ -45,6 +46,9 @@
           </td>
           <td>
             {{ request.target_owner }}
+          </td>
+          <td>
+            {{ request.created }}
           </td>
           <td>
             <a href="{{ jiraUrl }}/browse/{{ request.key }}" target="_blank" *ngIf="request.key"> {{ request.key }} </a>

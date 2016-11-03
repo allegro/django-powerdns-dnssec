@@ -9,6 +9,7 @@ export class RecordRequest {
   target_ttl: string;
   target_auth: string;
   target_remarks: string;
+  created: string;
   domain: number;
   record: number;
   last_change: JSON;

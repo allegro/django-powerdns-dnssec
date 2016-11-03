@@ -20,7 +20,8 @@ from powerdns.models import (
     validate_domain_name,
 )
 
-from powerdns.utils import AutoPtrOptions, RecordLike, flat_dict_diff
+from powerdns.utils import \
+    AutoPtrOptions, RecordLike, TimeTrackable, flat_dict_diff
 
 
 log = logging.getLogger(__name__)
@@ -69,7 +70,7 @@ class RequestStates(Choices):
     REJECTED = _('Rejected')
 
 
-class Request(Owned):
+class Request(Owned, TimeTrackable):
     """Abstract request"""
 
     class Meta:

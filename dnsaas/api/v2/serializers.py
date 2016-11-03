@@ -59,6 +59,13 @@ class RecordRequestSerializer(OwnerSerializer):
         required=False,
     )
 
+    created = serializers.DateTimeField(
+        format='%Y-%m-%d %H:%M:%S', read_only=True
+    )
+    modified = serializers.DateTimeField(
+        format='%Y-%m-%d %H:%M:%S', read_only=True
+    )
+
     class Meta:
         model = RecordRequest
 
