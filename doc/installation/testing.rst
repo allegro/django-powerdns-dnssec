@@ -7,7 +7,7 @@ risk of polluting your DNS, the included docker-compose configuration is best
 for you. All you need to do is::
 
     $ git clone git@github.com:allegro/django-powerdns-dnssec.git
-    $ cd django-powerdns-dnssec.git
+    $ cd django-powerdns-dnssec
     $ pip install docker-compose
     $ docker-compose up
 
