@@ -34,7 +34,7 @@ export class ServiceService implements AutocompleteServiceInterface {
   getAutocompleteSearchResults(value: string): Observable<Service[]> {
     let url: string =  ConfigService.get("serviceUrl");
     let params: URLSearchParams = new URLSearchParams();
-    params.set("name", value);
+    params.set("search", value);
     params.set("limit", "10");
     return this.http.get(url, params).map(this.extractData).catch(this.handleError);
   }
