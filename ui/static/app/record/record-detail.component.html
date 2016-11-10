@@ -184,7 +184,7 @@
         </div>
         <div class="col-md-3 col-md-offset-3">
           <div class="pull-right">
-            <button type="submit" class="btn btn-success" [disabled]="!recordForm.valid || !domain || !record.service">
+            <button type="submit" class="btn btn-success" [disabled]="canSubmit">
               <span *ngIf="isCreate">
                 <span *ngIf="saved" class="glyphicon glyphicon-refresh glyphicon-spin" aria-hidden="true"></span>
                 <span *ngIf="!saved" class="glyphicon glyphicon-plus" aria-hidden="true"></span>

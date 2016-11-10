@@ -1,6 +1,7 @@
 """Serializer classes for DNSaaS API"""
 import ipaddress
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from powerdns.utils import hostname2domain
 from powerdns.models import (
@@ -86,6 +87,10 @@ def _trim_whitespace(data_dict, trim_fields):
 
 class RecordSerializer(OwnerSerializer):
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['service'].required = settings.REQUIRED_SERVICE_FIELD
+
     class Meta:
         model = Record
         read_only_fields = ('change_date', 'ordername',)
@@ -97,7 +102,7 @@ class RecordSerializer(OwnerSerializer):
     )
     service = PrimaryKeyRelatedField(
         queryset=Service.objects.all(),
-        required=True,
+        # required by setting REQUIRED_SERVICE_FIELD
     )
     service_name = serializers.SerializerMethodField()
     modified = serializers.DateTimeField(

@@ -232,6 +232,8 @@ SENTRY_JS_DSN = ''
 SENTRY_JS_CONFIG = {}
 JIRA_URL = ''
 
+REQUIRED_SERVICE_FIELD = os.environ.get('REQUIRED_SERVICE_FIELD', True)
+
 if not TESTING:
     try:
         from settings_local import *  # noqa

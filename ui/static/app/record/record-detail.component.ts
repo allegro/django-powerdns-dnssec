@@ -7,6 +7,7 @@ import {
   Validators
 } from "@angular/common";
 import { CanActivate, Router, RouteParams } from "@angular/router-deprecated";
+import { ConfigService } from "../config.service";
 import { HTTP_PROVIDERS } from "@angular/http";
 import { AuthService } from "../auth/auth.service";
 import { TooltipDirective } from "../tooltip.directive";
@@ -93,6 +94,14 @@ export class RecordDetailComponent implements OnInit {
       }
     }
 
+    get canSubmit():Boolean {
+      if (Boolean(ConfigService.get("requiredServiceField"))) {
+        return !this.recordForm.valid || !this.domain || !this.record.service;
+      } else {
+        return !this.recordForm.valid || !this.domain;
+      }
+    }
+
     get canEditService():Boolean {
       return !this.initService;
     }
@@ -126,7 +135,11 @@ export class RecordDetailComponent implements OnInit {
     }
 
     onSubmit() {
-      if (this.recordForm.valid && this.domain && this.record.service) {
+      var validForm: Boolean = this.recordForm.valid && Boolean(this.domain);
+      if (Boolean(ConfigService.get("requiredServiceField"))) {
+        validForm = validForm && Boolean(this.record.service);
+      }
+      if (validForm) {
         this.saved = true;
         if (this.recordName) {
           let dot: string = this.recordName.endsWith(".") ? "" : ".";
