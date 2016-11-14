@@ -271,6 +271,9 @@ class DomainOwner(models.Model):
         choices=[(type_.name, type_.value) for type_ in OwnershipType],
     )
 
+    class Meta:
+        unique_together = (("domain", "owner", "ownership_type"),)
+
 
 rules.add_perm('powerdns', rules.is_authenticated)
 rules.add_perm('powerdns.add_domain', rules.is_superuser)
