@@ -21,4 +21,6 @@ class ObtainAuthToken(ObtainAuthToken):
             'user': user.get_full_name() or user.username,
             'is_admin': user.is_superuser
         })
+
+
 obtain_auth_token = ObtainAuthToken.as_view()

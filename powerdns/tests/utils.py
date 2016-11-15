@@ -149,5 +149,6 @@ def assert_exists(exists, Model, **kwargs):
             "doesn't exist" if exists else "exists"
         ))
 
+
 assert_does_exist = ft.partial(assert_exists, True)
 assert_not_exists = ft.partial(assert_exists, False)

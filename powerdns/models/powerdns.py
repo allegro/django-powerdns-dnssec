@@ -215,6 +215,18 @@ class Domain(PreviousStateMixin, OwnershipByService, TimeTrackable, Owned):
         related_name='domain_owners'
     )
 
+    require_sec_acceptance = models.BooleanField(
+        null=False,
+        default=False,
+        help_text="""Do new A records require security acceptance"""
+    )
+
+    require_seo_acceptance = models.BooleanField(
+        null=False,
+        default=False,
+        help_text="""Does deleting A records require SEO acceptance"""
+    )
+
     class Meta:
         db_table = u'domains'
         verbose_name = _("domain")

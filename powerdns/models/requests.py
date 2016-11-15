@@ -49,16 +49,21 @@ def can_auto_accept_record_request(user_request, user, action):
     )
     _validate_domain(domain)
     if action == 'create':
-        can_auto_accept = user_request.domain.can_auto_accept(user)
+        can_auto_accept = (
+            user_request.domain.can_auto_accept(user) and
+            not user_request.is_sec_acceptance_required()
+        )
     elif action == 'update':
         can_auto_accept = (
             user_request.domain.can_auto_accept(user) and
-            user_request.record.can_auto_accept(user)
+            user_request.record.can_auto_accept(user) and
+            not user_request.is_sec_acceptance_required()
         )
     elif action == 'delete':
         can_auto_accept = (
             user_request.target.domain.can_auto_accept(user) and
-            user_request.target.can_auto_accept(user)
+            user_request.target.can_auto_accept(user) and
+            not user_request.is_seo_acceptance_required()
         )
     return can_auto_accept
 
@@ -133,6 +138,22 @@ class DeleteRequest(Request):
 
     def __str__(self):
         return 'Delete {}'.format(self.target)
+
+    def is_seo_acceptance_required(self):
+        """
+        Check if delete request requires SEO acceptance.
+        """
+        if self.owner and self.owner.is_superuser:
+            return False
+        return (
+            isinstance(self.target, Record) and
+            self.target.type in settings.SEO_ACCEPTANCE_FOR_RECORD_TYPE and
+            (
+                not self.target.domain.template or
+                self.target.domain.template.is_public_domain
+            ) and
+            self.target.domain.require_seo_acceptance
+        )
 
 
 rules.add_perm('powerdns.add_deleterequest', rules.is_authenticated)
@@ -452,6 +473,21 @@ class RecordRequest(ChangeCreateRequest, RecordLike):
             'ttl':  self.target_ttl or '',
             'type':  self.target_type or '',
         }
+
+    def is_sec_acceptance_required(self):
+        """
+        Check if record request requires SEC acceptance.
+        """
+        if self.owner and self.owner.is_superuser:
+            return False
+        return (
+            self.target_type in settings.SEC_ACCEPTANCE_FOR_RECORD_TYPE and
+            (
+                not self.domain.template or
+                self.domain.template.is_public_domain
+            ) and
+            self.domain.require_sec_acceptance
+        )
 
 
 rules.add_perm('powerdns.add_recordrequest', rules.is_authenticated)

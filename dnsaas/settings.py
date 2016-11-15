@@ -232,6 +232,12 @@ SENTRY_JS_DSN = ''
 SENTRY_JS_CONFIG = {}
 JIRA_URL = ''
 
+# tells which record should be checked by SEC (when rest of conditions are met,
+# see: RecordRequest.is_seo_acceptance_required)
+SEC_ACCEPTANCE_FOR_RECORD_TYPE = {'A', 'AAAA'}
+# tells which record should be checked by SEO (when rest of conditions are met,
+# see: DeleteRequest.is_seo_acceptance_required)
+SEO_ACCEPTANCE_FOR_RECORD_TYPE = {'A', 'AAAA', 'CNAME'}
 REQUIRED_SERVICE_FIELD = os.environ.get('REQUIRED_SERVICE_FIELD', True)
 
 if not TESTING:
