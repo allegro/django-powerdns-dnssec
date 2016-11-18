@@ -59,7 +59,7 @@ setup(
         # 3.3.3 includes bug, https://github.com/rtfd/readthedocs.org/issues/2101
         'djangorestframework==3.3.2',
         'django-rest-swagger==0.3.8',
-        'django-filter>=0.10.0',
+        'django-filter==0.15.2',
         'django-threadlocals>=0.8',
         'docutils>=0.12',
         'rules>=0.4',

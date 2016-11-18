@@ -584,6 +584,7 @@ class Record(
         Record.objects.create(
             type='PTR',
             domain=domain,
+            service=self.service,
             name='.'.join([number, domain_name]),
             content=self.name,
             depends_on=self,

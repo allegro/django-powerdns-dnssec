@@ -5,7 +5,7 @@ from unittest import mock
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
-from powerdns.models import Domain, Record
+from powerdns.models import Domain, Record, get_ptr_obj
 from powerdns.tests.utils import (
     DomainFactory,
     DomainTemplateFactory,
@@ -88,6 +88,19 @@ class TestAutoPtr(TestCase):
             name='1.1.168.192.in-addr.arpa',
             owner=self.user,
         )
+
+    def test_ptr_gets_service_from_record(self):
+        record = RecordFactory(
+            domain=self.ptr_domain,
+            type='A',
+            name='site.example.com',
+            content='192.168.1.1',
+            owner=self.user,
+        )
+
+        ptr = get_ptr_obj(record.content, record.name)
+        self.assertNotEqual(record.service, None)
+        self.assertEqual(record.service, ptr.service)
 
     def test_auto_ptr_edit(self):
         """PTR changes when A changes"""
