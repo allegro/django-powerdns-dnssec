@@ -39,6 +39,10 @@ class OwnerSerializer(ModelSerializer):
 class DomainSerializer(OwnerSerializer):
 
     id = ReadOnlyField()
+    service_name = serializers.SerializerMethodField()
+
+    def get_service_name(self, obj):
+        return obj.service.name if obj.service else ''
 
     class Meta:
         model = Domain

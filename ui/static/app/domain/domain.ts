@@ -4,6 +4,7 @@ export class Domain {
   public type: string;
   public master: string;
   public owner: string;
+  public service_name: string;
 
   constructor() { }
 }

@@ -56,11 +56,19 @@ class OwnershipByService(models.Model):
 
     service = models.ForeignKey(Service, blank=True, null=True)
 
+    @property
+    def service_owners(self):
+        if self.service:
+            owners = self.service.owners
+        else:
+            owners = ServiceOwner.objects.none()
+        return owners
+
     def _has_access_by_service(self, user):
         "Check if user is one of owners of service assigned to this model."
         if self.service:
             permission_by_service = (
-                user.id in self.service.owners.values_list('id', flat=True)
+                user.id in self.service_owners.values_list('id', flat=True)
             )
         else:
             permission_by_service = False
