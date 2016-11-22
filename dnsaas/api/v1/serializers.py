@@ -37,7 +37,7 @@ class DomainSerializer(OwnerSerializer):
     class Meta:
         model = Domain
         read_only_fields = ('notified_serial',)
-        exclude = ('service',)
+        exclude = ('service', 'direct_owners')
 
 
 class RecordRequestSerializer(OwnerSerializer):
