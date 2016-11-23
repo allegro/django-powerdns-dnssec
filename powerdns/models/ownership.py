@@ -59,16 +59,30 @@ class OwnershipByService(models.Model):
     @property
     def service_owners(self):
         if self.service:
-            owners = self.service.owners
+            owners = self.service.owners.through.objects
         else:
             owners = ServiceOwner.objects.none()
         return owners
+
+    @property
+    def business_service_owners(self):
+        return self.service_owners.filter(
+            ownership_type=OwnershipType.BO.name
+        )
+
+    @property
+    def technical_service_owners(self):
+        return self.service_owners.filter(
+            ownership_type=OwnershipType.TO.name
+        )
 
     def _has_access_by_service(self, user):
         "Check if user is one of owners of service assigned to this model."
         if self.service:
             permission_by_service = (
-                user.id in self.service_owners.values_list('id', flat=True)
+                user.id in self.service_owners.values_list(
+                    'owner_id', flat=True
+                )
             )
         else:
             permission_by_service = False

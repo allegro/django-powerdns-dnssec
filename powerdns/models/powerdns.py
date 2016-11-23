@@ -277,14 +277,16 @@ class Domain(PreviousStateMixin, OwnershipByService, TimeTrackable, Owned):
     @property
     def service_owners(self):
         """Returns owners by service unless direct_owners are set"""
-        owners = self.direct_owners
+        owners = self.direct_owners.through.objects
         if not owners.exists():
             owners = super().service_owners
         return owners
 
     def has_access_by_service(self, user):
         "Check if user is one of owners either direct or through service"
-        return user.id in self.service_owners.values_list('id', flat=True)
+        return user.id in self.service_owners.values_list(
+            'owner_id', flat=True
+        )
 
 
 class DomainOwner(models.Model):
