@@ -49,20 +49,38 @@ setup(
     ],
     install_requires = [
         'Django>=1.8.13',
-        'django-extensions>=1.7.0',
+        'django-extensions>=1.5.5',
         'django-nose>=1.4',
         'dj.choices>=0.10.0',
-        'mysqlclient==1.3.7',
-        'nose-cov>=1.6',
-        'factory_boy>=2.5.2',
-        # 3.3.3 includes bug, https://github.com/rtfd/readthedocs.org/issues/2101
-        'djangorestframework>=3.3.2',
-        'django-rest-swagger==0.3.8',
-        'django-filter>=0.15.2',
         'django-threadlocals>=0.8',
-        'docutils>=0.12',
         'rules>=0.4',
-        'raven==5.20.0'
+    ],
+    extras_require = {
+        'docs': [
+            'docutils>=0.12',
+        ],
+
+        'dnsaas': [
+            'Django>=1.8.13,<1.9',
+            'django-extensions==1.5.5',
+            # 3.3.3 includes bug, https://github.com/rtfd/readthedocs.org/issues/2101
+            'djangorestframework==3.3.2',
+            'django-rest-swagger==0.3.8',
+            'django-filter==0.15.2',
+            'mysqlclient==1.3.7',
+            'raven==5.20.0'
+        ],
+
+        # https://github.com/pypa/pip/issues/1197#issuecomment-228939212
+        'tests': [
+            'django-nose>=1.4',
+            'nose-cov>=1.6',
+            'factory_boy>=2.5.2',
+        ]
+    },
+    tests_require = [
+        'django-powerdns-dnssec[dnsaas]',
+        'django-powerdns-dnssec[tests]',
     ],
     zip_safe = False,  # if only because of the readme file
 )
