@@ -49,7 +49,6 @@ setup(
     ],
     install_requires = [
         'Django>=1.8.13',
-        'django-autocomplete-light==2.3.3',
         'django-extensions>=1.7.0',
         'django-nose>=1.4',
         'dj.choices>=0.10.0',
