@@ -43,6 +43,7 @@ AUX_RECORD_TYPES = ('AFSDB', 'CERT', 'LOC', 'RP', 'SPF', 'SSHFP')
 RECORD_TYPES = sorted(set(
     BASIC_RECORD_TYPES + DNSSEC_RECORD_TYPES + AUX_RECORD_TYPES
 ))
+IP_TYPES_FOR_PTR = {'A', 'AAAA'}
 
 
 # If we try get the domain in the global scope then removing it
@@ -521,13 +522,13 @@ class Record(
     def save(self, *args, **kwargs):
         self.change_date = int(time.time())
         self.ordername = self._generate_ordername()
-        if self.type == 'A':
+        if self.type in IP_TYPES_FOR_PTR:
             self.number = int(ipaddress.ip_address(self.content))
         super(Record, self).save(*args, **kwargs)
 
     def get_ptr(self):
         """Get PTR for `self` record if record is A or AAAA type."""
-        if self.type in {'A', 'AAAA'}:
+        if self.type in IP_TYPES_FOR_PTR:
             return get_ptr_obj(self.content, self.name)
 
     def _delete_old_ptr(self):
@@ -562,7 +563,7 @@ class Record(
         """
         Delete ptr for `self` if exists
         """
-        if self.type not in {'A', 'AAAA'}:
+        if self.type not in IP_TYPES_FOR_PTR:
             return
 
         self._delete_old_ptr()
@@ -572,9 +573,9 @@ class Record(
 
     def create_ptr(self):
         """Creates a PTR record for A record creating a domain if necessary."""
-        if self.type != 'A':
+        if self.type not in IP_TYPES_FOR_PTR:
             raise ValueError(_('Creating PTR only for A records'))
-        domain_name, number = to_reverse(self.content)
+        number, domain_name = to_reverse(self.content)
         if self.domain.auto_ptr == AutoPtrOptions.ALWAYS:
             domain, created = Domain.objects.get_or_create(
                 name=domain_name,
@@ -654,7 +655,7 @@ def update_serial(sender, instance, **kwargs):
 
 
 def _update_records_ptrs(domain):
-    records = Record.objects.filter(domain=domain, type='A')
+    records = Record.objects.filter(domain=domain, type__in=IP_TYPES_FOR_PTR)
     for record in records:
         _create_ptr(record)
 
@@ -669,7 +670,7 @@ def update_ptr(sender, instance, **kwargs):
 def _create_ptr(record):
     if (
         record.domain.auto_ptr == AutoPtrOptions.NEVER or
-        record.type not in {'A', 'AAAA'}
+        record.type not in IP_TYPES_FOR_PTR
     ):
         record.delete_ptr()
         return

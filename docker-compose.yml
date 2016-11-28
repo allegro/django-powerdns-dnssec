@@ -3,21 +3,24 @@
 
 dnsaas:
     build: .
-    ports: 
+    ports:
         - "8080:8080"
-    links: 
-        - mysql:db
+    links:
+        - db:db
 pdns:
     build: docker/pdns
     ports:
         - "5353:53"
         - "5353:53/udp"
     links:
-        - mysql:db
-mysql:
+        - db:db
+
+db:
     image: "drakedroid/mysql-with-data"
     environment:
         MYSQL_ROOT_PASSWORD: root
         MYSQL_USER: dnsaas
         MYSQL_DATABASE: dnsaas
         MYSQL_PASSWORD: dnsaas
+    ports:
+        - "33066:3306"

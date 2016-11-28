@@ -43,7 +43,7 @@ from .serializers import (
     SuperMasterSerializer,
     TsigKeysTemplateSerializer,
 )
-from powerdns.utils import to_reverse
+from powerdns.utils import reverse_pointer
 
 
 log = logging.getLogger(__name__)
@@ -272,7 +272,7 @@ class RecordViewSet(OwnerViewSet):
         if ips:
             a_records = Record.objects.filter(content__in=ips, type='A')
             ptrs = [
-                "{1}.{0}".format(*to_reverse(r.content)) for r in a_records
+                reverse_pointer(r.content) for r in a_records
             ]
             queryset = queryset.filter(
                 (Q(content__in=[r.content for r in a_records]) & Q(type='A')) |
