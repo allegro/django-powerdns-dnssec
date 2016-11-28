@@ -572,9 +572,12 @@ class Record(
             current_ptr.delete()
 
     def create_ptr(self):
-        """Creates a PTR record for A record creating a domain if necessary."""
+        """
+        Creates a PTR record for A or AAAA record creating a domain if
+        necessary.
+        """
         if self.type not in IP_TYPES_FOR_PTR:
-            raise ValueError(_('Creating PTR only for A records'))
+            raise ValueError(_('Creating PTR only for A or AAAA records'))
         number, domain_name = to_reverse(self.content)
         if self.domain.auto_ptr == AutoPtrOptions.ALWAYS:
             domain, created = Domain.objects.get_or_create(
