@@ -62,8 +62,14 @@ class DomainMetadataInline(admin.TabularInline):
     extra = 0
 
 
+class DomainOwnerInline(admin.TabularInline):
+    model = Domain.direct_owners.through
+    extra = 3
+    raw_id_fields = ('owner',)
+
+
 class DomainAdmin(ForeignKeyAutocompleteAdmin, admin.ModelAdmin):
-    inlines = [DomainMetadataInline]
+    inlines = [DomainMetadataInline, DomainOwnerInline]
     list_display = (
         'name',
         'type',
@@ -252,6 +258,7 @@ class OwnerInline(admin.TabularInline):
 @admin.register(Service)
 class ServiceAdmin(admin.ModelAdmin):
     list_display = ['__str__', 'is_active']
+    search_fields = ('name', 'uid',)
     inlines = (OwnerInline,)
 
 
