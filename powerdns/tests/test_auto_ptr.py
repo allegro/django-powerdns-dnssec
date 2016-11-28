@@ -297,3 +297,78 @@ class TestAutoPtr(TestCase):
         self.no_ptr_domain.save()
 
         self.assertEqual(update_records.call_count, saves_counter)
+
+    # -------------------------------------------------------------------------
+    # IPv6
+    # -------------------------------------------------------------------------
+    def test_default_ptr_created_for_aaaa(self):
+        """A PTR record is created for an AAAA record with default template"""
+        RecordFactory(
+            domain=self.ptr_domain,
+            type='AAAA',
+            name='site.example.com',
+            content='2001:0db8:0:0::1428:57ab',
+            owner=self.user,
+        )
+        domain = Domain.objects.get(
+            name='a.7.5.8.2.4.1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa',  # noqa
+        )
+        self.assertEqual(domain.type, 'NATIVE')
+        self.assertTrue(domain.get_soa().content.endswith('600'))
+        assert_does_exist(
+            Record,
+            domain=domain,
+            name='b.a.7.5.8.2.4.1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa',  # noqa
+            owner=self.user,
+        )
+
+    def test_auto_ptr_edit_for_aaaa(self):
+        """PTR changes when AAAA changes"""
+        record = RecordFactory(
+            domain=self.ptr_domain,
+            type='AAAA',
+            name='site.example.com',
+            content='2001:0db8:0:0::1428:57ab',
+        )
+        record.content = '2001:0db9:0:0::1428:57ab'
+        record.save()
+        old_domain = Domain.objects.get(
+            name='a.7.5.8.2.4.1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa',  # noqa
+        )
+        new_domain = Domain.objects.get(
+            name='a.7.5.8.2.4.1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.9.b.d.0.1.0.0.2.ip6.arpa',  # noqa
+        )
+        assert_does_exist(
+            Record,
+            domain=new_domain,
+            name='b.a.7.5.8.2.4.1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.9.b.d.0.1.0.0.2.ip6.arpa',  # noqa
+            type='PTR',
+        )
+        assert_not_exists(
+            Record,
+            domain=old_domain,
+            name='b.a.7.5.8.2.4.1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa',  # noqa
+            type='PTR',
+        )
+
+    def test_ptr_autoremove_for_aaaa(self):
+        """
+        A PTR record is automatically removed with its AAAA record is removed
+        """
+        a = RecordFactory(
+            domain=self.ptr_domain,
+            type='AAAA',
+            name='site.example.com',
+            content='2001:0db8:0:0::1428:57ab',
+        )
+        assert_does_exist(
+            Record,
+            name='b.a.7.5.8.2.4.1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa',  # noqa
+            type='PTR'
+        )
+        a.delete()
+        assert_not_exists(
+            Record,
+            name='b.a.7.5.8.2.4.1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa',  # noqa
+            type='PTR'
+        )

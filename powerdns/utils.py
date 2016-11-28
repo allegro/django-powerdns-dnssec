@@ -189,34 +189,56 @@ class DomainForRecordValidator(PermissionValidator):
             return super().__call__(object_)
 
 
+# TODO(mkurek): rename to sth better
 def to_reverse(ip):
     """
     Given an ip address it will return a tuple of (domain, number)
     suitable for PTR record
+
+    Example:
+    >>> to_reverse('192.168.1.2')
+    ('2', '1.1.168.192.in-addr.arpa')
+    >>> to_reverse('2001:0db8:0:0::1428:57ab')
+    ('b', 'a.7.5.8.2.4.1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa')  # noqa
     """
-    *domain_parts, number = ip.split('.')
-    domain = '{}.in-addr.arpa'.format('.'.join(reversed(domain_parts)))
-    return (domain, number)
+    return _reverse_ip(ip)
 
 
 def reverse_pointer(ip):
     """
-    Reverse `ip` to ptr.
+    Return reversed IP address in PTR format. Handles IPv4 and IPv6.
 
     Example:
-    >>> reverse_ip_to_ptr('192.168.1.1')
-    '1.1.168.192.in-addr.arpa'
-    >>> reverse_pointer('2001:db8::')
-    '0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa'
+    >>> reverse_pointer('192.168.1.2')
+    '2.1.1.168.192.in-addr.arpa'
+    >>> reverse_pointer('2001:0db8:0:0::1428:57ab')
+    'b.a.7.5.8.2.4.1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa'
+    """
+    return '.'.join(_reverse_ip(ip))
+
+
+def _reverse_ip(ip):
+    """
+    Reverse `ip` to ptr.
+
+    Returns: tuple of (last_byte, domain) suitable for PTR record
+    last_byte is the last byte of IPv4 address and last character of IPv6
+    address
+
+    Example:
+    >>> _reverse_ip('192.168.1.2')
+    ('2', '1.1.168.192.in-addr.arpa')
+    >>> _reverse_ip('2001:0db8:0:0::1428:57ab')
+    ('b', 'a.7.5.8.2.4.1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa')  # noqa
     """
     ip_obj = ipaddress.ip_address(ip)
     if isinstance(ip_obj, ipaddress.IPv6Address):
-        reverse_chars = ip_obj.exploded[::-1].replace(':', '')
-        rev_ptr = '.'.join(reverse_chars) + '.ip6.arpa'
+        last_byte, *first_bytes_reversed = ip_obj.exploded[::-1].replace(':', '')  # noqa
+        domain_suffix = 'ip6.arpa'
     else:
-        reverse_octets = str(ip_obj).split('.')[::-1]
-        rev_ptr = '.'.join(reverse_octets) + '.in-addr.arpa'
-    return rev_ptr
+        last_byte, *first_bytes_reversed = str(ip_obj).split('.')[::-1]
+        domain_suffix = 'in-addr.arpa'
+    return last_byte, '.'.join(first_bytes_reversed + [domain_suffix])
 
 
 class AutoPtrOptions(Choices):

@@ -20,8 +20,8 @@ DATABASES = {
         'NAME': 'dnsaas',
         'USER': os.environ.get('DNSAAS_DB_USER', 'dnsaas'),
         'PASSWORD': os.environ.get('DNSAAS_DB_PASSWORD', 'dnsaas'),
-        'HOST': os.environ.get('DNSAAS_DB_HOST', 'localhost'),
-        'PORT': '3306',
+        'HOST': os.environ.get('DNSAAS_DB_HOST', '127.0.0.1'),
+        'PORT': os.environ.get('DNSAAS_DB_PORT', '3306'),
         'TEST': {
             'NAME': 'test_dnsaas',
         },
