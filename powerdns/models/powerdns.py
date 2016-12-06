@@ -278,7 +278,7 @@ class Domain(PreviousStateMixin, OwnershipByService, TimeTrackable, Owned):
     @property
     def service_owners(self):
         """Returns owners by service unless direct_owners are set"""
-        owners = self.direct_owners.through.objects
+        owners = self.direct_owners.through.objects.filter(domain=self)
         if not owners.exists():
             owners = super().service_owners
         return owners
