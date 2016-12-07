@@ -1,6 +1,8 @@
-from django.conf.urls import url, patterns
+from django.conf.urls import url
 
 from rest_framework.routers import DefaultRouter
+
+from powerdns.utils import patterns
 
 from .views import (
     CryptoKeyViewSet,
@@ -15,6 +17,7 @@ from .views import (
     SuperMasterViewSet,
     TsigKeysViewSet,
 )
+
 
 router = DefaultRouter()
 router.register(r'crypto-keys', CryptoKeyViewSet)
