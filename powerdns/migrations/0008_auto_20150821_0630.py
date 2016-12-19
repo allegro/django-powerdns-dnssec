@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='recordtemplate',
             name='auto_ptr',
-            field=models.BooleanField(default=True, verbose_name='Auto PTR field'),
+            field=models.IntegerField(default=2, verbose_name='Auto PTR field'),
         ),
         migrations.AlterField(
             model_name='domain',
