@@ -41,7 +41,7 @@
     "jasmine-core": "2.4.1",
     "jasmine-spec-reporter": "^2.4.0",
     "lite-server": "^2.2.0",
-    "typescript": "^1.8.10",
+    "typescript": "1.8.10",
     "typings": "^0.8.1",
     "webpack": "^1.13.0"
   }
