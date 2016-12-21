@@ -104,8 +104,12 @@ class RecordDeleteRequestFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = DeleteRequest
 
-    content_type = ContentType.objects.get_for_model(Record)
     target = factory.SubFactory(RecordFactory)
+    owner = factory.SubFactory(UserFactory)
+
+    @property
+    def content_type(self):
+        return ContentType.objects.get_for_model(Record)
 
 
 class RecordTestCase(TestCase):
