@@ -1,6 +1,18 @@
 Installation as django application
 ====================================
 
-To add powerdns to your django project simply add ``powerdns``,
-``django_extensions`` and ``rest_frameworkd`` to ``INSTALLED_APPS`` in your
-``settings.py``.
+Use pip to install ``django-powerdns-dnssec`` and all its dependencies from PyPI:
+
+.. code-block:: bash
+
+    $ pip install django-powerdns-dnssec
+
+then add ``powerdns`` and ``django_extensions`` to ``INSTALLED_APPS`` in your project's ``settings.py``:
+
+..code-block:: python
+
+    INSTALLED_APPS = [
+        # ...
+        'powerdns',
+        # ...
+    ]

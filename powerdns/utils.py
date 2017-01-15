@@ -3,6 +3,7 @@
 import ipaddress
 
 import rules
+from django import VERSION
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericRelation
 from django.core.mail import send_mail
@@ -407,3 +408,14 @@ def hostname2domain(hostname):
             pass
         parts = parts[1:]
     return domain
+
+
+def patterns(prefix, *args):
+    if VERSION < (1, 9):
+        from django.conf.urls import patterns as django_patterns
+        return django_patterns(prefix, *args)
+    elif prefix != '':
+        raise Exception("You need to update your URLConf to be a list of URL "
+                        "objects")
+    else:
+        return list(args)

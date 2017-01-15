@@ -1,4 +1,7 @@
-from django.conf.urls import include, patterns, url
+from django.conf.urls import include, url
+
+from powerdns.utils import patterns
+
 
 urlpatterns = patterns(
     '',

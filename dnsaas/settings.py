@@ -147,7 +147,6 @@ INSTALLED_APPS = (
     'powerdns',
     'dnsaas',
     'ui',
-    'autocomplete_light',
     'django.contrib.admin',
     'django.contrib.admindocs',
     'rules',
