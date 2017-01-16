@@ -996,7 +996,7 @@ class TestIPRecordTest(BaseApiTestCase):
         self.assertEqual(record.name, target_name)
 
     def test_update_txt_records_when_record_name_change(self):
-        target_name = 'update_test_1.{}'.format(self.domain.name)
+        target_name = 'new-value.{}'.format(self.domain.name)
         record = RecordFactory(
             type='A',
             content='127.0.0.9',
@@ -1020,7 +1020,10 @@ class TestIPRecordTest(BaseApiTestCase):
             },
             'action': 'update',
         })
+        self.assertNotEqual(self.data['new'], self.data['old'])
+
         response = self._send_post_data_to_endpoint()
+
         self.assertEqual(response.status_code, 200)
         record.refresh_from_db()
         record_txt.refresh_from_db()
