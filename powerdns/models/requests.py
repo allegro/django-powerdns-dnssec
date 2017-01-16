@@ -16,9 +16,9 @@ from .powerdns import (
     Domain,
     Owned,
     Record,
-    Service,
     validate_domain_name,
 )
+from .ownership import Service
 
 from ..utils import \
     AutoPtrOptions, RecordLike, TimeTrackable, flat_dict_diff
