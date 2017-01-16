@@ -1,0 +1,33 @@
+# TODO:
+# * run integration tests
+# * coverage
+# * multi-db (run tests on other versions of mysql (5.5, 5.6) and postgres)
+
+language: python
+
+env:
+    global:
+        - DNSAAS_DB_USER=root
+        - DNSAAS_DB_PASSWORD=""
+        - DJANGO_SETTINGS_MODULE=dnsaas.settings_test
+    matrix:
+        - DJANGO_VERSION=1.8.17
+        - DJANGO_VERSION=1.9.12
+        - DJANGO_VERSION=1.10.5
+matrix:
+    allow_failures:
+        - env: DJANGO_VERSION=1.10.5
+
+python:
+    - "3.4"
+
+before_install:
+    - pip install -U flake8==3.0.4 pip
+    - make flake
+
+install:
+    - make install-test
+    - pip install django==$DJANGO_VERSION
+
+script:
+    - make test
