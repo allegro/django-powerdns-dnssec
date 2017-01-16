@@ -708,7 +708,7 @@ class SuperMaster(TimeTrackable):
 
 class DomainMetadata(TimeTrackable):
     domain = models.ForeignKey(Domain, verbose_name=_("domain"))
-    kind = models.CharField(_("kind"), max_length=15)
+    kind = models.CharField(_("kind"), max_length=31)
     content = models.TextField(_("content"), blank=True, null=True)
 
     class Meta:
