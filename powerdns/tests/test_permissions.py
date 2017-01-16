@@ -9,7 +9,7 @@ from django.test import TestCase
 from powerdns.models import Authorisation
 from powerdns.utils import AutoPtrOptions
 
-from powerdns.tests.utils import (
+from .utils import (
     DomainFactory,
     RecordFactory,
     user_client,

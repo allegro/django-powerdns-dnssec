@@ -12,7 +12,7 @@ from django.utils.translation import ugettext_lazy as _
 from threadlocals.threadlocals import get_current_user
 import rules
 
-from powerdns.models import (
+from .powerdns import (
     Domain,
     Owned,
     Record,
@@ -20,7 +20,7 @@ from powerdns.models import (
     validate_domain_name,
 )
 
-from powerdns.utils import \
+from ..utils import \
     AutoPtrOptions, RecordLike, TimeTrackable, flat_dict_diff
 
 

@@ -16,8 +16,8 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.deconstruct import deconstructible
 from threadlocals.threadlocals import get_current_user
 
-from powerdns.models import OwnershipByService, OwnershipType
-from powerdns.utils import (
+from .ownership import OwnershipByService, OwnershipType
+from ..utils import (
     AutoPtrOptions,
     is_authorised,
     is_owner,
@@ -411,7 +411,7 @@ class Record(
 
     @property
     def opened_requests(self):
-        from powerdns.models import RequestStates
+        from .requests import RequestStates
         return self.requests.filter(state=RequestStates.OPEN.id).all()
 
     def __str__(self):

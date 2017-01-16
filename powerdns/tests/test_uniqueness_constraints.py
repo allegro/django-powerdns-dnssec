@@ -1,6 +1,6 @@
 """Tests for keeping uniqueness constraints"""
 
-from powerdns.tests.utils import RecordFactory, RecordTestCase
+from .utils import RecordFactory, RecordTestCase
 
 
 class TestUniquenessConstraints(RecordTestCase):

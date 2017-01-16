@@ -14,7 +14,7 @@ from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-from powerdns.utils import TimeTrackable
+from ..utils import TimeTrackable
 
 
 class OwnershipType(Enum):

@@ -4,7 +4,7 @@ from django.db import models
 from django.contrib.contenttypes.fields import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 
-from powerdns.utils import is_owner
+from ..utils import is_owner
 
 
 class Authorisation(models.Model):

@@ -5,7 +5,7 @@
 from django.contrib.auth import get_user_model
 
 from powerdns.models import Domain, Record, RecordRequest
-from powerdns.tests.utils import RecordFactory, RecordTestCase
+from .utils import RecordFactory, RecordTestCase
 
 
 class TestRequestUniquenessConstraints(RecordTestCase):

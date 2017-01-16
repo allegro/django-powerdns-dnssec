@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 
 from powerdns.models import Domain, Record, get_ptr_obj
-from powerdns.tests.utils import (
+from .utils import (
     DomainFactory,
     DomainTemplateFactory,
     RecordFactory,

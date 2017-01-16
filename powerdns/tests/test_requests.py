@@ -9,7 +9,7 @@ from powerdns.models import (
     Record,
     RecordRequest,
 )
-from powerdns.tests.utils import (
+from .utils import (
     ServiceFactory,
     assert_does_exist,
     assert_not_exists,
