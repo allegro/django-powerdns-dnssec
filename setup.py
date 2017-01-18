@@ -22,7 +22,7 @@ with open('version.json') as f:
 setup(
     name = 'django-powerdns-dnssec',
     version = version,
-    url = 'http://bitbucket.org/ambv/django-powerdns/',
+    url = 'https://github.com/allegro/django-powerdns-dnssec',
     license = 'BSD',
     description = 'PowerDNS administration app for Django',
     long_description = long_description,
