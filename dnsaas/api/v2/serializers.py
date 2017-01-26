@@ -158,11 +158,7 @@ class RecordSerializer(OwnerSerializer):
                 ipaddress.ip_address(content)
             except ValueError:
                 raise serializers.ValidationError({
-                    'content': [
-                        'Content should be IP valid address when type: {} '.format(  # noqa
-                            ' or '.join(sorted(RECORD_A_TYPES))
-                        )
-                    ]
+                    'content': ['Content should be valid IP address']
                 })
 
         self._clean_txt_content(record_type, attrs)
