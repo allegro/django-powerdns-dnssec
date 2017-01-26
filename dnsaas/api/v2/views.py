@@ -365,7 +365,7 @@ class IPRecordView(APIView):
         new = data['new']
         try:
             Record.objects.create(
-                type__in=RECORD_A_TYPES,
+                type='A',
                 name=new['hostname'],
                 domain=hostname2domain(new['hostname']),
                 number=int(ipaddress.ip_address(new['address'])),
