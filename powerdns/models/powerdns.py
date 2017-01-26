@@ -43,7 +43,7 @@ AUX_RECORD_TYPES = ('AFSDB', 'CERT', 'LOC', 'RP', 'SPF', 'SSHFP')
 RECORD_TYPES = sorted(set(
     BASIC_RECORD_TYPES + DNSSEC_RECORD_TYPES + AUX_RECORD_TYPES
 ))
-IP_TYPES_FOR_PTR = {'A', 'AAAA'}
+RECORD_A_TYPES = IP_TYPES_FOR_PTR = {'A', 'AAAA'}
 
 
 # If we try get the domain in the global scope then removing it

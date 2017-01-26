@@ -3,6 +3,7 @@
 from django.db.models import Q
 
 from powerdns.models import (
+    RECORD_A_TYPES,
     can_delete,
     can_edit,
     CryptoKey,
@@ -89,12 +90,14 @@ class RecordViewSet(OwnerViewSet):
         queryset = super().get_queryset()
         ips = self.request.query_params.getlist('ip')
         if ips:
-            a_records = Record.objects.filter(content__in=ips, type='A')
+            a_records = Record.objects.filter(
+                content__in=ips, type__in=RECORD_A_TYPES
+            )
             ptrs = [
                 reverse_pointer(r.content) for r in a_records
             ]
             queryset = queryset.filter(
-                (Q(content__in=[r.content for r in a_records]) & Q(type='A')) |
+                (Q(content__in=[r.content for r in a_records]) & Q(type__in=RECORD_A_TYPES)) |  # noqa
                 (Q(content__in=[r.name for r in a_records]) & Q(type='CNAME')) |  # noqa
                 (Q(name__in=[r.name for r in a_records]) & Q(type='TXT')) |
                 (Q(name__in=ptrs) & Q(type='PTR'))

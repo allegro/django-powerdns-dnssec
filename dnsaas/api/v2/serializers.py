@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from powerdns.utils import hostname2domain
 from powerdns.models import (
+    RECORD_A_TYPES,
     CryptoKey,
     Domain,
     DomainMetadata,
@@ -152,16 +153,13 @@ class RecordSerializer(OwnerSerializer):
             attrs.get('domain'), attrs.get('content'), attrs.get('type')
         )
 
-        if (
-            record_type == 'A'
-        ):
+        if record_type in RECORD_A_TYPES:
             try:
                 ipaddress.ip_address(content)
             except ValueError:
-                raise serializers.ValidationError(
-                    {'content':
-                     ['Content should be IP valid address when type="A".']}
-                )
+                raise serializers.ValidationError({
+                    'content': ['Content should be valid IP address']
+                })
 
         self._clean_txt_content(record_type, attrs)
 
