@@ -11,6 +11,7 @@ from django.db.models import Prefetch, Q
 
 from powerdns.utils import hostname2domain
 from powerdns.models import (
+    RECORD_A_TYPES,
     CryptoKey,
     DeleteRequest,
     Domain,
@@ -270,12 +271,14 @@ class RecordViewSet(OwnerViewSet):
         queryset = super().get_queryset()
         ips = self.request.query_params.getlist('ip')
         if ips:
-            a_records = Record.objects.filter(content__in=ips, type='A')
+            a_records = Record.objects.filter(
+                content__in=ips, type__in=RECORD_A_TYPES,
+            )
             ptrs = [
                 reverse_pointer(r.content) for r in a_records
             ]
             queryset = queryset.filter(
-                (Q(content__in=[r.content for r in a_records]) & Q(type='A')) |
+                (Q(content__in=[r.content for r in a_records]) & Q(type__in=RECORD_A_TYPES)) |  # noqa
                 (Q(content__in=[r.name for r in a_records]) & Q(type='CNAME')) |  # noqa
                 (Q(name__in=[r.name for r in a_records]) & Q(type='TXT')) |
                 (Q(name__in=ptrs) & Q(type='PTR'))
@@ -351,7 +354,9 @@ class IPRecordView(APIView):
     def _get_record(self, ip, hostname):
         ip = int(ipaddress.ip_address(ip))
         try:
-            record = Record.objects.get(type='A', number=ip, name=hostname)
+            record = Record.objects.get(
+                type__in=RECORD_A_TYPES, number=ip, name=hostname
+            )
         except (Record.DoesNotExist, MultipleObjectsReturned):
             record = None
         return record
@@ -360,7 +365,7 @@ class IPRecordView(APIView):
         new = data['new']
         try:
             Record.objects.create(
-                type='A',
+                type__in=RECORD_A_TYPES,
                 name=new['hostname'],
                 domain=hostname2domain(new['hostname']),
                 number=int(ipaddress.ip_address(new['address'])),
