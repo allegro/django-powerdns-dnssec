@@ -61,7 +61,7 @@ export class RecordDetailComponent implements OnInit {
     ) {
       this.recordForm = formBuilder.group({
         name: [],
-        content: ["", Validators.required],
+        content: [],
         type: ["", Validators.required],
         ttl: ["", Validators.required],
         prio: [], // Visible only if type is MX
