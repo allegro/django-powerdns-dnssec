@@ -111,14 +111,12 @@
               type="text"
               id="content"
               class="form-control"
-              required
               [(ngModel)]="record.content"
               ngControl="content"
               #content="ngForm"
               [disabled]="!domain"
               #inputContent />
-          <div [hidden]="content.valid || content.pristine" class="alert alert-danger">
-            <p *ngIf="content.errors && content.errors.required">Content is required.</p>
+          <div [hidden]="recordForm.controls['content'].valid" class="alert alert-danger">
             <p *ngIf="content.errors && content.errors.apiError">{{ content.errors.apiError }}</p>
           </div>
          </div>
