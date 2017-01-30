@@ -310,6 +310,20 @@ class TestRecords(BaseApiTestCase):
         )
         self.assertEqual(response.data['content'], 'aa')
 
+    def test_post_raise_error_when_AAAA_content_is_invalid(self):
+        self.client.login(username='regular_user1', password='regular_user1')
+        domain = DomainFactory()
+        data = {
+            'type': 'AAAA',
+            'domain': domain.id,
+            'name': 'www.' + domain.name,
+            'content': '192.168.0.1',
+            'service': ServiceFactory().id,
+        }
+        response = self.send_post(reverse('api:v2:record-list'), data)
+
+        self.assertEqual(response.status_code, 400)
+
     #
     # updates
     #
@@ -564,6 +578,19 @@ class TestRecords(BaseApiTestCase):
             'type': {'new': '', 'old': self.default_data['type']},
             '_request_type': 'update',
         })
+
+    def test_patch_raise_error_when_AAAA_content_is_invalid(self):
+        self.client.login(username='regular_user1', password='regular_user1')
+        record = RecordFactory(owner=self.regular_user1)
+
+        response = self.send_patch(
+            reverse('api:v2:record-detail', kwargs={'pk': record.pk}),
+            data={
+                'type': 'AAAA', 'content': '192.168.1.1'
+            },
+        )
+
+        self.assertEqual(response.status_code, 400)
 
     #
     # deletion

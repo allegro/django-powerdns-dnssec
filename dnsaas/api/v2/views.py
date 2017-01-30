@@ -4,7 +4,7 @@ import django_filters
 import ipaddress
 import logging
 
-from django.core.exceptions import MultipleObjectsReturned
+from django.core.exceptions import MultipleObjectsReturned, ValidationError
 from django.core.urlresolvers import reverse
 from django.db import IntegrityError
 from django.db.models import Prefetch, Q
@@ -147,6 +147,19 @@ class RecordViewSet(OwnerViewSet):
             data['owner'] = self.request.user.username
         return data
 
+    def _custom_clean(self, instance):
+        # this would be called by `perform_update` or `perform_create`
+        # but since we have `target_` attribute we call it in `create` or
+        # `update`
+        try:
+            instance.clean()
+        except ValidationError as e:
+            return Response(
+                {"error": str(e.message)},
+                status=status.HTTP_400_BAD_REQUEST,
+                headers={}
+            )
+
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(
             data=self._set_owner(request.data.copy())
@@ -157,6 +170,9 @@ class RecordViewSet(OwnerViewSet):
         record_request.copy_records_data(serializer.validated_data.items())
         record_request.owner = request.user
         record_request.target_owner = serializer.validated_data['owner']
+        respone_with_error = self._custom_clean(record_request)
+        if respone_with_error:
+            return respone_with_error
 
         if can_auto_accept_record_request(
             record_request, request.user, 'create',
@@ -215,6 +231,9 @@ class RecordViewSet(OwnerViewSet):
         record_request.owner = request.user
         record_request.target_owner = serializer.validated_data.get('owner')
         record_request.record = serializer.instance
+        respone_with_error = self._custom_clean(record_request)
+        if respone_with_error:
+            return respone_with_error
 
         if can_auto_accept_record_request(
             record_request, request.user, 'update',
