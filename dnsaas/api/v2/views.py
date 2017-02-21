@@ -26,7 +26,7 @@ from powerdns.models import (
     TsigKey,
     can_auto_accept_record_request,
 )
-from rest_framework import filters, status
+from rest_framework import filters, serializers, status
 from rest_framework.permissions import DjangoObjectPermissions, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
@@ -258,6 +258,13 @@ class RecordViewSet(OwnerViewSet):
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
+
+        if not instance.has_owner():
+            raise serializers.ValidationError({
+                'owner': [
+                    'Record requires owner to be deletable. Please contact DNS support.'  # noqa
+                ]
+            })
 
         if (
             instance.opened_requests and

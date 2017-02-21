@@ -56,6 +56,12 @@ class OwnershipByService(models.Model):
 
     service = models.ForeignKey(Service, blank=True, null=True)
 
+    def has_owner(self):
+        has_service_owner = self.service and self.service.owners.exists()
+        if not self.owner_id and not has_service_owner:
+            return False
+        return True
+
     @property
     def service_owners(self):
         if self.service:

@@ -22,6 +22,7 @@ from powerdns.tests.utils import (
     RecordFactory,
     RecordRequestFactory,
     ServiceFactory,
+    ServiceOwnerFactory,
     UserFactory,
 )
 from dnsaas.api.v2.views import RecordViewSet, IPRecordView
@@ -327,6 +328,58 @@ class TestRecords(BaseApiTestCase):
     #
     # updates
     #
+    def test_update_raise_error_when_record_has_no_owner_and_no_service(
+        self
+    ):
+        self.client.login(username='regular_user1', password='regular_user1')
+        record = RecordFactory(
+            type='A',
+            name='blog.com',
+            content='192.168.1.0',
+            owner=None,
+            service=None,
+        )
+        new_name = 'new-' + record.name
+
+        assert record.service is None
+        response = self.client.patch(
+            reverse('api:v2:record-detail', kwargs={'pk': record.pk}),
+            data={'name': new_name},
+            format='json',
+            **{'HTTP_ACCEPT': 'application/json; version=v2'}
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            response.data,
+            {'owner': ['Record requires owner to be editable. Please contact DNS support.']},  # noqa
+        )
+
+    def test_update_works_when_record_has_no_owner_but_has_service_owner(
+        self
+    ):
+        self.client.login(username='regular_user1', password='regular_user1')
+        so = ServiceOwnerFactory(owner=self.regular_user1)
+        record = RecordFactory(
+            type='A',
+            name='blog.com',
+            content='192.168.1.0',
+            owner=None,
+            domain__owner=self.regular_user1,
+            service=so.service,
+        )
+        new_name = 'new-' + record.name
+
+        assert record.service.owners.exists()
+        response = self.client.patch(
+            reverse('api:v2:record-detail', kwargs={'pk': record.pk}),
+            data={'name': new_name},
+            format='json',
+            **{'HTTP_ACCEPT': 'application/json; version=v2'}
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
     def test_update_record_when_recordrequest_doesnt_exist(self):
         self.client.login(username='super_user', password='super_user')
         record = RecordFactory(
@@ -624,6 +677,31 @@ class TestRecords(BaseApiTestCase):
             RecordRequest.objects.get(pk=record_request.id).record
         self.assertTrue(
             DeleteRequest.objects.get(target_id=record_request.record_id)
+        )
+
+    def test_delete_raise_error_when_record_misses_owner_and_service_owner(
+        self
+    ):
+        self.client.login(username='regular_user1', password='regular_user1')
+        record = RecordFactory(
+            type='A',
+            name='blog.com',
+            content='192.168.1.0',
+            owner=None,
+            service=None,
+        )
+        response = self.client.delete(
+            reverse(
+                'api:v2:record-detail',
+                kwargs={'pk': record.pk},
+            ),
+            format='json',
+            **{'HTTP_ACCEPT': 'application/json; version=v2'}
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            response.data,
+            {'owner': ['Record requires owner to be deletable. Please contact DNS support.']},  # noqa
         )
 
     def test_user_cant_delete_record(self):
