@@ -24,7 +24,7 @@ The application is now developed by `Allegro pyLabs <pylabs@allegro.pl>`
 
 |ReadTheDocs|_
 
-.. image:: https://travis-ci.org/allegro/django-powerdns-dnssec.svg?branch=master
+.. image:: https://travis-ci.org/allegro/django-powerdns-dnssec.svg?branch=develop
     :target: https://travis-ci.org/allegro/django-powerdns-dnssec
 .. |ReadTheDocs| image:: https://readthedocs.org/projects/django-powerdns-dnssec/badge/?version=latest
 .. _ReadTheDocs: http://django-powerdns-dnssec.readthedocs.org/en/latest/?badge=latest
