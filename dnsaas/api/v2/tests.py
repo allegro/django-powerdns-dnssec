@@ -1074,6 +1074,17 @@ class TestIPRecordTest(BaseApiTestCase):
         response = self._send_post_data_to_endpoint()
         self.assertEqual(response.status_code, 409)
 
+    def test_create_record_with_nonexisting_domain(self):
+        self.data.update({
+            'old': {},
+            'new': {
+                'address': '127.0.0.1',
+                'hostname': 'test123.nonexisting.com'
+            }
+        })
+        response = self._send_post_data_to_endpoint()
+        self.assertEqual(response.status_code, 400)
+
     def test_update_record(self):
         target_content = '192.168.1.8'
         target_name = 'test_update_2.{}'.format(self.domain.name)
@@ -1167,6 +1178,27 @@ class TestIPRecordTest(BaseApiTestCase):
         self.assertEqual(record.name, target_name)
         self.assertEqual(record.domain_id, self.domain_2.id)
         self.assertEqual(record_txt.name, target_name)
+
+    def test_update_record_with_nonexisting_domain(self):
+        record = RecordFactory(
+            type='A',
+            content='127.0.0.9',
+            name='update_test_1.{}'.format(self.domain.name),
+            domain=self.domain
+        )
+        self.data.update({
+            'old': {
+                'address': record.content,
+                'hostname': record.name
+            },
+            'new': {
+                'address': '127.0.0.10',
+                'hostname': 'update_test_2.nonexisting.com',
+            },
+            'action': 'update',
+        })
+        response = self._send_post_data_to_endpoint()
+        self.assertEqual(response.status_code, 400)
 
     def test_delete_txt_records_when_record_delete(self):
         record = RecordFactory(
