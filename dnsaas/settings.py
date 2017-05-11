@@ -28,6 +28,10 @@ DATABASES = {
     }
 }
 
+DEFAULT_TIMESTAMP_FORMAT = os.environ.get(
+    'DEFAULT_TIMESTAMP_FORMAT', '%Y-%m-%d %H:%M:%S'
+)
+
 if TESTING:
     EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
     SKIP_MIGRATIONS = os.environ.get('SKIP_MIGRATIONS', None)

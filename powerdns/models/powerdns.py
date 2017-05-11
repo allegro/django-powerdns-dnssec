@@ -1,4 +1,5 @@
 import base64
+import datetime
 import hashlib
 import ipaddress
 import sys
@@ -525,6 +526,12 @@ class Record(
         if self.type in IP_TYPES_FOR_PTR:
             self.number = int(ipaddress.ip_address(self.content))
         super(Record, self).save(*args, **kwargs)
+
+    @property
+    def formatted_change_date(self):
+        if self.change_date:
+            dt = datetime.datetime.fromtimestamp(self.change_date)
+            return dt.strftime(settings.DEFAULT_TIMESTAMP_FORMAT)
 
     def get_ptr(self):
         """Get PTR for `self` record if record is A or AAAA type."""

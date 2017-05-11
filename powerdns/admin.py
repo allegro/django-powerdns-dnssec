@@ -101,7 +101,7 @@ class RecordAdmin(ForeignKeyAutocompleteAdmin, admin.ModelAdmin):
         'owner',
         'ttl',
         'prio',
-        'change_date',
+        'formatted_change_date',
     )
     list_filter = ('type', 'ttl', 'auth', 'domain', 'created', 'modified')
     list_per_page = 250
@@ -109,6 +109,7 @@ class RecordAdmin(ForeignKeyAutocompleteAdmin, admin.ModelAdmin):
     search_fields = ('name', 'content',)
     readonly_fields = (
         'change_date', 'ordername', 'created', 'modified', 'depends_on',
+        'formatted_change_date',
     )
     related_search_fields = {
         'domain': ('name',),
