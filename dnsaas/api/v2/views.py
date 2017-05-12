@@ -226,6 +226,11 @@ class RecordViewSet(OwnerViewSet):
                 serializer.initial_data.keys()
             )
         ]
+        if (
+            'service' not in serializer.validated_data and
+            serializer.instance.service
+        ):
+            data_to_copy.append(('service', serializer.instance.service))
         record_request.copy_records_data(data_to_copy)
         record_request.domain = serializer.instance.domain
         record_request.owner = request.user
@@ -392,13 +397,17 @@ class IPRecordView(APIView):
         domain = hostname2domain(new['hostname'])
         if not domain:
             return status.HTTP_400_BAD_REQUEST, 'Domain not found'
+        service = None
+        if data.get('service_uid'):
+            service = Service.get_service_by_uid(data['service_uid'])
         try:
             Record.objects.create(
                 type='A',
                 name=new['hostname'],
                 domain=domain,
                 number=int(ipaddress.ip_address(new['address'])),
-                content=new['address']
+                content=new['address'],
+                service=service
             )
         except IntegrityError as e:
             return status.HTTP_409_CONFLICT, str(e)

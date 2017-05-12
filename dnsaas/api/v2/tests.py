@@ -1058,6 +1058,29 @@ class TestIPRecordTest(BaseApiTestCase):
         response = self._send_post_data_to_endpoint()
         self.assertEqual(response.status_code, 200)
 
+    def test_add_record_when_service_uid_was_provided(self):
+        service = ServiceFactory()
+        self.data.update({
+            'old': {
+                'address': '127.0.1.1',
+                'hostname': 'test123.example.com'
+            },
+            'new': {
+                'address': '127.0.1.1',
+                'hostname': 'test123.example.com'
+            },
+            'service_uid': service.uid
+        })
+        response = self._send_post_data_to_endpoint()
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(
+            Record.objects.filter(
+                name='test123.example.com',
+                content='127.0.1.1',
+                service=service
+            ).exists()
+        )
+
     def test_create_duplicate_record(self):
         self.data.update({
             'old': {
@@ -1295,7 +1318,7 @@ class TestServiceField(BaseApiTestCase):
             service=None,
         )
 
-    def test_create_record_saves_service(self):
+    def test_create_record_saves_service_by_service_pk(self):
         self.client.login(
             username='owner_with_access', password='owner_with_access'
         )
@@ -1309,7 +1332,27 @@ class TestServiceField(BaseApiTestCase):
                 'name': 'example.com',
                 'content': '192.168.0.1',
                 'service': service.id,
+            },
+        )
 
+        record = Record.objects.get(pk=response.data['id'])
+        self.assertEqual(record.service.id, service.id)
+        self.assertEqual(response.data['service'], service.id)
+
+    def test_create_record_saves_service_by_service_uid(self):
+        self.client.login(
+            username='owner_with_access', password='owner_with_access'
+        )
+        service = ServiceFactory()
+
+        response = self.send_post(
+            reverse('api:v2:record-list'),
+            {
+                'type': 'A',
+                'domain': self.domain.id,
+                'name': 'example.com',
+                'content': '192.168.0.1',
+                'service_uid': service.uid,
             },
         )
 
@@ -1333,7 +1376,12 @@ class TestServiceField(BaseApiTestCase):
         )
 
         self.assertEqual(
-            response.data['service'], ['This field is required.']
+            response.data['service'],
+            [
+                'Service is required. Please provide DNSaaS internal '
+                'service ID in field `service` or global service UID in '
+                'field `service_uid`.'
+            ]
         )
 
     def test_patch_record_works_when_service_is_empty(self):

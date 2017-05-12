@@ -92,10 +92,6 @@ def _trim_whitespace(data_dict, trim_fields):
 
 class RecordSerializer(OwnerSerializer):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['service'].required = settings.REQUIRED_SERVICE_FIELD
-
     class Meta:
         model = Record
         read_only_fields = ('change_date', 'ordername',)
@@ -107,6 +103,18 @@ class RecordSerializer(OwnerSerializer):
     )
     service = PrimaryKeyRelatedField(
         queryset=Service.objects.all(),
+        required=False,
+        allow_null=True,
+        # required by setting REQUIRED_SERVICE_FIELD
+    )
+    service_uid = SlugRelatedField(
+        slug_field='uid',
+        source='service',
+        queryset=Service.objects.all(),
+        allow_null=True,
+        required=False,
+        many=False,
+        read_only=False,
         # required by setting REQUIRED_SERVICE_FIELD
     )
     service_name = serializers.SerializerMethodField()
@@ -122,6 +130,14 @@ class RecordSerializer(OwnerSerializer):
     unrestricted_domain = serializers.BooleanField(
         source='domain.unrestricted', read_only=True
     )
+
+    def is_valid(self, raise_exception=False):
+        if (
+            'service_uid' in self.initial_data and
+            not self.initial_data['service_uid']
+        ):
+            del self.initial_data['service_uid']
+        return super(RecordSerializer, self).is_valid(raise_exception)
 
     def get_service_name(self, obj):
         return obj.service.name if obj.service else ''
@@ -152,6 +168,18 @@ class RecordSerializer(OwnerSerializer):
             raise serializers.ValidationError({
                 'owner': [
                     'Record requires owner to be editable. Please contact DNS support.'  # noqa
+                ]
+            })
+
+    def _validate_service(self, attrs):
+        if not settings.REQUIRED_SERVICE_FIELD or self.instance:
+            return
+        if 'service' not in attrs:
+            raise serializers.ValidationError({
+                'service': [
+                    'Service is required. Please provide DNSaaS internal '
+                    'service ID in field `service` or global service UID in '
+                    'field `service_uid`.'
                 ]
             })
 
@@ -196,6 +224,9 @@ class RecordSerializer(OwnerSerializer):
                         ]
                     })
                 attrs['domain'] = domain
+
+        self._validate_service(attrs)
+
         return attrs
 
 

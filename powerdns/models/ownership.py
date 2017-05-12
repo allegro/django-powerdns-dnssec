@@ -34,6 +34,20 @@ class Service(TimeTrackable):
     def __str__(self):
         return '{} ({})'.format(self.name, self.uid)
 
+    @classmethod
+    def get_service_by_uid(cls, uid):
+        """
+        Return service by UID or None If service with specified UID does not
+        exist.
+        """
+
+        try:
+            service = cls.objects.get(uid=uid)
+        except cls.DoesNotExist:
+            return
+        else:
+            return service
+
 
 class ServiceOwner(TimeTrackable):
     service = models.ForeignKey(Service)
