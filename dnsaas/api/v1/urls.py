@@ -1,3 +1,4 @@
+from django.conf import settings
 from rest_framework.routers import DefaultRouter
 
 from .views import (
@@ -12,12 +13,13 @@ from .views import (
 )
 
 router = DefaultRouter()
-router.register(r'domains', DomainViewSet)
-router.register(r'records', RecordViewSet)
-router.register(r'crypto-keys', CryptoKeyViewSet)
-router.register(r'domains-metadata', DomainMetadataViewSet)
-router.register(r'super-masters', SuperMasterViewSet)
-router.register(r'domain-templates', DomainTemplateViewSet)
-router.register(r'record-templates', RecordTemplateViewSet)
-router.register(r'tsigkeys', TsigKeysViewSet)
+if settings.API_V1_ENABLED:
+    router.register(r'domains', DomainViewSet)
+    router.register(r'records', RecordViewSet)
+    router.register(r'crypto-keys', CryptoKeyViewSet)
+    router.register(r'domains-metadata', DomainMetadataViewSet)
+    router.register(r'super-masters', SuperMasterViewSet)
+    router.register(r'domain-templates', DomainTemplateViewSet)
+    router.register(r'record-templates', RecordTemplateViewSet)
+    router.register(r'tsigkeys', TsigKeysViewSet)
 urlpatterns = router.urls

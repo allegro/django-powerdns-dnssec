@@ -11,6 +11,7 @@ from powerdns.utils import AutoPtrOptions
 
 from .utils import (
     DomainFactory,
+    ServiceFactory,
     RecordFactory,
     user_client,
 )
@@ -18,7 +19,7 @@ from .utils import (
 
 def get_url(model, obj_):
     return reverse(
-        'api:default:' + model + '-detail', kwargs={'pk': obj_.pk}
+        'api:v2:' + model + '-detail', kwargs={'pk': obj_.pk}
     )
 
 
@@ -36,6 +37,7 @@ class TestPermissions(TestCase):
         self.user = get_user_model().objects.create_user(
             'user', 'superuser@example.com', 'password'
         )
+        self.service = ServiceFactory()
         self.su_domain = DomainFactory(
             name='su.example.com',
             owner=self.superuser,
@@ -106,19 +108,20 @@ class TestPermissions(TestCase):
         )
         self.assertEqual(request.status_code, 200)
 
-    def test_user_can_create_domain(self):
-        """Normal user can create domain that is not a child of other domain.
+    def test_user_cant_create_domain(self):
+        """Normal user can't create domain that is not a child of other domain.
         """
         request = self.u_client.post(
-            reverse('api:default:domain-list'),
+            reverse('api:v2:domain-list'),
             {'name': 'example2.com'}
         )
         self.assertEqual(request.status_code, 403)
 
-    def test_user_can_subdomain_her_own(self):
-        """Normal user can create domain that is a child of domain she owns."""
+    def test_user_cant_subdomain_her_own(self):
+        """Normal user can't create domain that is a child of domain she owns.
+        """
         request = self.u_client.post(
-            reverse('api:default:domain-list'),
+            reverse('api:v2:domain-list'),
             {'name': 'subdomain.u.example.com'}
         )
         self.assertEqual(request.status_code, 403)
@@ -127,7 +130,7 @@ class TestPermissions(TestCase):
         """Normal user can't create domain that is a child of not owned domain.
         """
         request = self.u_client.post(
-            reverse('api:default:domain-list'),
+            reverse('api:v2:domain-list'),
             {'name': 'subdomain.su.example.com'}
         )
         self.assertEqual(request.status_code, 403)
@@ -141,25 +144,13 @@ class TestPermissions(TestCase):
         self.assertEqual(request.status_code, 200)
 
     def test_u_cant_edit_other_records(self):
-        """Normal user can't edit record not owned by herself."""
+        """Normal user can't edit record not owned by herself, create request
+        instead."""
         request = self.u_client.patch(
             get_record_url(self.su_record),
             {'content': '192.168.1.3'},
         )
-        self.assertEqual(request.status_code, 403)
-
-    def test_authorised_user_can_edit_other_records(self):
-        """Normal user can edit record not owned by herself if authorised."""
-        Authorisation.objects.create(
-            owner=self.superuser,
-            target=self.su_record,
-            authorised=self.user,
-        )
-        request = self.u_client.patch(
-            get_record_url(self.su_record),
-            {'content': '192.168.1.3'},
-        )
-        self.assertEqual(request.status_code, 200)
+        self.assertEqual(request.status_code, 202)
 
     def test_u_can_edit_her_records(self):
         """Normal user can edit record not owned by herself."""
@@ -172,12 +163,13 @@ class TestPermissions(TestCase):
     def test_su_can_create_records(self):
         """Superuser can create records in domain she doesn't own."""
         request = self.su_client.post(
-            reverse('api:default:record-list'),
+            reverse('api:v2:record-list'),
             {
                 'name': 'site.u.example.com',
                 'content': '192.168.1.4',
                 'type': 'A',
-                'domain': get_domain_url(self.u_domain),
+                'domain': self.u_domain.id,
+                'service': self.service.id,
             },
         )
         self.assertEqual(request.status_code, 201)
@@ -185,12 +177,13 @@ class TestPermissions(TestCase):
     def test_user_can_create_records_in_her_domain(self):
         """Normal user can create records in domain she owns."""
         request = self.su_client.post(
-            reverse('api:default:record-list'),
+            reverse('api:v2:record-list'),
             {
                 'name': 'site.u.example.com',
                 'content': '192.168.1.4',
                 'type': 'A',
-                'domain': get_domain_url(self.u_domain),
+                'domain': self.u_domain.id,
+                'service': self.service.id,
             },
         )
         self.assertEqual(request.status_code, 201)
@@ -199,12 +192,13 @@ class TestPermissions(TestCase):
         """Normal user can create records in domain that is marked as
         'unrestricted'."""
         request = self.u_client.post(
-            reverse('api:default:record-list'),
+            reverse('api:v2:record-list'),
             {
                 'name': 'site.u.example.com',
                 'content': '192.168.1.4',
                 'type': 'A',
-                'domain': get_domain_url(self.unrestricted_domain),
+                'domain': self.unrestricted_domain.id,
+                'service': self.service.id,
             },
         )
         self.assertEqual(request.status_code, 201)
@@ -212,12 +206,13 @@ class TestPermissions(TestCase):
     def test_user_cant_create_records_in_other_domains(self):
         """Normal user can't create records in domain she doesn't own."""
         request = self.u_client.post(
-            reverse('api:default:record-list'),
+            reverse('api:v2:record-list'),
             {
                 'name': 'site.u.example.com',
                 'content': '192.168.1.4',
                 'type': 'A',
-                'domain': get_domain_url(self.su_domain),
+                'domain': self.su_domain.id,
+                'service': self.service.id,
             },
         )
-        self.assertEqual(request.status_code, 400)
+        self.assertEqual(request.status_code, 202)

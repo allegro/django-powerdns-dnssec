@@ -1,7 +1,6 @@
 """Tests for record/domain ownership"""
 
 from django.contrib.auth import get_user_model
-from django.core import mail
 from django.test import TestCase
 
 from powerdns.models import (
@@ -17,6 +16,7 @@ from .utils import (
     DomainFactory,
     RecordDeleteRequestFactory,
     RecordFactory,
+    ServiceFactory,
     ServiceOwnerFactory,
     UserFactory,
 )
@@ -33,22 +33,15 @@ class TestOwnershipBase(TestCase):
             'user2', 'user2@example.com', 'password'
         )
         self.client = user_client(self.user1)
-        mail.outbox = []
+        self.service = ServiceFactory()
 
     def tearDown(self):
         for Model in [Domain, Record, get_user_model()]:
             Model.objects.all().delete()
 
-    def assertOwner(self, request, username, mailed):
-        """Assert the owner in returned data is username and he
-        was/was not mailed"""
+    def assertOwner(self, request, username):
+        """Assert the owner in returned data is username"""
         self.assertEqual(request.data['owner'], username)
-        if len(mail.outbox) > 1:
-            raise RuntimeError('Tests broken. Clean the outbox on teardown')
-        if mailed and len(mail.outbox) == 0:
-            raise AssertionError('Notification not sent, while it should be')
-        if not mailed and len(mail.outbox) == 1:
-            raise AssertionError("Notification sent, while it shouldn't be")
 
 
 class TestDomainOwnership(TestOwnershipBase):
@@ -57,18 +50,18 @@ class TestDomainOwnership(TestOwnershipBase):
     def test_auto_user(self):
         """Domain owner is set to current user if no owner is specified"""
         request = self.client.post(
-            '/api/domains/',
+            '/api/v2/domains/',
             data={'name': 'owned.example.com'},
         )
-        self.assertOwner(request, 'user1', mailed=False)
+        self.assertOwner(request, 'user1')
 
     def test_explicit_user(self):
         """Domain owner is set to explicitly set value"""
         request = self.client.post(
-            '/api/domains/',
+            '/api/v2/domains/',
             data={'name': 'owned.example.com', 'owner': 'user2'},
         )
-        self.assertOwner(request, 'user2', mailed=True)
+        self.assertOwner(request, 'user2')
 
 
 class TestRecordOwnership(TestOwnershipBase):
@@ -81,29 +74,31 @@ class TestRecordOwnership(TestOwnershipBase):
     def test_auto_user(self):
         """Record owner is set to current user if no owner is specified"""
         request = self.client.post(
-            '/api/records/',
+            '/api/v2/records/',
             data={
-                'domain': '/api/domains/{}/'.format(self.domain.pk),
+                'domain': self.domain.pk,
                 'type': 'CNAME',
                 'name': 'www.owned.example.com',
                 'content': 'blog.owned.example.com',
+                'service': self.service.id,
             },
         )
-        self.assertOwner(request, 'user1', mailed=False)
+        self.assertOwner(request, 'user1')
 
     def test_explicit_user(self):
         """Record owner is set to explicitly set value"""
         request = self.client.post(
-            '/api/records/',
+            '/api/v2/records/',
             data={
-                'domain': '/api/domains/{}/'.format(self.domain.pk),
+                'domain': self.domain.pk,
                 'type': 'CNAME',
                 'name': 'www.owned.example.com',
                 'content': 'blog.owned.example.com',
+                'service': self.service.id,
                 'owner': 'user2',
             },
         )
-        self.assertOwner(request, 'user2', mailed=True)
+        self.assertOwner(request, 'user2')
 
 
 class TestCreateRecordAccessByServiceOwnership(TestCase):

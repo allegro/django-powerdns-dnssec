@@ -248,3 +248,8 @@ if not TESTING:
         from settings_local import *  # noqa
     except ImportError:
         pass
+
+
+# Currently old API v1 is disabled by default, it will be removed in future
+# release.
+API_V1_ENABLED = os.environ.get('API_V1_ENABLED', False)
