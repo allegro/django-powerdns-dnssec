@@ -798,16 +798,16 @@ class TestRecords(BaseApiTestCase):
 class TestRecordValidation(BaseApiTestCase):
     def setUp(self):
         super().setUp()
+        self.client.login(username='super_user', password='super_user')
+        self.domain = DomainFactory(name='example.com', owner=self.super_user)
         self.default_data = {
             'service': ServiceFactory().id,
+            'domain': self.domain.id,
         }
 
     def test_validation_error_when_A_record_name_is_bad(self):
-        self.client.login(username='super_user', password='super_user')
-        domain = DomainFactory(name='example.com', owner=self.super_user)
         self.default_data.update({
             'type': 'A',
-            'domain': domain.id,
             'name': 'this-is-bad-bad-value-for-name',
             'content': 'this-is-bad-bad-value-for-content',
         })
@@ -819,12 +819,9 @@ class TestRecordValidation(BaseApiTestCase):
         self.assertTrue(response.data['name'])
 
     def test_validation_error_when_A_record_content_is_bad(self):
-        self.client.login(username='super_user', password='super_user')
-        domain = DomainFactory(name='example.com', owner=self.super_user)
         self.default_data.update({
             'type': 'A',
-            'domain': domain.id,
-            'name': 'www.' + domain.name,
+            'name': 'www.' + self.domain.name,
             'content': 'ThisIsBadBadValueForContent',
         })
         response = self.client.post(
@@ -833,6 +830,21 @@ class TestRecordValidation(BaseApiTestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertTrue(response.data['content'])
+
+    def test_validation_error_when_CNAME_record_name_and_content_is_the_same(
+        self
+    ):
+        name = 'abc.' + self.domain.name,
+        self.default_data.update({
+            'type': 'CNAME',
+            'name': name,
+            'content': name,
+        })
+        response = self.client.post(
+            reverse('api:v2:record-list'), self.default_data, format='json',
+            **{'HTTP_ACCEPT': 'application/json; version=v2'}
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
 class TestObtainAuthToken(TestCase):

@@ -44,6 +44,19 @@ validate_dn_optional_dot = RegexValidator(
 validate_time = RegexValidator('^[0-9]+$')
 
 
+def validate_name_equal_to_content(name, content):
+    """Validator checks if record name is not equal to content
+
+    In theory NS record can contain same name and content, and with
+    glue record configuration it will work. However it is not good
+    practice so we are not allowing such configuration.
+    """
+    if name == content:
+        raise ValidationError(
+            'Cannot create record with the same name and content'
+        )
+
+
 def validate_soa(value):
     """Validator for a correct SOA record"""
     try:
@@ -329,6 +342,7 @@ class RecordLike(models.Model):
             validate_soa(content)
         elif type_ in DOMAIN_NAME_RECORDS:
             validate_domain_name(content)
+            validate_name_equal_to_content(self.get_field('name'), content)
 
     def validate_for_conflicts(self):
         """Ensure this record doesn't conflict with other records."""
