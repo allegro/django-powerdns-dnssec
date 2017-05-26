@@ -200,9 +200,30 @@ class TestAutoPtr(TestCase):
             name='1.1.168.192.in-addr.arpa'
         )
 
-    def test_ptr_domain_exists(self):
-        """A PTR record with 'only-if-domain' is created if domain exists"""
+    def test_should_create_ptr_when_high_possible_level_domain_exists(self):
+        """
+        A PTR record with 'only-if-domain' is created if high level domain
+        exists.
+        """
         domain = DomainFactory(name='1.168.192.in-addr.arpa')
+        RecordFactory(
+            domain=self.ptr_if_domain,
+            type='A',
+            name='site.example.com',
+            content='192.168.1.1',
+        )
+        assert_does_exist(
+            Record,
+            domain=domain,
+            name='1.1.168.192.in-addr.arpa'
+        )
+
+    def test_should_create_ptr_when_low_possible_level_domain_exists(self):
+        """
+        A PTR record with 'only-if-domain' is created if low level domain
+        exists.
+        """
+        domain = DomainFactory(name='192.in-addr.arpa')
         RecordFactory(
             domain=self.ptr_if_domain,
             type='A',
@@ -315,6 +336,22 @@ class TestAutoPtr(TestCase):
         )
         self.assertEqual(domain.type, 'NATIVE')
         self.assertTrue(domain.get_soa().content.endswith('600'))
+        assert_does_exist(
+            Record,
+            domain=domain,
+            name='b.a.7.5.8.2.4.1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa',  # noqa
+            owner=self.user,
+        )
+
+    def test_create_ptr_for_aaaa_record_with_existing_domain(self):
+        domain = DomainFactory(name='8.b.d.0.1.0.0.2.ip6.arpa')
+        RecordFactory(
+            domain=self.ptr_domain,
+            type='AAAA',
+            name='site.example.com',
+            content='2001:0db8:0:0::1428:57ab',
+            owner=self.user,
+        )
         assert_does_exist(
             Record,
             domain=domain,

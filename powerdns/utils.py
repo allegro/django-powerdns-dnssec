@@ -14,6 +14,7 @@ from django.core.validators import (
     RegexValidator
 )
 from django.db import models
+from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
 from threadlocals.threadlocals import get_current_user
 from dj.choices import Choices
@@ -433,3 +434,34 @@ def patterns(prefix, *args):
                         "objects")
     else:
         return list(args)
+
+
+def get_matching_domains(base_domain_name):
+    """
+    Returns matching to provided name Domain object instances.
+
+    Example:
+    >>> get_matching_domains(30.20.10.in-addr.arpa)
+    [
+        <Domain: 30.20.10.in-addr.arpa>, <Domain: 20.10.in-addr.arpa>,
+        <Domain: 10.in-addr.arpa>
+    ]
+    """
+    from powerdns.models import Domain
+
+    q_filters = Q(name__exact=base_domain_name)
+    chunks = base_domain_name.split('.')[1:-2]
+    suffix = '.'.join(base_domain_name.split('.')[-2:])
+
+    for i, chunk in enumerate(chunks):
+        dn = '{content}.{suffix}'.format(
+            content='.'.join(chunks[i:]),
+            suffix=suffix
+        )
+        q_filters |= Q(name__exact=dn)
+
+    matching_domains = Domain.objects.filter(q_filters)
+    matching_domains = sorted(
+        matching_domains, key=lambda domain: len(domain.name), reverse=True
+    )
+    return matching_domains

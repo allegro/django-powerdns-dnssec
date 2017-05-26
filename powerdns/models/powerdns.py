@@ -20,6 +20,7 @@ from threadlocals.threadlocals import get_current_user
 from .ownership import OwnershipByService, OwnershipType
 from ..utils import (
     AutoPtrOptions,
+    get_matching_domains,
     is_authorised,
     is_owner,
     no_object,
@@ -585,32 +586,33 @@ class Record(
         """
         if self.type not in IP_TYPES_FOR_PTR:
             raise ValueError(_('Creating PTR only for A or AAAA records'))
-        number, domain_name = to_reverse(self.content)
-        if self.domain.auto_ptr == AutoPtrOptions.ALWAYS:
-            domain, created = Domain.objects.get_or_create(
-                name=domain_name,
-                defaults={
-                    'template': (
-                        self.domain.reverse_template or
-                        get_default_reverse_domain()
-                    ),
-                    'type': self.domain.type,
-                }
-            )
-        elif self.domain.auto_ptr == AutoPtrOptions.ONLY_IF_DOMAIN:
-            try:
-                domain = Domain.objects.get(name=domain_name)
-            except Domain.DoesNotExist:
+
+        number, base_domain_name = to_reverse(self.content)
+        matching_domains = get_matching_domains(base_domain_name)
+
+        if not matching_domains:
+            if self.domain.auto_ptr == AutoPtrOptions.ALWAYS:
+                domain, created = Domain.objects.get_or_create(
+                    name=base_domain_name,
+                    defaults={
+                        'template': (
+                            self.domain.reverse_template or
+                            get_default_reverse_domain()
+                        ),
+                        'type': self.domain.type
+                    }
+                )
+            else:
                 return
         else:
-            return
+            domain = matching_domains[0]
 
         self.delete_ptr()
         Record.objects.create(
             type='PTR',
             domain=domain,
             service=self.service,
-            name='.'.join([number, domain_name]),
+            name='.'.join([number, base_domain_name]),
             content=self.name,
             depends_on=self,
             owner=self.owner,
