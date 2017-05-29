@@ -123,7 +123,6 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'threadlocals.middleware.ThreadLocalMiddleware',
-    'dnsaas.api.middleware.VersionSwitch',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
@@ -248,8 +247,3 @@ if not TESTING:
         from settings_local import *  # noqa
     except ImportError:
         pass
-
-
-# Currently old API v1 is disabled by default, it will be removed in future
-# release.
-API_V1_ENABLED = os.environ.get('API_V1_ENABLED', False)
