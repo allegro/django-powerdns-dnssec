@@ -164,7 +164,6 @@ TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 NOSE_ARGS = [
     '-c.noserc',
     '--verbosity=2',
-    '--exclude=integration-tests',  # To be run in docker
 ]
 
 DNSAAS_DEFAULT_REVERSE_DOMAIN_TEMPLATE = 'reverse'
