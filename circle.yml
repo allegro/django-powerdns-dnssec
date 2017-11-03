@@ -1,9 +1,0 @@
-machine:
-    services:
-        - docker
-dependencies:
-    override:
-        - "true" # If we don't override, Circle will try to install in p2.7
-test:
-    override:
-        - cd integration-tests && docker-compose run runner

@@ -13,6 +13,3 @@ domain templates to reduce the amount of work needed.
    name of an actual domain.
 3. When creating a domain - select the appropriate template. The predefined
    records will be created automatically.
-
-As an example of a domain configuration see the ``reverse`` domain that is
-available in ``docker-compose`` installation.
