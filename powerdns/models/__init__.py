@@ -1,4 +1,3 @@
-from .authorisations import *  # noqa
 from .ownership import *  # noqa
 from .powerdns import *  # noqa
 from .requests import *  # noqa

@@ -20,18 +20,18 @@ with open('version.json') as f:
     version = '.'.join(str(part) for part in json.load(f))
 
 setup(
-    name = 'django-powerdns-dnssec',
-    version = version,
-    url = 'https://github.com/allegro/django-powerdns-dnssec',
-    license = 'BSD',
-    description = 'PowerDNS administration app for Django',
-    long_description = long_description,
-    author = 'Peter Nixon, Łukasz Langa, pylabs Team',
-    author_email = 'pylabs@allegro.pl',
-    packages = [p for p in find_packages() if not p.startswith('example')],
-    include_package_data = True,
-    platforms = 'any',
-    classifiers = [
+    name='django-powerdns-dnssec',
+    version=version,
+    url='https://github.com/allegro/django-powerdns-dnssec',
+    license='BSD',
+    description='PowerDNS administration app for Django',
+    long_description=long_description,
+    author='Peter Nixon, Łukasz Langa, pylabs Team',
+    author_email='pylabs@allegro.pl',
+    packages=[p for p in find_packages() if not p.startswith('example')],
+    include_package_data=True,
+    platforms='any',
+    classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Framework :: Django',
         'Intended Audience :: Developers',
@@ -47,15 +47,14 @@ setup(
         'Topic :: Internet :: WWW/HTTP :: WSGI :: Application',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
-    install_requires = [
+    install_requires=[
         'Django>=1.8.13',
         'django-extensions>=1.5.5',
         'django-nose>=1.4',
         'dj.choices>=0.10.0',
         'django-threadlocals>=0.8',
-        'rules>=0.4',
     ],
-    extras_require = {
+    extras_require={
         'docs': [
             'docutils>=0.12',
         ],
@@ -78,9 +77,9 @@ setup(
             'factory_boy>=2.5.2',
         ]
     },
-    tests_require = [
+    tests_require=[
         'django-powerdns-dnssec[dnsaas]',
         'django-powerdns-dnssec[tests]',
     ],
-    zip_safe = False,  # if only because of the readme file
+    zip_safe=False,  # if only because of the readme file
 )

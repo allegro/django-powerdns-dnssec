@@ -5,7 +5,6 @@ import ipaddress
 import sys
 import time
 
-import rules
 from dj.choices.fields import ChoiceField
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericRelation
@@ -15,15 +14,11 @@ from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
 from django.utils.deconstruct import deconstructible
-from threadlocals.threadlocals import get_current_user
 
 from .ownership import OwnershipByService, OwnershipType
 from ..utils import (
     AutoPtrOptions,
     get_matching_domains,
-    is_authorised,
-    is_owner,
-    no_object,
     Owned,
     RecordLike,
     TimeTrackable,
@@ -52,10 +47,6 @@ RECORD_A_TYPES = IP_TYPES_FOR_PTR = {'A', 'AAAA'}
 # would be unrecoverable. Thus this little helper function.
 
 DEFAULT_REVERSE_DOMAIN_TEMPLATE = None
-
-
-can_edit = rules.is_superuser | no_object | is_owner | is_authorised
-can_delete = rules.is_superuser | is_owner | is_authorised
 
 
 class PreviousStateMixin(models.Model):
@@ -111,37 +102,12 @@ b32_trans = maketrans_func(
     '0123456789ABCDEFGHIJKLMNOPQRSTUV'
 )
 
-# Validator for the domain names only in RFC-1035
-# PowerDNS considers the whole zone to be invalid if any of the records end
-# with a period so this custom validator is used to catch them
 
-
-# This is a class for historical reasons in order not to break migrations
 @deconstructible
 class SubDomainValidator():
     def __call__(self, domain_name):
-        """Validates if a not authorised user tries to subdomain a domain she
-        can't edit"""
-        user = get_current_user()
-        if rules.is_superuser(user):
-            return domain_name
-        domain_bits = domain_name.split('.')
-        for i in range(-len(domain_bits), 0):
-            super_domain = '.'.join(domain_bits[i:])
-            try:
-                super_domain = Domain.objects.get(name=super_domain)
-            except Domain.DoesNotExist:
-                continue
-            if can_edit(user, super_domain):
-                # ALLOW - this user owns a superdomain
-                return domain_name
-            else:
-                # DENY - this user doesn't own a superdomain
-                raise ValidationError(
-                    "You don't have a permission to create a subdomain in {}".
-                    format(super_domain)
-                )
-        # Fallthrough - ALLOW - we don't manage any superdomain
+        """This class is here only to NOT break old migrations.
+        It'll be removed in future releases."""
         return domain_name
 
     def __eq__(self, other):
@@ -162,7 +128,7 @@ class Domain(PreviousStateMixin, OwnershipByService, TimeTrackable, Owned):
         _("name"),
         unique=True,
         max_length=255,
-        validators=[validate_domain_name, SubDomainValidator()]
+        validators=[validate_domain_name]
     )
     master = models.CharField(
         _("master"), max_length=128, blank=True, null=True,
@@ -259,9 +225,7 @@ class Domain(PreviousStateMixin, OwnershipByService, TimeTrackable, Owned):
             user.is_superuser or
             self.unrestricted or
             user == self.owner or
-            user.id in self.authorisations.values_list(
-                'authorised', flat=True
-            ) or self.has_access_by_service(user)
+            self.has_access_by_service(user)
         )
 
     def as_empty_history(self):
@@ -302,12 +266,6 @@ class DomainOwner(models.Model):
 
     class Meta:
         unique_together = (("domain", "owner", "ownership_type"),)
-
-
-rules.add_perm('powerdns', rules.is_authenticated)
-rules.add_perm('powerdns.add_domain', rules.is_superuser)
-rules.add_perm('powerdns.change_domain', can_edit)
-rules.add_perm('powerdns.delete_domain', can_delete)
 
 
 class Record(
@@ -624,9 +582,7 @@ class Record(
         return (
             user.is_superuser or
             user == self.owner or
-            user.id in self.authorisations.values_list(
-                'authorised', flat=True
-            ) or self._has_access_by_service(user)
+            self._has_access_by_service(user)
         )
 
     def as_empty_history(self):
@@ -650,11 +606,6 @@ class Record(
             'ttl':  self.ttl or '',
             'type':  self.type or '',
         }
-
-
-rules.add_perm('powerdns.add_record', rules.is_authenticated)
-rules.add_perm('powerdns.change_record', rules.is_authenticated)
-rules.add_perm('powerdns.delete_record', rules.is_authenticated)
 
 
 # When we delete a record, the zone changes, but there no change_date is

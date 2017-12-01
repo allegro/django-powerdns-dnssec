@@ -70,8 +70,7 @@ class OwnerViewSet(FiltersMixin, ModelViewSet):
         if serializer.validated_data.get('owner') is None:
             serializer.save(owner=self.request.user)
         else:
-            object_ = serializer.save()
-            object_.email_owner(self.request.user)
+            serializer.save()
 
 
 class DomainFilter(django_filters.FilterSet):

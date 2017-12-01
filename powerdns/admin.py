@@ -225,11 +225,12 @@ class DomainRequestAdmin(ReadonlyAdminMixin, admin.ModelAdmin):
     search_fields = ('domain__name',)
 
 
-class RecordRequestAdmin(ReadonlyAdminMixin, admin.ModelAdmin):
+class RecordRequestAdmin(admin.ModelAdmin):
     model = RecordRequest
     list_display = ['target_' + field for field in RECORD_LIST_FIELDS] + \
                    ['state', 'created']
     list_filter = ('state',)
+    readonly_fields = ('created',)
     fields = [
         'domain',
         'key',

@@ -6,7 +6,6 @@ from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 
-from powerdns.models import Authorisation
 from powerdns.utils import AutoPtrOptions
 
 from .utils import (
@@ -87,26 +86,13 @@ class TestPermissions(TestCase):
         )
         self.assertEqual(request.status_code, 403)
 
-    def test_authorised_user_can_edit_other_domains(self):
-        """Normal user can edit domains she doesn't own if authorised."""
-        Authorisation.objects.create(
-            owner=self.superuser,
-            target=self.su_domain,
-            authorised=self.user
-        )
-        request = self.u_client.patch(
-            get_domain_url(self.su_domain),
-            {'type': 'NATIVE'},
-        )
-        self.assertEqual(request.status_code, 200)
-
-    def test_user_can_edit_her_domains(self):
-        """Normal user can edit domains she owns."""
+    def test_user_cant_edit_her_domains(self):
+        """Normal user cant edit even owned domains."""
         request = self.u_client.patch(
             get_domain_url(self.u_domain),
             {'type': 'NATIVE'},
         )
-        self.assertEqual(request.status_code, 200)
+        self.assertEqual(request.status_code, 403)
 
     def test_user_cant_create_domain(self):
         """Normal user can't create domain that is not a child of other domain.

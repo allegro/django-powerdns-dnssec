@@ -10,7 +10,6 @@ from dj.choices.fields import ChoiceField
 from django.contrib.contenttypes.fields import ContentType, GenericForeignKey
 from django.utils.translation import ugettext_lazy as _
 from threadlocals.threadlocals import get_current_user
-import rules
 
 from .powerdns import (
     Domain,
@@ -156,9 +155,6 @@ class DeleteRequest(Request):
         )
 
 
-rules.add_perm('powerdns.add_deleterequest', rules.is_authenticated)
-
-
 class ChangeCreateRequest(Request):
     """Abstract change/create request"""
 
@@ -231,7 +227,7 @@ class ChangeCreateRequest(Request):
             elif 'target_' + field_name in all_fields:
                 setattr(self, 'target_' + field_name, value)
             else:
-                log.warning("Unknown field")
+                log.warning("Unknown field {}:{}".format(field_name, value))
 
 
 class DomainRequest(ChangeCreateRequest):
@@ -352,10 +348,6 @@ class DomainRequest(ChangeCreateRequest):
         return {}
 
 
-# rules.add_perm('powerdns', rules.is_authenticated)
-rules.add_perm('powerdns.add_domainrequest', rules.is_authenticated)
-
-
 class RecordRequest(ChangeCreateRequest, RecordLike):
 
     copy_fields = [
@@ -470,8 +462,8 @@ class RecordRequest(ChangeCreateRequest, RecordLike):
             'owner': getattr(self.target_owner, 'username', ''),
             'prio': self.target_prio or '',
             'remarks': self.target_remarks or '',
-            'ttl':  self.target_ttl or '',
-            'type':  self.target_type or '',
+            'ttl': self.target_ttl or '',
+            'type': self.target_type or '',
         }
 
     def is_sec_acceptance_required(self):
@@ -488,6 +480,3 @@ class RecordRequest(ChangeCreateRequest, RecordLike):
             ) and
             self.domain.require_sec_acceptance
         )
-
-
-rules.add_perm('powerdns.add_recordrequest', rules.is_authenticated)
