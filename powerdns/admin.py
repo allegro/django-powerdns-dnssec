@@ -1,10 +1,15 @@
 from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
-from django.contrib.admin.widgets import AdminRadioSelect
-from django.contrib.auth.admin import UserAdmin
-from django.contrib.auth import get_user_model
 from django.db import models
-from django.forms import NullBooleanSelect
+from django.utils.translation import ugettext_lazy as _
+
+from powerdns.forms import (
+    CryptoKeyForm,
+    DomainForm,
+    DomainMetadataForm,
+    RecordForm,
+    RecordRequestForm,
+)
 from powerdns.models import (
     CryptoKey,
     DeleteRequest,
@@ -20,8 +25,6 @@ from powerdns.models import (
     SuperMaster,
     TsigKey,
 )
-from django.utils.translation import ugettext_lazy as _
-from django_extensions.admin import ForeignKeyAutocompleteAdmin
 
 
 RECORD_LIST_FIELDS = (
@@ -68,7 +71,8 @@ class DomainOwnerInline(admin.TabularInline):
     raw_id_fields = ('owner',)
 
 
-class DomainAdmin(ForeignKeyAutocompleteAdmin, admin.ModelAdmin):
+@admin.register(Domain)
+class DomainAdmin(admin.ModelAdmin):
     inlines = [DomainMetadataInline, DomainOwnerInline]
     list_display = (
         'name',
@@ -85,13 +89,11 @@ class DomainAdmin(ForeignKeyAutocompleteAdmin, admin.ModelAdmin):
     search_fields = ('name',)
     radio_fields = {'type': admin.HORIZONTAL}
     readonly_fields = ('notified_serial', 'created', 'modified')
+    form = DomainForm
 
 
-class NullBooleanRadioSelect(NullBooleanSelect, AdminRadioSelect):
-    pass
-
-
-class RecordAdmin(ForeignKeyAutocompleteAdmin, admin.ModelAdmin):
+@admin.register(Record)
+class RecordAdmin(admin.ModelAdmin):
     list_select_related = ('depends_on', 'domain', 'owner', 'template',)
     list_display = (
         'name',
@@ -111,22 +113,15 @@ class RecordAdmin(ForeignKeyAutocompleteAdmin, admin.ModelAdmin):
         'change_date', 'ordername', 'created', 'modified', 'depends_on',
         'formatted_change_date',
     )
-    related_search_fields = {
-        'domain': ('name',),
-    }
-    formfield_overrides = {
-        models.NullBooleanField: {
-            'widget': NullBooleanRadioSelect(
-                attrs={'class': 'radiolist inline'}
-            ),
-        },
-    }
+    form = RecordForm
 
 
-class RecordTemplateAdmin(ForeignKeyAutocompleteAdmin):
+@admin.register(RecordTemplate)
+class RecordTemplateAdmin(admin.ModelAdmin):
     list_display = RECORD_LIST_FIELDS
 
 
+@admin.register(SuperMaster)
 class SuperMasterAdmin(admin.ModelAdmin):
     list_display = ('ip', 'nameserver', 'account',)
     list_filter = ('ip', 'account', 'created', 'modified')
@@ -134,38 +129,29 @@ class SuperMasterAdmin(admin.ModelAdmin):
     readonly_fields = ('created', 'modified')
 
 
-class DomainMetadataAdmin(ForeignKeyAutocompleteAdmin):
+@admin.register(DomainMetadata)
+class DomainMetadataAdmin(admin.ModelAdmin):
     list_select_related = ('domain',)
     list_display = ('domain', 'kind', 'content',)
     list_filter = ('kind', 'domain', 'created', 'modified')
     list_per_page = 250
     list_filter = ('created', 'modified')
     readonly_fields = ('created', 'modified')
-    related_search_fields = {
-        'domain': ('name',),
-    }
     save_on_top = True
     search_fields = ('content',)
+    form = DomainMetadataForm
 
 
-class CryptoKeyAdmin(ForeignKeyAutocompleteAdmin):
+@admin.register(CryptoKey)
+class CryptoKeyAdmin(admin.ModelAdmin):
     list_display = ('domain', 'flags', 'active', 'content',)
     list_filter = ('active', 'domain', 'created', 'modified')
     list_select_related = ('domain',)
     list_per_page = 250
     readonly_fields = ('created', 'modified')
-    related_search_fields = {
-        'domain': ('name',),
-    }
     save_on_top = True
     search_fields = ('content',)
-    formfield_overrides = {
-        models.NullBooleanField: {
-            'widget': NullBooleanRadioSelect(
-                attrs={'class': 'radiolist inline'}
-            ),
-        },
-    }
+    form = CryptoKeyForm
 
 
 class RecordTemplateInline(admin.StackedInline):
@@ -173,7 +159,8 @@ class RecordTemplateInline(admin.StackedInline):
     extra = 1
 
 
-class DomainTemplateAdmin(ForeignKeyAutocompleteAdmin):
+@admin.register(DomainTemplate)
+class DomainTemplateAdmin(admin.ModelAdmin):
     inlines = [RecordTemplateInline]
     list_display = ['name', 'is_public_domain']
 
@@ -192,6 +179,7 @@ class ReadonlyAdminMixin(object):
         return False
 
 
+@admin.register(DeleteRequest)
 class DeleteRequestAdmin(ReadonlyAdminMixin, admin.ModelAdmin):
     model = DeleteRequest
     list_display = ['content_type', 'state', 'created']
@@ -200,6 +188,7 @@ class DeleteRequestAdmin(ReadonlyAdminMixin, admin.ModelAdmin):
     radio_fields = {'content_type': admin.HORIZONTAL}
 
 
+@admin.register(DomainRequest)
 class DomainRequestAdmin(ReadonlyAdminMixin, admin.ModelAdmin):
     model = DomainRequest
     list_display = ['domain', 'state', 'created']
@@ -225,6 +214,7 @@ class DomainRequestAdmin(ReadonlyAdminMixin, admin.ModelAdmin):
     search_fields = ('domain__name',)
 
 
+@admin.register(RecordRequest)
 class RecordRequestAdmin(admin.ModelAdmin):
     model = RecordRequest
     list_display = ['target_' + field for field in RECORD_LIST_FIELDS] + \
@@ -249,6 +239,7 @@ class RecordRequestAdmin(admin.ModelAdmin):
         'target_type',
     ]
     search_fields = ('domain__name', 'record__name', 'record__content')
+    form = RecordRequestForm
 
 
 class OwnerInline(admin.TabularInline):
@@ -270,21 +261,6 @@ class ServiceOwnerAdmin(admin.ModelAdmin):
     raw_id_fields = ("service", 'owner')
 
 
-# walkaround long load of user change_view until autocomplete-light3 gets
-# integrated
-UserAdmin.filter_horizontal = ()
-admin.site.unregister(get_user_model())
-admin.site.register(get_user_model(), UserAdmin)
-
-
-admin.site.register(Domain, DomainAdmin)
-admin.site.register(Record, RecordAdmin)
-admin.site.register(RecordTemplate, RecordTemplateAdmin)
-admin.site.register(SuperMaster, SuperMasterAdmin)
-admin.site.register(DomainMetadata, DomainMetadataAdmin)
-admin.site.register(CryptoKey, CryptoKeyAdmin)
-admin.site.register(TsigKey)
-admin.site.register(DomainTemplate, DomainTemplateAdmin)
-admin.site.register(DomainRequest, DomainRequestAdmin)
-admin.site.register(RecordRequest, RecordRequestAdmin)
-admin.site.register(DeleteRequest, DeleteRequestAdmin)
+@admin.register(TsigKey)
+class TsigKeyAdmin(admin.ModelAdmin):
+    list_display = ['name', 'algorithm']

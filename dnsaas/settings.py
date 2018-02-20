@@ -137,23 +137,27 @@ WSGI_APPLICATION = 'dnsaas.wsgi.application'
 TEMPLATE_DIRS = ()
 
 INSTALLED_APPS = (
+    'dal',
+    'dal_select2',
+    'django.contrib.admin',
+    'django.contrib.admindocs',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'raven.contrib.django.raven_compat',
+
     'django_extensions',
     'django_nose',
+    'raven.contrib.django.raven_compat',
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_swagger',
+
     'powerdns',
     'dnsaas',
     'ui',
-    'django.contrib.admin',
-    'django.contrib.admindocs',
 )
 
 AUTHENTICATION_BACKENDS = (
