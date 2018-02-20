@@ -1,10 +1,10 @@
 from django.conf.urls import include, url
 from django.contrib import admin
-from django.contrib.auth import get_user_model
 from django.contrib.admin.views.decorators import staff_member_required
 from django.conf import settings
 
 from dal import autocomplete
+from dnsaas.autocompletes import UserAutocomplete
 from dnsaas.utils import VERSION
 from powerdns.models import (
     Domain,
@@ -28,7 +28,7 @@ autocomplete_urlpatterns = [
     url(
         'users/$',
         staff_member_required(
-            autocomplete.Select2QuerySetView.as_view(model=get_user_model())
+            UserAutocomplete.as_view()
         ),
         name='users',
     ),
