@@ -9,7 +9,7 @@ from django.core.urlresolvers import reverse
 from django.db import IntegrityError
 from django.db.models import Prefetch, Q
 
-from powerdns.utils import hostname2domain
+from powerdns.utils import find_domain_for_record
 from powerdns.models import (
     RECORD_A_TYPES,
     CryptoKey,
@@ -393,7 +393,7 @@ class IPRecordView(APIView):
 
     def _add_record(self, data):
         new = data['new']
-        domain = hostname2domain(new['hostname'])
+        domain = find_domain_for_record(new['hostname'])
         if not domain:
             return status.HTTP_400_BAD_REQUEST, 'Domain not found'
         service = None
@@ -424,7 +424,7 @@ class IPRecordView(APIView):
             return self._delete_record(dict(
                 address=old['address'], hostname=old['hostname']
             ))
-        domain = hostname2domain(new['hostname'])
+        domain = find_domain_for_record(new['hostname'])
         if not domain:
             return status.HTTP_400_BAD_REQUEST, 'Domain not found'
         if record:

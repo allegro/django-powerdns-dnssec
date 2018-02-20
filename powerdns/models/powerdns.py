@@ -18,7 +18,7 @@ from django.utils.deconstruct import deconstructible
 from .ownership import OwnershipByService, OwnershipType
 from ..utils import (
     AutoPtrOptions,
-    get_matching_domains,
+    find_domain_for_record,
     Owned,
     RecordLike,
     TimeTrackable,
@@ -546,9 +546,9 @@ class Record(
             raise ValueError(_('Creating PTR only for A or AAAA records'))
 
         number, base_domain_name = to_reverse(self.content)
-        matching_domains = get_matching_domains(base_domain_name)
+        domain = find_domain_for_record(base_domain_name)
 
-        if not matching_domains:
+        if not domain:
             if self.domain.auto_ptr == AutoPtrOptions.ALWAYS:
                 domain, created = Domain.objects.get_or_create(
                     name=base_domain_name,
@@ -562,8 +562,6 @@ class Record(
                 )
             else:
                 return
-        else:
-            domain = matching_domains[0]
 
         self.delete_ptr()
         Record.objects.create(
@@ -592,8 +590,8 @@ class Record(
             'owner': '',
             'prio': '',
             'remarks': '',
-            'ttl':  '',
-            'type':  '',
+            'ttl': '',
+            'type': '',
         }
 
     def as_history_dump(self):
@@ -603,8 +601,8 @@ class Record(
             'owner': getattr(self.owner, 'username', ''),
             'prio': self.prio or '',
             'remarks': self.remarks or '',
-            'ttl':  self.ttl or '',
-            'type':  self.type or '',
+            'ttl': self.ttl or '',
+            'type': self.type or '',
         }
 
 

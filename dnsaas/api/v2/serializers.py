@@ -3,7 +3,7 @@ import ipaddress
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from powerdns.utils import hostname2domain
+from powerdns.utils import find_domain_for_record
 from powerdns.models import (
     RECORD_A_TYPES,
     CryptoKey,
@@ -214,7 +214,7 @@ class RecordSerializer(OwnerSerializer):
         if not self.instance:
             # get domain from name only for creation
             if not domain:
-                domain = hostname2domain(attrs['name'])
+                domain = find_domain_for_record(attrs['name'])
                 if not domain:
                     raise serializers.ValidationError({
                         'domain': [

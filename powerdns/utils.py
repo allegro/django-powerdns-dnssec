@@ -11,7 +11,6 @@ from django.core.validators import (
     RegexValidator
 )
 from django.db import models
-from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
 from dj.choices import Choices
 
@@ -314,29 +313,6 @@ def flat_dict_diff(old_dict, new_dict):
     return diff_result
 
 
-def hostname2domain(hostname):
-    """
-    Find longest existing domain within `hostname` or None
-
-    Example:
-        hostname = sub-domain.on.existing-domain.com
-        and only existing-domain.com exists
-    Then it returns `existing-domain.com` as db object.
-    """
-    from .models import Domain
-
-    domain = None
-    parts = hostname.split('.')
-    while parts:
-        try:
-            domain = Domain.objects.get(name='.'.join(parts))
-            break
-        except Domain.DoesNotExist:
-            pass
-        parts = parts[1:]
-    return domain
-
-
 def patterns(prefix, *args):
     if VERSION < (1, 9):
         from django.conf.urls import patterns as django_patterns
@@ -348,32 +324,30 @@ def patterns(prefix, *args):
         return list(args)
 
 
-def get_matching_domains(base_domain_name):
+def find_domain_for_record(record_name):
     """
     Returns matching to provided name Domain object instances.
 
-    Example:
+    Example when 20.10.in-addr.arpa domain exist:
     >>> get_matching_domains(30.20.10.in-addr.arpa)
-    [
-        <Domain: 30.20.10.in-addr.arpa>, <Domain: 20.10.in-addr.arpa>,
-        <Domain: 10.in-addr.arpa>
-    ]
+        <Domain: 20.10.in-addr.arpa>
+
+    Example when only existing-domain.com domain exist:
+    >>> get_matching_domains(sub-domain.on.existing-domain.com)
+        <Domain: existing-domain.com>
     """
-    from powerdns.models import Domain
+    from .models import Domain
+    chunks = record_name.split('.')
 
-    q_filters = Q(name__exact=base_domain_name)
-    chunks = base_domain_name.split('.')[1:-2]
-    suffix = '.'.join(base_domain_name.split('.')[-2:])
+    search_partial_domains = [
+        '.'.join(chunks[i:]) for i in range(len(chunks))
+    ]
 
-    for i, chunk in enumerate(chunks):
-        dn = '{content}.{suffix}'.format(
-            content='.'.join(chunks[i:]),
-            suffix=suffix
-        )
-        q_filters |= Q(name__exact=dn)
-
-    matching_domains = Domain.objects.filter(q_filters)
+    matching_domains = Domain.objects.filter(name__in=search_partial_domains)
     matching_domains = sorted(
         matching_domains, key=lambda domain: len(domain.name), reverse=True
     )
-    return matching_domains
+    if matching_domains:
+        return matching_domains[0]
+    else:
+        return None
