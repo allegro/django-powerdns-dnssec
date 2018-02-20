@@ -5,7 +5,6 @@ from dal import autocomplete
 
 class UserAutocomplete(autocomplete.Select2QuerySetView):
     queryset = get_user_model().objects.all()
-    model_field_name = 'username'
 
     def get_queryset(self):
         qs = self.queryset
