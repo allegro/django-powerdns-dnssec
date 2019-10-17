@@ -13,6 +13,11 @@ modify your DNS records.
 November 2012.
 
 
+Project status
+--------------
+This project is deprecated and not maintained anymore.
+
+
 Authors
 -------
 
